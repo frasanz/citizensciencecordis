@@ -112,9 +112,17 @@ tbody tr:hover{background:var(--acento-claro)}
    tabla, que es donde debe estar. */
 .rejilla{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
 .rejilla>*{min-width:0}
-/* Paises tiene siete columnas y no cabe en media rejilla: en pantalla ancha
-   ocupa las dos, para no tener que desplazarla en un monitor grande. */
-@media(min-width:901px){#p-paises{grid-column:1/-1}}
+@media(min-width:901px){
+  /* Paises (siete columnas) y Subprogramas (nombres oficiales largos) ocupan la
+     rejilla entera: a media anchura habia que desplazarlas o se cortaban los
+     nombres. Tipo de entidad y Entidades si caben una al lado de otra. */
+  #p-paises,#p-familias{grid-column:1/-1}
+}
+/* Los nombres oficiales de subprograma son largos ('Food security, sustainable
+   agriculture and forestry, marine...'). En su tabla se dejan partir en dos
+   lineas: mejor eso que cortarlos con puntos suspensivos, porque el tooltip que
+   mostraria el nombre completo no existe en pantalla tactil. */
+#p-familias .nom{max-width:none;white-space:normal;overflow:visible}
 @media(max-width:900px){.rejilla{grid-template-columns:minmax(0,1fr)}}
 .panel{min-width:0;max-width:100%}
 .cabecera-tabla>div{min-width:0}
