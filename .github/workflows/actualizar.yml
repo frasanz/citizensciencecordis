@@ -50,7 +50,11 @@ jobs:
             git push
           fi
 
+      # enablement activa Pages con origen "GitHub Actions" en el primer
+      # despliegue, para no tener que configurarlo a mano en los ajustes.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web
