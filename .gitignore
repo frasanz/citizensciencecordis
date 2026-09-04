@@ -1,0 +1,7 @@
+node_modules/
+.cache/
+.capturas/
+.DS_Store
+
+# Documento interno de trabajo: no se publica.
+*.docx

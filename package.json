@@ -1,0 +1,24 @@
+{
+  "name": "cordis-ciencia-ciudadana",
+  "version": "1.0.0",
+  "description": "Indicadores de ciencia ciudadana en los programas marco europeos, a partir de los datos abiertos de CORDIS",
+  "type": "module",
+  "scripts": {
+    "snapshot": "node scripts/snapshot.js",
+    "serve": "node scripts/serve.js",
+    "test": "node scripts/test-csv.js && node scripts/smoke.js && node scripts/responsive.js",
+    "test:csv": "node scripts/test-csv.js",
+    "test:web": "node scripts/smoke.js",
+    "test:responsive": "node scripts/responsive.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "playwright": "^1.62.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frasanz/citizensciencecordis"
+  },
+  "homepage": "https://frasanz.github.io/citizensciencecordis/"
+}

@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ciencia ciudadana en los programas marco europeos</title>
+<style>
+:root{
+  --fondo:#fbfaf8; --panel:#fff; --borde:#e3e0d9; --borde-fuerte:#cfcabf;
+  --texto:#1c1a17; --suave:#6b665d; --tenue:#8f8a80;
+  --acento:#1f5f5b; --acento-claro:#e6f0ef;
+  --he:#1f5f5b; --h2020:#c07a2b; --fp7:#7a6ea8; --fp6:#a8536e;
+  --destacado:#b03a2e;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --fondo:#16181a; --panel:#1e2124; --borde:#2f3438; --borde-fuerte:#414750;
+  --texto:#eceae6; --suave:#a8a49c; --tenue:#7d7970;
+  --acento:#5bb3ab; --acento-claro:#17302e;
+  --he:#5bb3ab; --h2020:#e0a05a; --fp7:#a99ce0; --fp6:#d9829a;
+  --destacado:#e8705f;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);
+  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.envoltorio{max-width:1120px;margin:0 auto;padding:28px 20px 80px}
+
+header h1{font-size:26px;line-height:1.2;margin:0 0 6px;letter-spacing:-.02em;font-weight:650}
+header p{margin:0;color:var(--suave);font-size:14px}
+header .fuente{margin-top:8px;font-size:12.5px;color:var(--tenue)}
+header .fuente code{background:var(--acento-claro);color:var(--acento);padding:1px 5px;border-radius:4px;
+  font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+
+.barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 18px}
+button{font:inherit;font-size:13.5px;padding:7px 14px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--borde-fuerte);background:var(--panel);color:var(--texto);transition:.12s}
+button:hover:not(:disabled){border-color:var(--acento);color:var(--acento)}
+button:disabled{opacity:.5;cursor:default}
+button.primario{background:var(--acento);border-color:var(--acento);color:#fff;font-weight:550}
+button.primario:hover:not(:disabled){filter:brightness(1.1);color:#fff}
+
+.panel{background:var(--panel);border:1px solid var(--borde);border-radius:var(--r);padding:16px 18px;margin-bottom:18px}
+.filtros{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.grupo{display:flex;flex-direction:column;gap:7px}
+.grupo>span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--tenue);font-weight:600}
+.opciones{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:5px 11px;border-radius:99px;
+  border:1px solid var(--borde-fuerte);cursor:pointer;user-select:none;background:transparent;transition:.12s}
+.chip input{display:none}
+.chip:hover{border-color:var(--acento)}
+.chip.on{background:var(--acento-claro);border-color:var(--acento);color:var(--acento);font-weight:550}
+.chip .punto{width:8px;height:8px;border-radius:99px;background:currentColor;opacity:.75}
+select,input[type=number],input[type=month]{font:inherit;font-size:13.5px;padding:6px 9px;border-radius:7px;
+  border:1px solid var(--borde-fuerte);background:var(--panel);color:var(--texto)}
+input[type=number]{width:78px}
+input[type=month]{width:auto}
+.periodo{align-items:center}
+.rot{font-size:12.5px;color:var(--tenue)}
+.periodo button{padding:6px 11px;font-size:12.5px}
+
+/* ---------- ayuda contextual ---------- */
+.ayuda{width:15px;height:15px;min-width:15px;padding:0;border-radius:99px;flex:none;
+  border:1px solid var(--borde-fuerte);background:transparent;color:var(--tenue);
+  font-size:10px;font-weight:700;line-height:1;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;vertical-align:1px;margin-left:5px}
+.ayuda:hover,.ayuda[aria-expanded=true]{border-color:var(--acento);color:var(--acento);background:var(--acento-claro)}
+.globo{position:fixed;z-index:60;max-width:min(330px,calc(100vw - 24px));
+  background:var(--panel);border:1px solid var(--borde-fuerte);border-radius:9px;
+  padding:11px 13px;box-shadow:0 10px 30px rgba(0,0,0,.16);font-size:12.5px;line-height:1.55}
+.globo h4{margin:0 0 5px;font-size:12.5px;font-weight:650;color:var(--texto)}
+.globo p{margin:0;color:var(--suave)}
+.globo p+p{margin-top:7px}
+.globo b{color:var(--texto);font-weight:600}
+.globo code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;
+  background:var(--acento-claro);color:var(--acento);padding:1px 4px;border-radius:4px}
+.cabecera-tabla h2{display:flex;align-items:center}
+
+
+.cifras{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+@media(max-width:860px){.cifras{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.cifra{background:var(--panel);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px}
+.cifra .n{font-size:27px;font-weight:640;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.cifra .et{font-size:12.5px;color:var(--suave);margin-top:3px}
+.cifra .sub{font-size:12px;color:var(--tenue);margin-top:2px}
+.cifra.foco .n{color:var(--acento)}
+
+h2{font-size:15px;font-weight:620;margin:0 0 3px;letter-spacing:-.01em}
+h2+.nota{margin:0 0 14px;font-size:12.5px;color:var(--tenue)}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:right;padding:6px 9px;border-bottom:1px solid var(--borde)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenue);font-weight:600;
+  border-bottom:1px solid var(--borde-fuerte);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td{font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--acento-claro)}
+/* display:block es imprescindible: max-width y text-overflow no se aplican a
+   elementos inline, y sin ello el titulo estira la columna a su ancho natural
+   (llegaba a 1.991 px y dejaba los numeros fuera de pantalla). */
+.nom{display:block;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pct{color:var(--suave);font-size:12.5px}
+.tabla-scroll{overflow-x:auto}
+.cabecera-tabla{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.cabecera-tabla button{padding:4px 10px;font-size:12px;white-space:nowrap}
+
+/* minmax(0,...) y min-width:0 son imprescindibles: por defecto un hijo de grid o
+   de flex no encoge por debajo de su min-content, asi que una tabla ancha
+   empuja el panel fuera de la ventana y aparece scroll horizontal en toda la
+   pagina. Con esto el panel si encoge y el desplazamiento queda dentro de la
+   tabla, que es donde debe estar. */
+.rejilla{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.rejilla>*{min-width:0}
+/* Paises tiene siete columnas y no cabe en media rejilla: en pantalla ancha
+   ocupa las dos, para no tener que desplazarla en un monitor grande. */
+@media(min-width:901px){#p-paises{grid-column:1/-1}}
+@media(max-width:900px){.rejilla{grid-template-columns:minmax(0,1fr)}}
+.panel{min-width:0;max-width:100%}
+.cabecera-tabla>div{min-width:0}
+.cabecera-tabla h2,.cabecera-tabla .nota{overflow-wrap:anywhere}
+.tabla-scroll{min-width:0;max-width:100%}
+/* Solo la tabla de proyectos, con ocho columnas, se niega a comprimirse y se
+   desplaza. Las demas tienen pocas columnas y encajan mejor partiendo el texto
+   en dos lineas que obligando a arrastrar la tabla. */
+#p-proyectos table{min-width:max-content}
+
+
+
+.leyenda{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--suave);margin-top:10px}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.leyenda i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+#estado{font-size:13px;color:var(--suave);min-height:19px;display:flex;align-items:center;gap:9px}
+.error{color:var(--destacado)}
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--borde);font-size:12.5px;color:var(--tenue)}
+footer code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--acento-claro);
+  color:var(--acento);padding:1px 5px;border-radius:4px}
+
+/* ---------- adaptacion a pantallas estrechas ---------- */
+@media(max-width:640px){
+  .envoltorio{padding:20px 14px 60px}
+  header h1{font-size:21px}
+  header p{font-size:13.5px}
+  .barra{gap:8px;margin:18px 0 14px}
+  .barra button{flex:1 1 auto}
+  #estado{flex-basis:100%;order:3}
+  .panel{padding:13px 14px;margin-bottom:14px}
+  .filtros{gap:15px}
+  .grupo{width:100%}
+  .cifras{grid-template-columns:1fr 1fr;gap:9px}
+  .cifra{padding:11px 12px}
+  .cifra .n{font-size:21px}
+  .cifra .et{font-size:11.5px}
+  .cifra .sub{font-size:11px}
+  table{font-size:12.5px}
+  th,td{padding:5px 7px}
+  th{font-size:10px}
+  .nom{max-width:44vw}
+  .cabecera-tabla{gap:8px}
+
+  /* Se ocultan las columnas de porcentaje, derivables de las que quedan, para
+     no obligar a desplazar la tabla por un dato redundante. */
+  #p-paises th:nth-child(3),#p-paises td:nth-child(3),
+  #p-paises th:nth-child(5),#p-paises td:nth-child(5),
+  #p-paises th:nth-child(6),#p-paises td:nth-child(6),
+  #p-familias th:nth-child(4),#p-familias td:nth-child(4),
+  /* De proyectos se quitan Programa y Aportacion: inicio, fin, coordinador y
+     entidades del pais son lo que se quiere leer aqui. */
+  #p-proyectos th:nth-child(7),#p-proyectos td:nth-child(7),
+  #p-proyectos th:nth-child(8),#p-proyectos td:nth-child(8){display:none}
+}
+@media(max-width:380px){
+  .nom{max-width:36vw}
+  /* Con cuatro columnas la aportacion no cabe; el dato sigue en el CSV. */
+  #p-entidades th:nth-child(4),#p-entidades td:nth-child(4){display:none}
+}
+
+/* El grafico se desplaza en horizontal si los anios no caben con holgura */
+#grafico{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+#grafico svg{display:block}
+.tabla-scroll{-webkit-overflow-scrolling:touch}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- cabeceras ordenables ---------- */
+th.ord{cursor:pointer;user-select:none;white-space:nowrap}
+th.ord:hover{color:var(--acento)}
+th.ord::after{content:"";display:inline-block;width:0;height:0;margin-left:5px;vertical-align:middle;
+  border-left:3.5px solid transparent;border-right:3.5px solid transparent;opacity:.28;
+  border-bottom:4.5px solid currentColor}
+th.ord.desc::after{border-bottom:none;border-top:4.5px solid currentColor}
+th.ord.activa{color:var(--acento)}
+th.ord.activa::after{opacity:1}
+
+/* ---------- entidades dentro de la tabla de proyectos ---------- */
+.ent{display:block;max-width:min(230px,40vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ent.coord{font-weight:600;color:var(--acento)}
+.pais{font:10.5px ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid var(--borde-fuerte);
+  border-radius:4px;padding:0 3px;margin-right:5px;color:var(--tenue);vertical-align:1px}
+.pais.foco{border-color:var(--acento);color:var(--acento);background:var(--acento-claro)}
+.mas{color:var(--tenue);font-size:11.5px}
+td.izq{text-align:left}
+
+
+</style>
+</head>
+<body>
+<div class="envoltorio">
+  <header>
+    <h1>Ciencia ciudadana en los programas marco europeos</h1>
+    <p>Proyectos que mencionan <em>citizen science</em> en su título o descripción, según los datos abiertos de CORDIS.</p>
+    <div class="fuente" id="fuente"></div>
+  </header>
+
+  <div class="barra">
+    <button class="primario" id="descargar-todo">Descargar todo (CSV)</button>
+    <div id="estado"></div>
+  </div>
+
+  <div class="panel filtros" id="filtros"></div>
+
+  <div class="cifras" id="cifras"></div>
+
+  <div class="panel">
+    <h2 id="t-grafico">Evolución por año de inicio</h2>
+    <div id="grafico"></div>
+    <div class="leyenda" id="leyenda"></div>
+  </div>
+
+  <div class="rejilla">
+    <div class="panel" id="p-paises"></div>
+    <div class="panel" id="p-familias"></div>
+    <div class="panel" id="p-tipos"></div>
+    <div class="panel" id="p-entidades"></div>
+  </div>
+
+  <div class="panel" id="p-proyectos"></div>
+
+  <footer id="pie"></footer>
+</div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
