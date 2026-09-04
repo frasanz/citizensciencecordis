@@ -50,11 +50,12 @@ jobs:
             git push
           fi
 
-      # enablement activa Pages con origen "GitHub Actions" en el primer
-      # despliegue, para no tener que configurarlo a mano en los ajustes.
+      # Pages hay que habilitarlo una sola vez con permisos de administracion,
+      # porque el token del workflow no puede crear el sitio (falla con
+      # "Resource not accessible by integration"). Hecho ya con:
+      #   gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow
+      # o en Ajustes > Pages > Source: GitHub Actions.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web
