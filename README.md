@@ -1,8 +1,13 @@
 # Ciencia ciudadana en los programas marco europeos
 
+### → **[frasanz.github.io/citizensciencecordis](https://frasanz.github.io/citizensciencecordis/)**
+
 Calcula, a partir de los datos abiertos de [CORDIS](https://cordis.europa.eu/datalab/browse.html),
 los indicadores de participación en proyectos europeos de ciencia ciudadana, y los publica
-como una web estática desde la que se pueden consultar y descargar en CSV.
+como una web estática desde la que se pueden consultar, filtrar y descargar en CSV.
+
+La web permite filtrar por programa marco, por país de referencia y por mes de inicio, ver la
+evolución año a año y descargar cualquier tabla. Cada cifra lleva una explicación de dónde sale.
 
 Sustituye el proceso manual en Excel con el que se elaboraron las cifras del documento de
 abril de 2026, que no eran reproducibles.
@@ -104,3 +109,8 @@ que la serie completa se reconstruye desde una única descarga.
 ## Datos
 
 CORDIS, Comisión Europea — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+El código, MIT.
+
+---
+
+**[frasanz.github.io/citizensciencecordis](https://frasanz.github.io/citizensciencecordis/)**
