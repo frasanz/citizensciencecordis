@@ -1,8 +1,10 @@
-// Descarga los datasets de CORDIS, calcula los indicadores y deja en web/data/
-// el JSON que consume la web mas los CSV descargables.
+// Descarga los datasets de CORDIS y LIFE (programas europeos) y los de AEI,
+// FECYT y Fundacion Biodiversidad (convocatorias españolas), calcula los
+// indicadores y deja en web/data/ los JSON que consume la web mas los CSV.
 //
-//   node scripts/snapshot.js                    -> HORIZON, H2020, FP7 y LIFE
+//   node scripts/snapshot.js                    -> todo: HORIZON, H2020, FP7, LIFE, AEI, FECYT, FB
 //   node scripts/snapshot.js --programas=HORIZON
+//   node scripts/snapshot.js --programas=AEI,FECYT,FB   -> solo la parte española (no toca indicadores.json)
 //   node scripts/snapshot.js --sin-cache
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,7 +16,9 @@ import {
   registroProyecto, registroBaseLegal, registrosParticipacion, leerTablaManual, escribirPendientes,
   claveNombre, grantDe,
 } from './life.js';
-import { TABLAS } from '../web/src/exportar.js';
+import { TABLAS, TABLAS_NACIONAL } from '../web/src/exportar.js';
+import { FINANCIADORES, crearFiltroNacional, construirNacional } from '../web/src/nacional.js';
+import { procesarNacional } from './nacional.js';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE = path.join(RAIZ, '.cache');
@@ -23,7 +27,9 @@ const SALIDA = path.join(RAIZ, 'web', 'data');
 const arg = (n, d) => (process.argv.find((a) => a.startsWith(`--${n}=`)) || `=${d}`).split('=')[1];
 const flag = (n) => process.argv.includes(`--${n}`);
 
-const quiero = arg('programas', 'HORIZON,H2020,FP7,LIFE').split(',').filter(Boolean);
+const todos = arg('programas', 'HORIZON,H2020,FP7,LIFE,AEI,FECYT,FB').split(',').filter(Boolean);
+const nacionales = todos.filter((c) => FINANCIADORES.some((f) => f.codigo === c));
+const quiero = todos.filter((c) => !nacionales.includes(c));
 const frase = arg('frase', 'citizen science');
 const campos = arg('campos', 'objective,title').split(',');
 const usarCache = !flag('sin-cache');
@@ -49,8 +55,10 @@ async function bytesDe(p) {
   return r;
 }
 
-console.log(`Filtro: "${frase}" en ${campos.join(' + ')}`);
-console.log(`Programas: ${quiero.join(', ')}\n`);
+if (quiero.length) {
+  console.log(`Filtro: "${frase}" en ${campos.join(' + ')}`);
+  console.log(`Programas: ${quiero.join(', ')}\n`);
+}
 
 const filtro = crearFiltro({ frase, campos });
 const analisis = crearAnalisis({ filtro });
@@ -175,24 +183,54 @@ async function procesarLife() {
   console.log(`  LIFE: procesado en ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }
 
-const r = analisis.resultado();
-r.meta.fuentes = fuentes;
-
 fs.mkdirSync(SALIDA, { recursive: true });
-fs.writeFileSync(path.join(SALIDA, 'indicadores.json'), JSON.stringify(r));
-for (const [nombre, fn] of Object.entries(TABLAS)) {
-  fs.writeFileSync(path.join(SALIDA, `${nombre}.csv`), fn(r));
+
+// Solo se reescribe indicadores.json si se ha pedido algun programa europeo:
+// asi `--programas=AEI` no deja la parte europea vacia.
+if (quiero.length) {
+  const r = analisis.resultado();
+  r.meta.fuentes = fuentes;
+  fs.writeFileSync(path.join(SALIDA, 'indicadores.json'), JSON.stringify(r));
+  for (const [nombre, fn] of Object.entries(TABLAS)) {
+    fs.writeFileSync(path.join(SALIDA, `${nombre}.csv`), fn(r));
+  }
+  console.log(`\n--- programas europeos ---`);
+  console.log(`proyectos            ${String(r.resumen.totalProyectos).padStart(6)}`);
+  console.log(`  ${r.programas.map((p) => `${p.clave}: ${p.proyectos}`).join('  ')}`);
+  console.log(`organizaciones unicas${String(r.resumen.organizacionesUnicas).padStart(6)}`);
+  console.log(`participaciones      ${String(r.resumen.participaciones).padStart(6)}`);
+  console.log(`espanoles            ${String(r.resumen.focoProyectos).padStart(6)}  (${r.resumen.focoPctProyectos.toFixed(1)}%)`);
+  console.log(`  coordinados        ${String(r.resumen.focoCoordinados).padStart(6)}  (${r.resumen.focoPctCoordinados.toFixed(1)}%)`);
+  console.log(`  entidades          ${String(r.resumen.focoOrganizaciones).padStart(6)}  (${r.resumen.focoPctOrganizaciones.toFixed(1)}%)`);
+  console.log(`  aportacion      ${(r.resumen.focoAportacionNeta / 1e6).toFixed(1).padStart(9)} M EUR  (${r.resumen.focoPctAportacion.toFixed(1)}%)`);
+}
+
+// ---------- convocatorias españolas ----------
+// AEI, FECYT y Fundacion Biodiversidad: una ayuda por entidad, sin consorcios.
+// Van a su propio JSON y a sus propios CSV; la web los muestra en otra pestaña.
+if (nacionales.length) {
+  const filtroNacional = crearFiltroNacional();
+  console.log(`\nConvocatorias españolas: ${nacionales.join(', ')}`);
+  console.log(`Filtro: ${filtroNacional.definicion.frases.map((f) => `"${f}"`).join(', ')} en título o resumen; en FECYT, además, la línea de ciencia ciudadana de la convocatoria`);
+  const { ayudas, fuentes: fuentesEs, avisos } = await procesarNacional({ raiz: RAIZ, cache: CACHE, usarCache, quiero: nacionales, filtro: filtroNacional });
+  if (avisos.length) {
+    console.log(`  ${avisos.length} avisos de lectura (revisar si crecen de una ejecución a otra):`);
+    for (const a of avisos.slice(0, 25)) console.log(`    - ${a}`);
+    if (avisos.length > 25) console.log(`    ... y ${avisos.length - 25} más`);
+  }
+  const n = construirNacional(ayudas, { filtro: filtroNacional, fuentes: fuentesEs });
+  n.meta.avisos = avisos.length;
+  fs.writeFileSync(path.join(SALIDA, 'nacional.json'), JSON.stringify(n));
+  for (const [nombre, fn] of Object.entries(TABLAS_NACIONAL)) fs.writeFileSync(path.join(SALIDA, `${nombre}.csv`), fn(n));
+  console.log(`\n--- convocatorias españolas ---`);
+  console.log(`ayudas               ${String(n.resumen.totalAyudas).padStart(6)}`);
+  console.log(`  ${n.financiadores.map((f) => `${f.clave}: ${f.ayudas}`).join('  ')}`);
+  console.log(`entidades            ${String(n.resumen.entidades).padStart(6)}`);
+  console.log(`importe concedido ${(n.resumen.importeTotal / 1e6).toFixed(1).padStart(9)} M EUR`);
+  console.log(`  por via:  ${n.vias.map((v) => `${v.clave}: ${v.ayudas}`).join('  ')}`);
+  console.log(`  sin CCAA  ${String(n.resumen.sinCcaa).padStart(6)}`);
 }
 
 const kb = (f) => (fs.statSync(path.join(SALIDA, f)).size / 1024).toFixed(0).padStart(6);
-console.log(`\n--- resultado ---`);
-console.log(`proyectos            ${String(r.resumen.totalProyectos).padStart(6)}`);
-console.log(`  ${r.programas.map((p) => `${p.clave}: ${p.proyectos}`).join('  ')}`);
-console.log(`organizaciones unicas${String(r.resumen.organizacionesUnicas).padStart(6)}`);
-console.log(`participaciones      ${String(r.resumen.participaciones).padStart(6)}`);
-console.log(`espanoles            ${String(r.resumen.focoProyectos).padStart(6)}  (${r.resumen.focoPctProyectos.toFixed(1)}%)`);
-console.log(`  coordinados        ${String(r.resumen.focoCoordinados).padStart(6)}  (${r.resumen.focoPctCoordinados.toFixed(1)}%)`);
-console.log(`  entidades          ${String(r.resumen.focoOrganizaciones).padStart(6)}  (${r.resumen.focoPctOrganizaciones.toFixed(1)}%)`);
-console.log(`  aportacion      ${(r.resumen.focoAportacionNeta / 1e6).toFixed(1).padStart(9)} M EUR  (${r.resumen.focoPctAportacion.toFixed(1)}%)`);
 console.log(`\n--- ficheros en web/data/ ---`);
 for (const f of fs.readdirSync(SALIDA)) console.log(`${kb(f)} KB  ${f}`);
