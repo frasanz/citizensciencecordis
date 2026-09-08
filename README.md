@@ -1,15 +1,23 @@
-# Ciencia ciudadana en los programas marco europeos
+# Ciencia ciudadana en la financiación pública
 
 ### → **[frasanz.github.io/citizensciencecordis](https://frasanz.github.io/citizensciencecordis/)**
 
-Calcula, a partir de los datos abiertos de [CORDIS](https://cordis.europa.eu/datalab/browse.html)
-y de la [base de datos pública de LIFE](https://webgate.ec.europa.eu/life/publicWebsite/search),
-los indicadores de participación en proyectos europeos de ciencia ciudadana, y los publica
-como una web estática desde la que se pueden consultar, filtrar y descargar en CSV.
+Calcula los indicadores de los proyectos de ciencia ciudadana financiados con dinero público y los
+publica como una web estática desde la que se pueden consultar, filtrar y descargar en CSV. Tiene
+dos pestañas, porque las dos mitades no comparten ni criterio ni unidad de medida:
 
-La web permite filtrar por programa marco, por país de referencia, por mes de inicio y por socio
-(cualquier entidad participante, buscándola por nombre o siglas), ver la evolución año a año y
-descargar cualquier tabla. Cada cifra lleva una explicación de dónde sale.
+- **Programas europeos**: FP7, Horizonte 2020 y Horizonte Europa, a partir de los datos abiertos de
+  [CORDIS](https://cordis.europa.eu/datalab/browse.html), y LIFE, a partir de la
+  [base de datos pública de CINEA](https://webgate.ec.europa.eu/life/publicWebsite/search).
+  La unidad es el proyecto con todo su consorcio: se puede filtrar por programa, por país de
+  referencia, por mes de inicio y por socio, y ver cuota, coordinaciones y dinero recibido por país.
+- **Convocatorias españolas**: la [AEI](https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas),
+  [FECYT](https://www.convocatoria.fecyt.es/publico/Resolucion/resolucion.aspx) y la
+  [Fundación Biodiversidad](https://fundacion-biodiversidad.es/buscador-de-proyectos/). La unidad es
+  la ayuda a una entidad, sin consorcios: se filtra por financiador, comunidad autónoma, año, vía
+  de entrada y entidad, y se ve el reparto por convocatoria, comunidad y entidad con el importe concedido.
+
+Cada cifra lleva una explicación de dónde sale, y cada registro anota por qué vía ha entrado.
 
 Sustituye el proceso manual en Excel con el que se elaboraron las cifras del documento de
 abril de 2026, que no eran reproducibles.
@@ -18,7 +26,8 @@ abril de 2026, que no eran reproducibles.
 
 ```sh
 npm install
-node scripts/snapshot.js      # descarga CORDIS y LIFE y regenera web/data/
+brew install poppler          # pdftotext, para las resoluciones en PDF de FECYT (apt: poppler-utils)
+node scripts/snapshot.js      # descarga todas las fuentes y regenera web/data/
 node scripts/serve.js         # http://localhost:8000
 npm test                      # parser + web + navegador real
 ```
@@ -26,18 +35,26 @@ npm test                      # parser + web + navegador real
 Opciones de `snapshot.js`:
 
 ```sh
-node scripts/snapshot.js --programas=HORIZON,H2020,FP7,LIFE
+node scripts/snapshot.js --programas=HORIZON,H2020,FP7,LIFE     # solo la parte europea
+node scripts/snapshot.js --programas=AEI,FECYT,FB               # solo la española (no toca indicadores.json)
 node scripts/snapshot.js --frase="citizen science" --campos=objective,title,keywords
-node scripts/snapshot.js --sin-cache      # ignora los ZIP ya descargados en .cache/
+node scripts/snapshot.js --sin-cache      # ignora lo ya descargado en .cache/
 ```
 
 ## Criterio de selección
 
-Un proyecto entra si la expresión **`citizen science`** aparece en su **título o descripción**
-(`objective`), tolerando guion y saltos de línea (`citizen-science`).
+En los programas europeos, un proyecto entra si la expresión **`citizen science`** aparece en su
+**título o descripción** (`objective`), tolerando guion y saltos de línea (`citizen-science`).
 
-El criterio queda guardado en `meta.filtro` dentro de `web/data/indicadores.json`, de modo que
-cualquier cifra publicada se puede auditar y volver a generar.
+En las convocatorias españolas, una ayuda entra si **`ciencia ciudadana`** o `citizen science` (o
+sus variantes en catalán, gallego y euskera) aparece en el **título o el resumen**. Hay dos vías más,
+porque las fuentes no dan lo mismo: en FECYT entran también las ayudas concedidas en la **línea de
+ciencia ciudadana** de su convocatoria, que existe desde 2020; y en la AEI, las que declaran la frase
+entre sus **palabras clave**, que su buscador permite consultar pero no exportar. Cada ayuda lleva
+anotada su vía (`via` en el CSV), y la web permite filtrar por ella.
+
+El criterio queda guardado en `meta.filtro` dentro de `web/data/indicadores.json` y de
+`web/data/nacional.json`, de modo que cualquier cifra publicada se puede auditar y volver a generar.
 
 ### Por qué las cifras no coinciden con las del documento de abril de 2026
 
@@ -78,29 +95,76 @@ resuelve por una cadena de fuentes, y cada participación lleva anotada la vía 
 Cada ejecución deja en `datos/life-paises-pendientes.csv` los nombres que quedan sin país, para
 copiarlos a `datos/life-paises.csv` con su código de país y la fuente consultada.
 
+## Convocatorias españolas
+
+Ninguno de los tres financiadores publica un volcado de datos. `scripts/nacional.js` orquesta lo
+que hay:
+
+| Fuente | De dónde sale | Qué da | Qué no da |
+|---|---|---|---|
+| **AEI** (`scripts/aei.js`) | El [buscador de ayudas concedidas](https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas) exporta a CSV con los mismos filtros que la web. Se consulta por título, resumen y palabras clave, con cada frase, y se unen los resultados por referencia. | Año, convocatoria, referencia, área, título, CIF y entidad, comunidad autónoma, provincia, importe y **resumen**. | Fechas de ejecución. Las palabras clave, que no se exportan. Incluye contratos y estancias, no solo proyectos. |
+| **FECYT** (`scripts/fecyt.js`) | Solo el [PDF de la resolución definitiva](https://www.convocatoria.fecyt.es/publico/Resolucion/resolucion.aspx) de cada año, desde 2020. Se convierte con `pdftotext -bbox-layout` y las tablas se reconstruyen por las coordenadas de cada palabra. | Referencia, título, entidad, comunidad autónoma, presupuesto, solicitado, **importe concedido** y la categoría de la convocatoria con su nombre literal. | Descripción. CIF. |
+| **Fundación Biodiversidad** (`scripts/biodiversidad.js`) | La API REST de su WordPress (sin autenticación) da todas las fichas de proyecto de sus programas; para las candidatas se baja la ficha HTML, donde están los datos. | Título, descripción y objetivos, línea de actuación, estado, años de ejecución, presupuesto, importe, entidad beneficiaria, localización y fondo (FEDER, FSE+, PRTR…). | CIF. El importe, en muchas fichas. La comunidad autónoma de la entidad. |
+
+El servidor de la AEI sirve su certificado sin la CA intermedia de la FNMT; `vendor/fnmt-ac-componentes.pem`
+la añade para que Node pueda verificarlo.
+
+La **comunidad autónoma** es la de la sede de la entidad beneficiaria. AEI y FECYT la dan; para la
+Fundación Biodiversidad se resuelve por una cadena de fuentes, anotada en la columna `ccaa_via`:
+
+| Vía | Qué es |
+|---|---|
+| `fuente` | La da la propia fuente (AEI y FECYT). |
+| `cruce` | Misma entidad, por nombre, en AEI o FECYT. |
+| `localizacion` | La ficha de la Fundación Biodiversidad localiza el proyecto en una única comunidad. |
+| `nombre` | El nombre de la entidad nombra la comunidad, una provincia o una ciudad, y solo una. |
+| `manual` | `datos/ccaa-entidades.csv`, la única tabla que edita una persona. |
+| `sin-ccaa` | No se ha podido determinar. Cuenta en el total, no en ninguna cifra por comunidad. |
+
+Cada ejecución deja en `datos/ccaa-entidades-pendientes.csv` las entidades sin comunidad, para
+copiarlas a `datos/ccaa-entidades.csv` con su comunidad y la fuente consultada.
+
+Las entidades se identifican por CIF cuando la AEI lo da, y por nombre normalizado si no; una
+ayuda sin CIF se engancha al CIF de otra con el mismo nombre. El año es el de la convocatoria en
+AEI y FECYT y el de inicio de ejecución en la Fundación Biodiversidad.
+
+Los fondos europeos que gestiona la Fundación Biodiversidad (FEDER, FSE, PRTR) se quedan en la
+pestaña española: la línea entre pestañas es quién concede la ayuda, no de dónde sale el dinero.
+
 ## Estructura
 
 ```
 web/                 sitio estático (es la raíz publicada en GitHub Pages)
-  index.html
-  app.js             interfaz, filtros, gráfico y ayuda contextual
+  index.html         las dos pestañas
+  app.js             pestaña europea: filtros, cifras, tablas y ayuda contextual
+  espana.js          pestaña española: lo mismo sobre las ayudas nacionales
+  comun.js           lo que comparten: formato, tablas, gráfico, buscador de entidad, ayuda
+  pestanas.js        cambio de pestaña; la activa va en la URL (#europa, #espana)
   src/               módulos compartidos con Node, sin build step
-    compute.js       cálculo de indicadores
+    compute.js       cálculo de indicadores europeos
+    nacional.js      cálculo de indicadores de las convocatorias españolas
     csv.js           parser CSV incremental
     exportar.js      generación de CSV
-  data/              resultados que genera snapshot.js
+  data/              resultados que genera snapshot.js (indicadores.json, nacional.json y los CSV)
 datos/
   life-paises.csv    países de socios de LIFE resueltos a mano
   life-paises-pendientes.csv   los que quedan sin país (lo regenera snapshot.js)
+  ccaa-entidades.csv           comunidad autónoma de entidades resuelta a mano
+  ccaa-entidades-pendientes.csv   las que quedan sin comunidad (lo regenera snapshot.js)
 scripts/
-  snapshot.js        descarga CORDIS y LIFE y regenera web/data/
+  snapshot.js        descarga todas las fuentes y regenera web/data/
   cordis.js          descarga y lectura en streaming de los ZIP
   life.js            API de LIFE, fichas, FTS y cadena de países
+  nacional.js        orquesta AEI, FECYT y Fundación Biodiversidad y la cadena de comunidades
+  aei.js             CSV del buscador de la AEI (con la CA de la FNMT)
+  fecyt.js           PDF de las resoluciones de FECYT, reconstruidos por coordenadas
+  biodiversidad.js   API y fichas de la Fundación Biodiversidad
   serve.js           servidor de desarrollo
   test-csv.js        casos del parser, incluidos los malformados de CORDIS
-  smoke.js           la web sobre un DOM real (jsdom)
-  responsive.js      la web en un navegador real, con capturas
+  smoke.js           la web sobre un DOM real (jsdom), las dos pestañas
+  responsive.js      la web en un navegador real, con capturas de las dos pestañas
 vendor/fflate.js     descompresión de ZIP (solo lo usa Node)
+vendor/fnmt-ac-componentes.pem   CA intermedia que le falta al servidor de la AEI
 ```
 
 `web/src/` es la misma copia que usan Node y el navegador: no hay compilación ni
@@ -109,9 +173,9 @@ publicado no cargue con ello.
 
 ## Cómo se actualizan los datos
 
-La web **no descarga nada de CORDIS ni de LIFE**: lee el `web/data/indicadores.json` ya calculado y
-aplica los filtros en el navegador. Para traer datos nuevos hay que ejecutar el snapshot,
-a mano o desde el workflow.
+La web **no descarga nada de ninguna fuente**: lee `web/data/indicadores.json` y
+`web/data/nacional.json` ya calculados y aplica los filtros en el navegador. Para traer datos nuevos
+hay que ejecutar el snapshot, a mano o desde el workflow, que instala poppler para los PDF de FECYT.
 
 Los ZIP descargados quedan en `.cache/` junto a la fecha real del volcado en CORDIS
 (cabecera `Last-Modified`), que es la que muestra la web. Esa fecha no es la de la
@@ -143,7 +207,9 @@ que la serie completa se reconstruye desde una única descarga.
 ## Datos
 
 CORDIS y base de datos pública de LIFE (CINEA), Comisión Europea —
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). El código, MIT.
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Buscador de ayudas concedidas de la AEI,
+resoluciones de FECYT y buscador de proyectos de la Fundación Biodiversidad: información pública de
+cada organismo, reutilizada según la Ley 37/2007 y la Ley 19/2013 de transparencia. El código, MIT.
 
 ---
 

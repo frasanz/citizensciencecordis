@@ -33,20 +33,25 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Recalcular indicadores desde CORDIS y LIFE
+      # FECYT solo publica sus concesiones en PDF: pdftotext (poppler) las convierte.
+      - name: Instalar poppler para leer los PDF de FECYT
         if: github.event_name != 'push'
-        run: node scripts/snapshot.js --sin-cache   # sin dependencias: fflate va en vendor/
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+
+      - name: Recalcular indicadores desde CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad
+        if: github.event_name != 'push'
+        run: node scripts/snapshot.js --sin-cache   # sin dependencias de npm: fflate va en vendor/
 
       - name: Guardar los datos si han cambiado
         if: github.event_name != 'push'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add web/data datos/life-paises-pendientes.csv
+          git add web/data datos/life-paises-pendientes.csv datos/ccaa-entidades-pendientes.csv
           if git diff --staged --quiet; then
-            echo "Ni CORDIS ni LIFE han cambiado nada desde la ultima vez."
+            echo "Ninguna fuente ha cambiado nada desde la ultima vez."
           else
-            git commit -m "Datos de CORDIS y LIFE a $(date -u +%Y-%m-%d)"
+            git commit -m "Datos de CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad a $(date -u +%Y-%m-%d)"
             git push
           fi
 
