@@ -79,14 +79,56 @@ for (const p of PANTALLAS) {
   // Una captura con la ayuda abierta, para revisarla de un vistazo.
   await pag.click('button.ayuda[data-ayuda=entidades]');
   await pag.screenshot({ path: path.join(SALIDA, `${p.nombre}-ayuda.png`) });
+  await pag.click('button.ayuda[data-ayuda=entidades]');
 
-  const ok = !r.scrollH && !r.desbordan.length && !errores.length && !ayuda.mal.length;
+  // La pestaña española, con la misma comprobacion de desbordes y un detalle abierto.
+  await pag.click('#pestana-espana');
+  await pag.waitForSelector('#p-ayudas tbody tr');
+  await pag.click('#p-ayudas .desplegar');
+  const es = await pag.evaluate(() => {
+    const de = document.documentElement;
+    const desbordan = [];
+    for (const n of document.querySelectorAll('#vista-espana *')) {
+      const c = n.getBoundingClientRect();
+      if (c.width === 0) continue;
+      if (c.right > de.clientWidth + 1 || c.left < -1) {
+        let a = n, permitido = false;
+        for (; a && a !== document.body; a = a.parentElement) {
+          const o = getComputedStyle(a).overflowX;
+          if (o === 'auto' || o === 'scroll') { permitido = true; break; }
+        }
+        if (!permitido) desbordan.push(`${n.tagName.toLowerCase()}.${n.className || '·'}`.slice(0, 54));
+      }
+    }
+    // Al pulsar el desplegable la pagina ha bajado; los globos se miden con cada
+    // boton a la vista, que es la unica situacion en la que alguien puede pulsarlo.
+    const botones = [...document.querySelectorAll('#vista-espana button.ayuda')];
+    const mal = [];
+    for (const b of botones) {
+      b.scrollIntoView({ block: 'center' });
+      b.click();
+      const g = document.querySelector('.globo');
+      if (!g) { mal.push(`${b.dataset.ayuda}: no abre`); continue; }
+      const c = g.getBoundingClientRect();
+      if (c.left < -1 || c.top < -1 || c.right > innerWidth + 1 || c.bottom > innerHeight + 1)
+        mal.push(`${b.dataset.ayuda} en ${Math.round(c.left)},${Math.round(c.top)}`);
+      b.click();
+    }
+    return { scrollH: de.scrollWidth > de.clientWidth, desbordan: [...new Set(desbordan)].slice(0, 6), ayudas: botones.length, mal,
+      grafico: document.querySelector('#grafico-es svg')?.getAttribute('width') };
+  });
+  await pag.screenshot({ path: path.join(SALIDA, `${p.nombre}-espana.png`), fullPage: true });
+
+  const ok = !r.scrollH && !r.desbordan.length && !errores.length && !ayuda.mal.length && !es.scrollH && !es.desbordan.length && !es.mal.length;
   if (!ok) fallos++;
   console.log(`${ok ? 'ok   ' : 'FALLO'} ${p.nombre.padEnd(14)} ancho=${String(r.ancho).padStart(4)}`
     + ` · scroll horiz: ${r.scrollH ? 'SI' : 'no'} · cifras/fila: ${r.cifras}`
-    + ` · grafico: ${r.grafico}px · cols proy: ${r.colsProy} · ayudas: ${ayuda.total}`);
+    + ` · grafico: ${r.grafico}px · cols proy: ${r.colsProy} · ayudas: ${ayuda.total}`
+    + ` · España: grafico ${es.grafico}px, ayudas ${es.ayudas}, scroll horiz ${es.scrollH ? 'SI' : 'no'}`);
   if (r.desbordan.length) console.log(`      desbordan: ${r.desbordan.join(', ')}`);
+  if (es.desbordan.length) console.log(`      desbordan (España): ${es.desbordan.join(', ')}`);
   if (ayuda.mal.length) console.log(`      ayuda fuera de pantalla: ${ayuda.mal.slice(0, 3).join(' | ')}`);
+  if (es.mal.length) console.log(`      ayuda fuera de pantalla (España): ${es.mal.slice(0, 3).join(' | ')}`);
   if (errores.length) console.log(`      errores JS: ${errores.join(' | ')}`);
   await ctx.close();
 }

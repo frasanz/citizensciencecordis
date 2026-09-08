@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ciencia ciudadana en los programas marco europeos</title>
+<title>Ciencia ciudadana en la financiación pública</title>
 <style>
 :root{
   --fondo:#fbfaf8; --panel:#fff; --borde:#e3e0d9; --borde-fuerte:#cfcabf;
   --texto:#1c1a17; --suave:#6b665d; --tenue:#8f8a80;
   --acento:#1f5f5b; --acento-claro:#e6f0ef;
   --he:#1f5f5b; --h2020:#c07a2b; --fp7:#7a6ea8; --fp6:#a8536e; --life:#4f7d2c;
+  --aei:#1f5f5b; --fecyt:#c07a2b; --fb:#4f7d2c;
   --destacado:#b03a2e;
   --r:10px;
 }
@@ -18,6 +19,7 @@
   --texto:#eceae6; --suave:#a8a49c; --tenue:#7d7970;
   --acento:#5bb3ab; --acento-claro:#17302e;
   --he:#5bb3ab; --h2020:#e0a05a; --fp7:#a99ce0; --fp6:#d9829a; --life:#8fc063;
+  --aei:#5bb3ab; --fecyt:#e0a05a; --fb:#8fc063;
   --destacado:#e8705f;
 }}
 *{box-sizing:border-box}
@@ -28,9 +30,6 @@ body{margin:0;background:var(--fondo);color:var(--texto);
 
 header h1{font-size:26px;line-height:1.2;margin:0 0 6px;letter-spacing:-.02em;font-weight:650}
 header p{margin:0;color:var(--suave);font-size:14px}
-header .fuente{margin-top:8px;font-size:12.5px;color:var(--tenue)}
-header .fuente code{background:var(--acento-claro);color:var(--acento);padding:1px 5px;border-radius:4px;
-  font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
 
 .barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 18px}
 button{font:inherit;font-size:13.5px;padding:7px 14px;border-radius:8px;cursor:pointer;
@@ -207,11 +206,46 @@ footer code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:v
 }
 
 /* El grafico se desplaza en horizontal si los anios no caben con holgura */
-#grafico{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
-#grafico svg{display:block}
+#grafico,#grafico-es{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+#grafico svg,#grafico-es svg{display:block}
 .tabla-scroll{-webkit-overflow-scrolling:touch}
 
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- pestañas ---------- */
+.pestanas{display:flex;gap:4px;margin:18px 0 0;border-bottom:1px solid var(--borde-fuerte)}
+.pestanas button{border:none;border-bottom:2px solid transparent;border-radius:8px 8px 0 0;margin-bottom:-1px;
+  background:transparent;color:var(--suave);font-size:14px;font-weight:550;padding:9px 14px}
+.pestanas button:hover{color:var(--acento);background:var(--acento-claro)}
+.pestanas button[aria-selected=true]{color:var(--acento);border-bottom-color:var(--acento)}
+.pestanas button .pct{margin-left:6px;font-weight:400}
+.vista>p.intro{margin:16px 0 0;color:var(--suave);font-size:14px}
+.vista .fuente{margin-top:8px;font-size:12.5px;color:var(--tenue)}
+.vista .fuente code{background:var(--acento-claro);color:var(--acento);padding:1px 5px;border-radius:4px;
+  font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+.vista .fuente a{color:inherit}
+@media(max-width:640px){.pestanas button{flex:1 1 auto;padding:8px 6px;font-size:13px}.pestanas button .pct{display:none}}
+
+/* ---------- detalle de una ayuda (pestaña española) ---------- */
+.desplegar{padding:0 5px;margin-right:4px;border:none;background:transparent;color:var(--tenue);font-size:12px;vertical-align:1px}
+.desplegar:hover{color:var(--acento)}
+#p-ayudas td.izq a.nom{display:inline-block;max-width:300px;vertical-align:bottom;color:inherit;text-decoration:none;border-bottom:1px dotted var(--borde-fuerte)}
+#p-ayudas td.izq a.nom:hover{color:var(--acento);border-color:var(--acento)}
+#p-ayudas table{min-width:max-content}
+.fila-detalle td{background:var(--acento-claro);white-space:normal}
+.detalle-ayuda{max-width:900px;font-size:13px}
+.detalle-ayuda .datos{margin:0 0 6px;color:var(--suave)}
+.detalle-ayuda .datos b{color:var(--texto);font-weight:600}
+.detalle-ayuda .resumen{margin:0;line-height:1.5;overflow-wrap:anywhere}
+.via{font-size:12px;color:var(--suave)}
+.dos-tablas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media(max-width:640px){.dos-tablas{grid-template-columns:minmax(0,1fr)}#p-ayudas td.izq a.nom{max-width:48vw}}
+/* Convocatorias y Entidades tienen nombres largos y cinco columnas: a media
+   anchura se cortaban, asi que ocupan la rejilla entera. */
+@media(min-width:901px){#p-convocatorias,#p-entidades-es{grid-column:1/-1}}
+#p-convocatorias .nom{max-width:none;white-space:normal;overflow:visible}
+#p-entidades-es a.nom{color:inherit;text-decoration:none;border-bottom:1px dotted var(--borde-fuerte);max-width:520px}
+#p-entidades-es a.nom:hover{color:var(--acento);border-color:var(--acento)}
 
 /* ---------- cabeceras ordenables ---------- */
 th.ord{cursor:pointer;user-select:none;white-space:nowrap}
@@ -238,36 +272,76 @@ td.izq{text-align:left}
 <body>
 <div class="envoltorio">
   <header>
-    <h1>Ciencia ciudadana en los programas marco europeos</h1>
-    <p>Proyectos que mencionan <em>citizen science</em> en su título o descripción, según los datos abiertos de CORDIS y de LIFE.</p>
-    <div class="fuente" id="fuente"></div>
+    <h1>Ciencia ciudadana en la financiación pública</h1>
+    <p>Qué proyectos de ciencia ciudadana financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos que publica cada financiador.</p>
   </header>
 
-  <div class="barra">
-    <button class="primario" id="descargar-todo">Descargar todo (CSV)</button>
-    <div id="estado"></div>
-  </div>
+  <nav class="pestanas" role="tablist" aria-label="Ámbito">
+    <button type="button" role="tab" id="pestana-europa" data-pestana="europa" aria-controls="vista-europa" aria-selected="true">Programas europeos<span class="pct">CORDIS y LIFE</span></button>
+    <button type="button" role="tab" id="pestana-espana" data-pestana="espana" aria-controls="vista-espana" aria-selected="false">Convocatorias españolas<span class="pct">AEI, FECYT y Fundación Biodiversidad</span></button>
+  </nav>
 
-  <div class="panel filtros" id="filtros"></div>
+  <section class="vista" id="vista-europa" role="tabpanel" aria-labelledby="pestana-europa">
+    <p class="intro">Proyectos que mencionan <em>citizen science</em> en su título o descripción, según los datos abiertos de CORDIS y de LIFE. La unidad es el proyecto con todo su consorcio.</p>
+    <div class="fuente" id="fuente"></div>
 
-  <div class="cifras" id="cifras"></div>
+    <div class="barra">
+      <button class="primario" id="descargar-todo">Descargar todo (CSV)</button>
+      <div id="estado"></div>
+    </div>
 
-  <div class="panel">
-    <h2 id="t-grafico">Evolución por año de inicio</h2>
-    <div id="grafico"></div>
-    <div class="leyenda" id="leyenda"></div>
-  </div>
+    <div class="panel filtros" id="filtros"></div>
 
-  <div class="rejilla">
-    <div class="panel" id="p-paises"></div>
-    <div class="panel" id="p-familias"></div>
-    <div class="panel" id="p-tipos"></div>
-    <div class="panel" id="p-entidades"></div>
-  </div>
+    <div class="cifras" id="cifras"></div>
 
-  <div class="panel" id="p-proyectos"></div>
+    <div class="panel">
+      <h2 id="t-grafico">Evolución por año de inicio</h2>
+      <div id="grafico"></div>
+      <div class="leyenda" id="leyenda"></div>
+    </div>
 
-  <footer id="pie"></footer>
+    <div class="rejilla">
+      <div class="panel" id="p-paises"></div>
+      <div class="panel" id="p-familias"></div>
+      <div class="panel" id="p-tipos"></div>
+      <div class="panel" id="p-entidades"></div>
+    </div>
+
+    <div class="panel" id="p-proyectos"></div>
+
+    <footer id="pie"></footer>
+  </section>
+
+  <section class="vista" id="vista-espana" role="tabpanel" aria-labelledby="pestana-espana" hidden>
+    <p class="intro">Ayudas concedidas por la AEI, FECYT y la Fundación Biodiversidad que mencionan <em>ciencia ciudadana</em> en su título o resumen, o que se conceden en la línea de ciencia ciudadana de FECYT. La unidad es la ayuda a una entidad: no hay consorcios, y estas cifras no se suman a las europeas.</p>
+    <div class="fuente" id="fuente-es"></div>
+
+    <div class="barra">
+      <button class="primario" id="descargar-todo-es">Descargar todo (CSV)</button>
+      <div id="estado-es"></div>
+    </div>
+
+    <div class="panel filtros" id="filtros-es"></div>
+
+    <div class="cifras" id="cifras-es"></div>
+
+    <div class="panel">
+      <h2 id="t-grafico-es">Ayudas por año</h2>
+      <div id="grafico-es"></div>
+      <div class="leyenda" id="leyenda-es"></div>
+    </div>
+
+    <div class="rejilla">
+      <div class="panel" id="p-ccaa"></div>
+      <div class="panel" id="p-vias"></div>
+      <div class="panel" id="p-convocatorias"></div>
+      <div class="panel" id="p-entidades-es"></div>
+    </div>
+
+    <div class="panel" id="p-ayudas"></div>
+
+    <footer id="pie-es"></footer>
+  </section>
 </div>
 <script type="module" src="./app.js"></script>
 </body>

@@ -8,6 +8,7 @@ import { JSDOM } from 'jsdom';
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WEB = path.join(RAIZ, 'web');
 const datos = JSON.parse(fs.readFileSync(path.join(WEB, 'data/indicadores.json'), 'utf8'));
+const nacional = JSON.parse(fs.readFileSync(path.join(WEB, 'data/nacional.json'), 'utf8'));
 
 const dom = new JSDOM(fs.readFileSync(path.join(WEB, 'index.html'), 'utf8'), {
   url: 'http://localhost/', pretendToBeVisual: true, runScripts: 'outside-only',
@@ -19,7 +20,9 @@ window.addEventListener('error', (e) => errores.push(e.message));
 // stubs de entorno que jsdom no trae
 window.fetch = async (u) => String(u).includes('indicadores.json')
   ? { ok: true, status: 200, json: async () => datos }
-  : { ok: false, status: 404 };
+  : String(u).includes('nacional.json')
+    ? { ok: true, status: 200, json: async () => nacional }
+    : { ok: false, status: 404 };
 window.URL.createObjectURL = () => 'blob:x';
 window.URL.revokeObjectURL = () => {};
 for (const k of ['document', 'fetch', 'Intl', 'Blob', 'URL', 'MouseEvent', 'Event'])
@@ -138,6 +141,102 @@ await new Promise((r) => setTimeout(r, 200));
 const desdeTablaOk = q('.cifra .n').textContent !== totalAntes && !!q('#f-socio-quitar');
 if (!desdeTablaOk) fallos++;
 console.log(`  ${desdeTablaOk ? 'ok  ' : 'FALLO'} pulsar una entidad de la tabla la elige como socio`);
+
+// ---------- pestaña de convocatorias españolas ----------
+// Se abre al pulsar la pestaña (carga nacional.json entonces) y tiene sus
+// propios filtros, cifras y tablas.
+const clic = (n) => n.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+const espera = (ms = 250) => new Promise((r) => setTimeout(r, ms));
+const okEuropaVisible = !q('#vista-europa').hidden && q('#vista-espana').hidden;
+if (!okEuropaVisible) fallos++;
+console.log(`  ${okEuropaVisible ? 'ok  ' : 'FALLO'} la pestaña europea es la portada`);
+
+clic(q('#pestana-espana'));
+await espera(400);
+const okCambio = q('#vista-europa').hidden && !q('#vista-espana').hidden && q('#pestana-espana').getAttribute('aria-selected') === 'true'
+  && window.location.hash === '#espana';
+if (!okCambio) fallos++;
+console.log(`  ${okCambio ? 'ok  ' : 'FALLO'} la pestaña española se muestra y va en la URL (${window.location.hash})`);
+
+const comprobacionesEs = [
+  ['cifras españolas', () => q('#cifras-es').querySelectorAll('.cifra').length === 4],
+  ['grafico español', () => !!q('#grafico-es svg') && q('#grafico-es svg').querySelectorAll('rect').length > 5],
+  ['tabla de CCAA', () => q('#p-ccaa tbody').children.length > 5],
+  ['tabla de convocatorias', () => q('#p-convocatorias tbody').children.length > 3],
+  ['tabla de entidades', () => q('#p-entidades-es tbody').children.length > 3],
+  ['trazabilidad con dos tablas', () => q('#p-vias').querySelectorAll('table').length === 2],
+  ['tabla de ayudas', () => q('#p-ayudas tbody').children.length > 10],
+  ['los tres financiadores', () => ['AEI', 'FECYT', 'FB'].every((c) => !!q(`[data-fin="${c}"]`))],
+  ['filtro de CCAA', () => q('#f-ccaa').options.length > 10],
+  ['filtro de años', () => !!q('#f-anio-desde') && !!q('#f-anio-hasta') && !!q('#f-anio-reset')],
+  ['filtro de vía', () => window.document.querySelectorAll('[data-via]').length >= 3],
+  ['enlaces a las tres fuentes en la tabla', () => {
+    const hrefs = [...q('#p-ayudas').querySelectorAll('a')].map((a) => a.href);
+    return hrefs.some((h) => h.includes('aei.gob.es')) && hrefs.some((h) => h.includes('fecyt.es')) && hrefs.some((h) => h.includes('fundacion-biodiversidad.es'));
+  }],
+  ['ayuda en cifras y tablas españolas', () => q('#vista-espana').querySelectorAll('button.ayuda').length >= 12],
+  ['pie con las fuentes', () => /AEI/.test(q('#pie-es').textContent) && /FECYT/.test(q('#pie-es').textContent)],
+  ['sin errores en consola', () => errores.length === 0],
+];
+for (const [nombre, fn] of comprobacionesEs) {
+  let ok = false, err = '';
+  try { ok = fn(); } catch (e) { err = ' — ' + e.message; }
+  if (!ok) fallos++;
+  console.log(`  ${ok ? 'ok  ' : 'FALLO'} ${nombre}${err}`);
+}
+
+// interaccion: quitar un financiador cambia el total
+const totalEs = () => q('#cifras-es .cifra .n').textContent;
+const antesEs = totalEs();
+clic(q('[data-fin="AEI"]'));
+await espera();
+const despuesEs = totalEs();
+const okFin = antesEs !== despuesEs;
+if (!okFin) fallos++;
+console.log(`  ${okFin ? 'ok  ' : 'FALLO'} quitar un financiador recalcula (${antesEs} -> ${despuesEs})`);
+clic(q('[data-fin="AEI"]'));
+await espera();
+
+// desplegar el detalle de una ayuda
+clic(q('#p-ayudas .desplegar'));
+await espera();
+const okDetalle = !!q('#p-ayudas .fila-detalle') && /Entra por/.test(q('#p-ayudas .fila-detalle').textContent);
+if (!okDetalle) fallos++;
+console.log(`  ${okDetalle ? 'ok  ' : 'FALLO'} el detalle de una ayuda se despliega`);
+
+// buscador de entidad
+const cajaEs = q('#f-entidad');
+cajaEs.value = 'zaragoza';
+cajaEs.dispatchEvent(new window.Event('input'));
+const sugEs = [...window.document.querySelectorAll('#f-entidad-lista [data-i]')];
+const okSug = sugEs.length > 0 && /zaragoza/i.test(sugEs[0].textContent);
+if (!okSug) fallos++;
+console.log(`  ${okSug ? 'ok  ' : 'FALLO'} el buscador de entidad sugiere (${sugEs.length} opciones)`);
+sugEs[0]?.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+await espera();
+const okEnt = totalEs() !== antesEs && !!q('#f-entidad-quitar') && /zaragoza/i.test(q('#p-ayudas .nota').textContent);
+if (!okEnt) fallos++;
+console.log(`  ${okEnt ? 'ok  ' : 'FALLO'} elegir una entidad filtra (${antesEs} -> ${totalEs()})`);
+clic(q('#f-entidad-quitar'));
+await espera();
+const okRest = totalEs() === antesEs;
+if (!okRest) fallos++;
+console.log(`  ${okRest ? 'ok  ' : 'FALLO'} quitar la entidad restaura el total`);
+
+// filtro de CCAA
+q('#f-ccaa').value = 'Aragón';
+q('#f-ccaa').dispatchEvent(new window.Event('change'));
+await espera();
+const okCcaa = totalEs() !== antesEs && [...q('#p-ccaa tbody').children].length === 1;
+if (!okCcaa) fallos++;
+console.log(`  ${okCcaa ? 'ok  ' : 'FALLO'} filtrar por CCAA deja solo esa comunidad (${totalEs()})`);
+
+// volver a la pestaña europea
+clic(q('#pestana-europa'));
+await espera();
+const okVuelta = !q('#vista-europa').hidden && q('#vista-espana').hidden && window.location.hash === '#europa';
+if (!okVuelta) fallos++;
+console.log(`  ${okVuelta ? 'ok  ' : 'FALLO'} volver a la pestaña europea`);
 
 if (errores.length) { console.log('\nerrores:'); errores.forEach((e) => console.log('   ', e)); }
 console.log(fallos ? `\n${fallos} FALLOS` : '\ntodo correcto');
