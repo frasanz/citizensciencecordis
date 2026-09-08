@@ -7,6 +7,8 @@ export const PROGRAMAS = [
   { codigo: 'H2020',   etiqueta: 'Horizonte 2020',   archivo: 'cordis-h2020projects-csv.zip',   periodo: '2014-2020' },
   { codigo: 'FP7',     etiqueta: 'FP7',              archivo: 'cordis-fp7projects-csv.zip',     periodo: '2007-2013' },
   { codigo: 'FP6',     etiqueta: 'FP6',              archivo: 'cordis-fp6projects-csv.zip',     periodo: '2002-2006' },
+  // LIFE no esta en CORDIS: lo lee scripts/life.js de la base de datos de CINEA.
+  { codigo: 'LIFE',    etiqueta: 'LIFE',             archivo: null,                             periodo: '1992-2027', fuente: 'CINEA' },
 ];
 
 export const ETIQUETA_PROGRAMA = Object.fromEntries(PROGRAMAS.map((p) => [p.codigo, p.etiqueta]));
@@ -98,6 +100,8 @@ export function crearAnalisis({ filtro, roles = ROLES }) {
         subprograma: null,
         subprogramaTitulo: "",
         familia: "",
+        url: rec.url || '',            // ficha oficial; si falta, la web enlaza a CORDIS
+        referencia: rec.referencia || '',
       });
     },
 
@@ -131,6 +135,9 @@ export function crearAnalisis({ filtro, roles = ROLES }) {
         tipo: rec.activityType || '',
         rol: rec.role || 'participant',
         aportacionNeta: num(rec.netEcContribution) || num(rec.ecContribution),
+        // De donde sale el pais: 'cordis' para todo CORDIS; en LIFE, la via de la
+        // cadena (ficha, cordis, fts, fts-aprox, forma-juridica, manual, sin-pais).
+        via: rec.paisVia || 'cordis',
       });
     },
 
@@ -155,11 +162,12 @@ function construir({ proyectos, participaciones, contadosPorPrograma, filtro,
 
   const orgsUnicas = new Set();
   let aportacionNetaTotal = 0;
+  let sinPais = 0;
 
   for (const p of participaciones) {
     aportacionNetaTotal += p.aportacionNeta;
     if (p.orgId) orgsUnicas.add(p.orgId);
-    if (!p.pais) continue;
+    if (!p.pais) { sinPais++; continue; }
     const e = paisDe(p.pais);
     e.proyectos.add(p.proyecto);
     if (p.rol === 'coordinator') e.coordinados.add(p.proyecto);
@@ -292,6 +300,7 @@ function construir({ proyectos, participaciones, contadosPorPrograma, filtro,
       totalProyectos,
       organizacionesUnicas: orgsUnicas.size,
       participaciones: participaciones.length,
+      participacionesSinPais: sinPais,
       aportacionNetaTotal,
       aportacionUETotal: [...proyectos.values()].reduce((s, p) => s + p.aportacionUE, 0),
       focoProyectos: foco.proyectos,
@@ -312,16 +321,35 @@ function construir({ proyectos, participaciones, contadosPorPrograma, filtro,
 
 // Recalcula el resultado a partir de los datos ya volcados en indicadores.json,
 // aplicando filtros en cliente. Es lo que permite que la web cambie de programa,
-// de pais o de tramo de anios al instante, sin volver a bajar nada de CORDIS.
+// de pais, de socio o de tramo de anios al instante, sin volver a bajar nada de CORDIS.
 // `periodo` son dos meses en formato "aaaa-mm", ambos inclusive. Se comparan
 // como texto porque ese formato ya ordena bien alfabeticamente.
-export function recomputar(datos, { programas = null, periodo = null, paisFoco = 'ES', paisesComparados } = {}) {
+// Identifica una entidad a lo largo de programas: el PIC (organisationID) es
+// estable entre H2020 y Horizonte Europa. Parte de FP7 no lo trae; esas filas
+// se enganchan al PIC de una fila homonima si existe, y si no se identifican
+// por nombre, para no perderlas.
+export function crearClaveEntidad(participaciones) {
+  const porNombre = new Map();
+  for (const p of participaciones) if (p.orgId && !porNombre.has(p.nombre)) porNombre.set(p.nombre, p.orgId);
+  return (p) => p.orgId || porNombre.get(p.nombre) || `n:${p.nombre}`;
+}
+
+export function recomputar(datos, { programas = null, periodo = null, paisFoco = 'ES', paisesComparados, socio = null } = {}) {
   const progOk = programas && programas.length ? new Set(programas) : null;
   const [desde, hasta] = periodo ?? [null, null];
+
+  // `socio` es la clave de una entidad: solo quedan los proyectos en los que participa.
+  let conSocio = null;
+  if (socio) {
+    conSocio = new Set();
+    const clave = crearClaveEntidad(datos.participaciones);
+    for (const x of datos.participaciones) if (clave(x) === socio) conSocio.add(x.proyecto);
+  }
 
   const proyectos = new Map();
   for (const p of datos.proyectos) {
     if (progOk && !progOk.has(p.programa)) continue;
+    if (conSocio && !conSocio.has(p.id)) continue;
     const mes = (p.inicio || '').slice(0, 7);
     // Un proyecto sin fecha de inicio no se descarta: no hay motivo para
     // ocultarlo solo porque a CORDIS le falte el dato.

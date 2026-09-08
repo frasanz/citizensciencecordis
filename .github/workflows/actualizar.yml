@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Recalcular indicadores desde CORDIS
+      - name: Recalcular indicadores desde CORDIS y LIFE
         if: github.event_name != 'push'
         run: node scripts/snapshot.js --sin-cache   # sin dependencias: fflate va en vendor/
 
@@ -42,11 +42,11 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add web/data
+          git add web/data datos/life-paises-pendientes.csv
           if git diff --staged --quiet; then
-            echo "CORDIS no ha cambiado nada desde la ultima vez."
+            echo "Ni CORDIS ni LIFE han cambiado nada desde la ultima vez."
           else
-            git commit -m "Datos de CORDIS a $(date -u +%Y-%m-%d)"
+            git commit -m "Datos de CORDIS y LIFE a $(date -u +%Y-%m-%d)"
             git push
           fi
 

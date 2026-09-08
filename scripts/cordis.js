@@ -53,7 +53,10 @@ function pasada(bytes, quiero) {
 // project.csv, y hasta no saber que proyectos casan con el filtro no se puede
 // decidir que organizaciones guardar. Descomprimir dos veces cuesta CPU pero
 // evita tener los 114 MB de CSV en memoria a la vez.
-export async function procesarPrograma(bytes, programa, analisis) {
+// `onOrganizacion`, si se da, recibe TODAS las filas de organization.csv, casen
+// o no con el filtro: sirve para resolver por nombre el pais de socios de otros
+// programas (LIFE) que no traen PIC.
+export async function procesarPrograma(bytes, programa, analisis, onOrganizacion = null) {
   await pasada(bytes, (n) => n.endsWith('project.csv') && {
     columnas: COLUMNAS_PROYECTO, opcionales: OPCIONALES_PROYECTO,
     onRecord: (r) => analisis.proyecto(r, programa),
@@ -65,7 +68,7 @@ export async function procesarPrograma(bytes, programa, analisis) {
     }) ||
     (n.endsWith('organization.csv') && {
       columnas: COLUMNAS_ORGANIZACION, opcionales: OPCIONALES_ORGANIZACION,
-      onRecord: (r) => analisis.participacion(r),
+      onRecord: (r) => { analisis.participacion(r); onOrganizacion?.(r); },
     }));
 }
 

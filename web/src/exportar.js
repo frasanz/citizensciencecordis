@@ -19,6 +19,7 @@ export const TABLAS = {
   proyectos: (r) => aCsv(r.proyectos, [
     { titulo: 'id', valor: (p) => p.id },
     { titulo: 'programa', valor: (p) => p.programa },
+    { titulo: 'referencia', valor: (p) => p.referencia || '' },
     { titulo: 'acronimo', valor: (p) => p.acronimo },
     { titulo: 'titulo', valor: (p) => p.titulo },
     { titulo: 'subprograma', valor: (p) => p.subprograma },
@@ -35,6 +36,7 @@ export const TABLAS = {
     { titulo: 'anio_inicio', valor: (p) => p.anio },
     { titulo: 'aportacion_ue_eur', valor: (p) => dec(p.aportacionUE) },
     { titulo: 'coste_total_eur', valor: (p) => dec(p.costeTotal) },
+    { titulo: 'url', valor: (p) => p.url || `https://cordis.europa.eu/project/id/${p.id}` },
   ]),
 
   participaciones: (r) => aCsv(r.participaciones, [
@@ -45,6 +47,7 @@ export const TABLAS = {
     { titulo: 'nombre', valor: (p) => p.nombre },
     { titulo: 'siglas', valor: (p) => p.siglas },
     { titulo: 'pais', valor: (p) => p.pais },
+    { titulo: 'pais_via', valor: (p) => p.via || 'cordis' },
     { titulo: 'tipo_entidad', valor: (p) => p.tipo },
     { titulo: 'rol', valor: (p) => p.rol },
     { titulo: 'aportacion_neta_eur', valor: (p) => dec(p.aportacionNeta) },
@@ -78,7 +81,7 @@ export const TABLAS = {
     { titulo: 'proyectos', valor: (s) => s.total },
     { titulo: 'proyectos_pais_foco', valor: (s) => s.foco },
     { titulo: 'aportacion_ue_eur', valor: (s) => dec(s.aportacionUE) },
-    ...['HORIZON', 'H2020', 'FP7', 'FP6'].map((p) => ({
+    ...['HORIZON', 'H2020', 'FP7', 'FP6', 'LIFE'].map((p) => ({
       titulo: `proyectos_${p}`, valor: (s) => s.porPrograma[p] || 0,
     })),
   ]),

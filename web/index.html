@@ -9,7 +9,7 @@
   --fondo:#fbfaf8; --panel:#fff; --borde:#e3e0d9; --borde-fuerte:#cfcabf;
   --texto:#1c1a17; --suave:#6b665d; --tenue:#8f8a80;
   --acento:#1f5f5b; --acento-claro:#e6f0ef;
-  --he:#1f5f5b; --h2020:#c07a2b; --fp7:#7a6ea8; --fp6:#a8536e;
+  --he:#1f5f5b; --h2020:#c07a2b; --fp7:#7a6ea8; --fp6:#a8536e; --life:#4f7d2c;
   --destacado:#b03a2e;
   --r:10px;
 }
@@ -17,7 +17,7 @@
   --fondo:#16181a; --panel:#1e2124; --borde:#2f3438; --borde-fuerte:#414750;
   --texto:#eceae6; --suave:#a8a49c; --tenue:#7d7970;
   --acento:#5bb3ab; --acento-claro:#17302e;
-  --he:#5bb3ab; --h2020:#e0a05a; --fp7:#a99ce0; --fp6:#d9829a;
+  --he:#5bb3ab; --h2020:#e0a05a; --fp7:#a99ce0; --fp6:#d9829a; --life:#8fc063;
   --destacado:#e8705f;
 }}
 *{box-sizing:border-box}
@@ -58,6 +58,27 @@ input[type=month]{width:auto}
 .periodo{align-items:center}
 .rot{font-size:12.5px;color:var(--tenue)}
 .periodo button{padding:6px 11px;font-size:12.5px}
+
+/* ---------- buscador de socio ---------- */
+.grupo.socio{position:relative;min-width:250px}
+#f-socio-cont{display:flex}
+input[type=search]{font:inherit;font-size:13.5px;padding:6px 9px;border-radius:7px;width:100%;
+  border:1px solid var(--borde-fuerte);background:var(--panel);color:var(--texto);-webkit-appearance:none}
+input[type=search]:focus{outline:none;border-color:var(--acento)}
+.sugerencias{position:absolute;left:0;right:0;top:100%;z-index:50;margin:4px 0 0;padding:4px;list-style:none;
+  background:var(--panel);border:1px solid var(--borde-fuerte);border-radius:9px;
+  box-shadow:0 10px 30px rgba(0,0,0,.16);max-height:300px;overflow-y:auto;min-width:min(360px,calc(100vw - 28px))}
+.sugerencias li{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer}
+.sugerencias li .nom{flex:1;max-width:none;min-width:0}
+.sugerencias li.activa,.sugerencias li:hover{background:var(--acento-claro);color:var(--acento)}
+.sugerencias li.nada{color:var(--tenue);cursor:default}
+.chip.socio-elegido{max-width:100%;cursor:default;padding-right:6px}
+.chip.socio-elegido .nom{max-width:230px}
+.chip.socio-elegido .pais{margin-right:0;border-color:var(--acento);color:var(--acento)}
+.chip.socio-elegido button{padding:0 6px;border:none;background:transparent;font-size:16px;line-height:1;color:inherit}
+.chip.socio-elegido button:hover{color:var(--destacado)}
+#p-entidades a.nom{color:inherit;text-decoration:none;border-bottom:1px dotted var(--borde-fuerte)}
+#p-entidades a.nom:hover{color:var(--acento);border-color:var(--acento)}
 
 /* ---------- ayuda contextual ---------- */
 .ayuda{width:15px;height:15px;min-width:15px;padding:0;border-radius:99px;flex:none;
@@ -155,7 +176,8 @@ footer code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:v
   #estado{flex-basis:100%;order:3}
   .panel{padding:13px 14px;margin-bottom:14px}
   .filtros{gap:15px}
-  .grupo{width:100%}
+  .grupo{width:100%;min-width:0}
+  .chip.socio-elegido .nom{max-width:60vw}
   .cifras{grid-template-columns:1fr 1fr;gap:9px}
   .cifra{padding:11px 12px}
   .cifra .n{font-size:21px}
@@ -174,9 +196,9 @@ footer code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:v
   #p-paises th:nth-child(6),#p-paises td:nth-child(6),
   #p-familias th:nth-child(4),#p-familias td:nth-child(4),
   /* De proyectos se quitan Programa y Aportacion: inicio, fin, coordinador y
-     entidades del pais son lo que se quiere leer aqui. */
-  #p-proyectos th:nth-child(7),#p-proyectos td:nth-child(7),
-  #p-proyectos th:nth-child(8),#p-proyectos td:nth-child(8){display:none}
+     entidades del pais son lo que se quiere leer aqui. Van por clase y no por
+     posicion, porque con un socio elegido aparece una columna mas. */
+  #p-proyectos .escritorio{display:none}
 }
 @media(max-width:380px){
   .nom{max-width:36vw}
@@ -217,7 +239,7 @@ td.izq{text-align:left}
 <div class="envoltorio">
   <header>
     <h1>Ciencia ciudadana en los programas marco europeos</h1>
-    <p>Proyectos que mencionan <em>citizen science</em> en su título o descripción, según los datos abiertos de CORDIS.</p>
+    <p>Proyectos que mencionan <em>citizen science</em> en su título o descripción, según los datos abiertos de CORDIS y de LIFE.</p>
     <div class="fuente" id="fuente"></div>
   </header>
 

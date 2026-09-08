@@ -38,6 +38,9 @@ const comprobaciones = [
   ['tabla de entidades', () => q('#p-entidades tbody').children.length > 3],
   ['tabla de proyectos', () => q('#p-proyectos tbody').children.length > 10],
   ['filtros de programa', () => window.document.querySelectorAll('[data-prog]').length >= 2],
+  ['LIFE entre los programas', () => !!q('[data-prog="LIFE"]')],
+  ['participaciones sin pais avisadas', () => /sin país/.test(q('.cifras').textContent)],
+  ['enlace a la ficha de LIFE', () => [...window.document.querySelectorAll('#p-proyectos a')].some((a) => a.href.includes('webgate.ec.europa.eu/life'))],
   ['selector de pais', () => q('#f-pais').options.length > 20],
   ['filtro por mes', () => {
     const d = q('#f-desde') || q('#f-desde-a');
@@ -98,6 +101,43 @@ const italia = q('#p-entidades h2').textContent;
 const okIt = italia.includes('Italia');
 if (!okIt) fallos++;
 console.log(`  ${okIt ? 'ok  ' : 'FALLO'} cambiar de pais repinta ("${italia}")`);
+
+// buscador de socio: escribir sugiere, elegir filtra, quitar restaura
+q('#f-pais').value = 'ES';
+q('#f-pais').dispatchEvent(new window.Event('change'));
+await new Promise((r) => setTimeout(r, 200));
+const totalAntes = q('.cifra .n').textContent;
+const caja = q('#f-socio');
+caja.value = 'ibercívis';           // con acento: la busqueda debe ignorarlo
+caja.dispatchEvent(new window.Event('input'));
+const sugerencias = [...window.document.querySelectorAll('#f-socio-lista [data-i]')];
+const sugiereOk = sugerencias.length > 0 && /IBERCIVIS/i.test(sugerencias[0].textContent);
+if (!sugiereOk) fallos++;
+console.log(`  ${sugiereOk ? 'ok  ' : 'FALLO'} el buscador de socio sugiere (${sugerencias.length} opciones)`);
+
+sugerencias[0]?.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+await new Promise((r) => setTimeout(r, 200));
+const totalSocio = q('.cifra .n').textContent;
+const notaProy = q('#p-proyectos .nota').textContent;
+const cabsSocio = [...q('#p-proyectos thead').querySelectorAll('th')].map((t) => t.textContent.trim());
+const filtraOk = totalSocio !== totalAntes && /IBERCIVIS/i.test(notaProy)
+  && cabsSocio.some((c) => c.startsWith('Papel de')) && !!q('#f-socio-quitar');
+if (!filtraOk) fallos++;
+console.log(`  ${filtraOk ? 'ok  ' : 'FALLO'} elegir socio filtra y añade su papel (${totalAntes} -> ${totalSocio})`);
+
+q('#f-socio-quitar').dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+await new Promise((r) => setTimeout(r, 200));
+const restauraOk = q('.cifra .n').textContent === totalAntes && !!q('#f-socio');
+if (!restauraOk) fallos++;
+console.log(`  ${restauraOk ? 'ok  ' : 'FALLO'} quitar el socio restaura el total`);
+
+// desde la tabla de entidades tambien se elige socio
+const enlaceEnt = q('#p-entidades [data-socio]');
+enlaceEnt.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+await new Promise((r) => setTimeout(r, 200));
+const desdeTablaOk = q('.cifra .n').textContent !== totalAntes && !!q('#f-socio-quitar');
+if (!desdeTablaOk) fallos++;
+console.log(`  ${desdeTablaOk ? 'ok  ' : 'FALLO'} pulsar una entidad de la tabla la elige como socio`);
 
 if (errores.length) { console.log('\nerrores:'); errores.forEach((e) => console.log('   ', e)); }
 console.log(fallos ? `\n${fallos} FALLOS` : '\ntodo correcto');
