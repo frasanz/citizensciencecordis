@@ -109,7 +109,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
     <li><code>manual</code>: <code>datos/life-paises.csv</code>, la única tabla que edita una persona.</li>
     <li><code>sin-pais</code>: no determinable. Cuenta en el total, no en ningún país.</li>
   </ol>
-  <p>Cada ejecución deja en <code>datos/life-paises-pendientes.csv</code> los nombres que quedan sin país.</p>
+  <p>Cada ejecución deja en <code>datos/life-paises-pendientes.csv</code> los nombres que quedan sin país. En esta edición eran 19 y se han resuelto a mano en <code>datos/life-paises.csv</code>, con la fuente de cada uno en su columna <code>fuente</code>: 10 se comprobaron en una fuente externa (registro, web oficial o directorio) y 9 se <strong>deducen</strong> del nombre, la forma jurídica y el proyecto (empresas y particulares italianos de FOREST4FUTURE, G.R.A.I.A., Alared y Schonert), y así consta en esa columna.</p>
   <h3>El dinero por socio: panel público de CINEA</h3>
   <p>CINEA publica el panel <em>LIFE Project Portfolio</em> (Qlik Sense), cuyo glosario dice que la contribución de la UE se da <strong>por beneficiario para las convocatorias de 2014 en adelante</strong>; en las anteriores se asigna entera al coordinador. De él se extrae una tabla de proyecto, participante (nombre legal del registro de participantes) e importe, que se guarda en <code>datos/life-importes.csv</code>. Se obtuvo filtrando la tabla del panel por los 35 proyectos que cumplen el criterio y leyendo sus filas; los totales cuadran con los del panel (285 filas y 97,4 M€, con 2 € de diferencia por el redondeo de sus celdas).</p>
   <ul>
