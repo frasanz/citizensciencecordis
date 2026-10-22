@@ -170,6 +170,7 @@ const comprobacionesEs = [
   ['filtro de CCAA', () => q('#f-ccaa').options.length > 10],
   ['filtro de años', () => !!q('#f-anio-desde') && !!q('#f-anio-hasta') && !!q('#f-anio-reset')],
   ['filtro de vía', () => window.document.querySelectorAll('[data-via]').length >= 3],
+  ['filtro de tipo de ayuda', () => ['proyecto', 'personal', 'estancia'].every((t) => !!q(`[data-tipo="${t}"]`))],
   ['enlaces a las tres fuentes en la tabla', () => {
     const hrefs = [...q('#p-ayudas').querySelectorAll('a')].map((a) => a.href);
     return hrefs.some((h) => h.includes('aei.gob.es')) && hrefs.some((h) => h.includes('fecyt.es')) && hrefs.some((h) => h.includes('fundacion-biodiversidad.es'));
@@ -195,6 +196,18 @@ const okFin = antesEs !== despuesEs;
 if (!okFin) fallos++;
 console.log(`  ${okFin ? 'ok  ' : 'FALLO'} quitar un financiador recalcula (${antesEs} -> ${despuesEs})`);
 clic(q('[data-fin="AEI"]'));
+await espera();
+
+// interaccion: dejar solo proyectos quita los contratos y las estancias
+clic(q('[data-tipo="personal"]'));
+clic(q('[data-tipo="estancia"]'));
+await espera();
+const soloProyectos = totalEs();
+const okTipo = Number(soloProyectos) < Number(antesEs) && Number(soloProyectos) > 0;
+if (!okTipo) fallos++;
+console.log(`  ${okTipo ? 'ok  ' : 'FALLO'} dejar solo proyectos recalcula (${antesEs} -> ${soloProyectos})`);
+clic(q('[data-tipo="personal"]'));
+clic(q('[data-tipo="estancia"]'));
 await espera();
 
 // desplegar el detalle de una ayuda

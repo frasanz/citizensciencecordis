@@ -12,7 +12,7 @@ dos pestañas, porque las dos mitades no comparten ni criterio ni unidad de medi
   La unidad es el proyecto con todo su consorcio: se puede filtrar por programa, por país de
   referencia, por mes de inicio y por socio, y ver cuota, coordinaciones y dinero recibido por país.
 - **Convocatorias españolas**: la [AEI](https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas),
-  [FECYT](https://www.convocatoria.fecyt.es/publico/Resolucion/resolucion.aspx) y la
+  [FECYT](https://www.convocatoria.fecyt.es/Publico/Convocatoria/ConvocatoriasAnteriores.aspx) y la
   [Fundación Biodiversidad](https://fundacion-biodiversidad.es/buscador-de-proyectos/). La unidad es
   la ayuda a una entidad, sin consorcios: se filtra por financiador, comunidad autónoma, año, vía
   de entrada y entidad, y se ve el reparto por convocatoria, comunidad y entidad con el importe concedido.
@@ -26,7 +26,7 @@ abril de 2026, que no eran reproducibles.
 
 ```sh
 npm install
-brew install poppler          # pdftotext, para las resoluciones en PDF de FECYT (apt: poppler-utils)
+brew install poppler          # pdftotext y pdftohtml, para los listados en PDF de FECYT (apt: poppler-utils)
 node scripts/snapshot.js      # descarga todas las fuentes y regenera web/data/
 node scripts/serve.js         # http://localhost:8000
 npm test                      # parser + web + navegador real
@@ -41,6 +41,13 @@ node scripts/snapshot.js --frase="citizen science" --campos=objective,title,keyw
 node scripts/snapshot.js --sin-cache      # ignora lo ya descargado en .cache/
 ```
 
+## Factsheet
+
+`node scripts/factsheet.js --pdf` genera `web/factsheet.html` y `web/factsheet.pdf`: cuatro páginas A4,
+«La ciencia ciudadana en España», con la identidad de Ibercivis (logo en `web/img/`). Lee los mismos
+JSON que la web, así que las cifras no pueden diverger; en la parte española cuenta solo proyectos.
+El PDF necesita Playwright y Chromium (`npx playwright install chromium`); el HTML, solo Node.
+
 ## Criterio de selección
 
 En los programas europeos, un proyecto entra si la expresión **`citizen science`** aparece en su
@@ -49,9 +56,10 @@ En los programas europeos, un proyecto entra si la expresión **`citizen science
 En las convocatorias españolas, una ayuda entra si **`ciencia ciudadana`** o `citizen science` (o
 sus variantes en catalán, gallego y euskera) aparece en el **título o el resumen**. Hay dos vías más,
 porque las fuentes no dan lo mismo: en FECYT entran también las ayudas concedidas en la **línea de
-ciencia ciudadana** de su convocatoria, que existe desde 2020; y en la AEI, las que declaran la frase
-entre sus **palabras clave**, que su buscador permite consultar pero no exportar. Cada ayuda lleva
-anotada su vía (`via` en el CSV), y la web permite filtrar por ella.
+ciencia ciudadana** de su convocatoria, que existe desde 2018; y en la AEI y en FECYT, las que
+declaran la frase entre sus **palabras clave**. Las de FECYT son los descriptores de la ficha de cada
+proyecto y se comprueban; las de la AEI, su buscador las permite consultar pero no exportar. Cada
+ayuda lleva anotada su vía (`via` en el CSV), y la web permite filtrar por ella.
 
 El criterio queda guardado en `meta.filtro` dentro de `web/data/indicadores.json` y de
 `web/data/nacional.json`, de modo que cualquier cifra publicada se puede auditar y volver a generar.
@@ -102,8 +110,8 @@ que hay:
 
 | Fuente | De dónde sale | Qué da | Qué no da |
 |---|---|---|---|
-| **AEI** (`scripts/aei.js`) | El [buscador de ayudas concedidas](https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas) exporta a CSV con los mismos filtros que la web. Se consulta por título, resumen y palabras clave, con cada frase, y se unen los resultados por referencia. | Año, convocatoria, referencia, área, título, CIF y entidad, comunidad autónoma, provincia, importe y **resumen**. | Fechas de ejecución. Las palabras clave, que no se exportan. Incluye contratos y estancias, no solo proyectos. |
-| **FECYT** (`scripts/fecyt.js`) | Solo el [PDF de la resolución definitiva](https://www.convocatoria.fecyt.es/publico/Resolucion/resolucion.aspx) de cada año, desde 2020. Se convierte con `pdftotext -bbox-layout` y las tablas se reconstruyen por las coordenadas de cada palabra. | Referencia, título, entidad, comunidad autónoma, presupuesto, solicitado, **importe concedido** y la categoría de la convocatoria con su nombre literal. | Descripción. CIF. |
+| **AEI** (`scripts/aei.js`) | El [buscador de ayudas concedidas](https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas) exporta a CSV con los mismos filtros que la web. Se consulta por título, resumen y palabras clave, con cada frase, y se unen los resultados por referencia. | Año, convocatoria, referencia, área, título, CIF y entidad, comunidad autónoma, provincia, importe y **resumen**. | Fechas de ejecución. Las palabras clave, que no se exportan. Incluye contratos y estancias, no solo proyectos: cada ayuda lleva su `tipo` (proyecto, contrato de personal, estancia) y se puede filtrar. |
+| **FECYT** (`scripts/fecyt.js`) | Dos cosas. El [listado de concedidas](https://www.convocatoria.fecyt.es/Publico/Convocatoria/ConvocatoriasAnteriores.aspx) de cada año desde 2012, un PDF que se convierte con `pdftotext -bbox-layout` y cuyas tablas se reconstruyen por las coordenadas de cada palabra. Y la **ficha resumen** de cada proyecto, una página HTML a la que apunta el enlace «Ver resumen» de cada fila; los enlaces se sacan del PDF con `pdftohtml -xml` y sirven además de lista de referencias del año, que tiene que cuadrar con las filas leídas. | Del PDF: comunidad autónoma, presupuesto, solicitado, **importe concedido** y la categoría de la convocatoria con su nombre literal. De la ficha: referencia, título, entidad, su localidad y tipo, **resumen**, descriptores y fechas de ejecución. | CIF. Antes de 2012 no hay ficha, y no se leen esos años. |
 | **Fundación Biodiversidad** (`scripts/biodiversidad.js`) | La API REST de su WordPress (sin autenticación) da todas las fichas de proyecto de sus programas; para las candidatas se baja la ficha HTML, donde están los datos. | Título, descripción y objetivos, línea de actuación, estado, años de ejecución, presupuesto, importe, entidad beneficiaria, localización y fondo (FEDER, FSE+, PRTR…). | CIF. El importe, en muchas fichas. La comunidad autónoma de la entidad. |
 
 El servidor de la AEI sirve su certificado sin la CA intermedia de la FNMT; `vendor/fnmt-ac-componentes.pem`
@@ -117,6 +125,7 @@ Fundación Biodiversidad se resuelve por una cadena de fuentes, anotada en la co
 | `fuente` | La da la propia fuente (AEI y FECYT). |
 | `cruce` | Misma entidad, por nombre, en AEI o FECYT. |
 | `localizacion` | La ficha de la Fundación Biodiversidad localiza el proyecto en una única comunidad. |
+| `localidad` | La ficha de FECYT da la localidad de la entidad, y esta nombra una comunidad, provincia o ciudad. |
 | `nombre` | El nombre de la entidad nombra la comunidad, una provincia o una ciudad, y solo una. |
 | `manual` | `datos/ccaa-entidades.csv`, la única tabla que edita una persona. |
 | `sin-ccaa` | No se ha podido determinar. Cuenta en el total, no en ninguna cifra por comunidad. |
@@ -157,8 +166,9 @@ scripts/
   life.js            API de LIFE, fichas, FTS y cadena de países
   nacional.js        orquesta AEI, FECYT y Fundación Biodiversidad y la cadena de comunidades
   aei.js             CSV del buscador de la AEI (con la CA de la FNMT)
-  fecyt.js           PDF de las resoluciones de FECYT, reconstruidos por coordenadas
+  fecyt.js           listados de concedidas de FECYT (PDF, por coordenadas) y fichas resumen (HTML)
   biodiversidad.js   API y fichas de la Fundación Biodiversidad
+  factsheet.js       factsheet de 4 páginas (HTML y PDF) a partir de los JSON
   serve.js           servidor de desarrollo
   test-csv.js        casos del parser, incluidos los malformados de CORDIS
   smoke.js           la web sobre un DOM real (jsdom), las dos pestañas
@@ -176,6 +186,7 @@ publicado no cargue con ello.
 La web **no descarga nada de ninguna fuente**: lee `web/data/indicadores.json` y
 `web/data/nacional.json` ya calculados y aplica los filtros en el navegador. Para traer datos nuevos
 hay que ejecutar el snapshot, a mano o desde el workflow, que instala poppler para los PDF de FECYT.
+Las fichas de FECYT se guardan en `.cache/fecyt/fichas/` y solo se bajan las que faltan.
 
 Los ZIP descargados quedan en `.cache/` junto a la fecha real del volcado en CORDIS
 (cabecera `Last-Modified`), que es la que muestra la web. Esa fecha no es la de la
@@ -208,7 +219,7 @@ que la serie completa se reconstruye desde una única descarga.
 
 CORDIS y base de datos pública de LIFE (CINEA), Comisión Europea —
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Buscador de ayudas concedidas de la AEI,
-resoluciones de FECYT y buscador de proyectos de la Fundación Biodiversidad: información pública de
+listados de concedidas y fichas resumen de FECYT y buscador de proyectos de la Fundación Biodiversidad: información pública de
 cada organismo, reutilizada según la Ley 37/2007 y la Ley 19/2013 de transparencia. El código, MIT.
 
 ---

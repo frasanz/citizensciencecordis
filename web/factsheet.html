@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La ciencia ciudadana en España · Factsheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+@page{size:A4;margin:0}
+:root{--negro:#111111;--carbon:#2b2b2b;--gris:#555555;--medio:#8a8a8a;--claro:#d9d9d9;--fondo:#f4f4f2;--ambar:#f2a900;--ambar-osc:#a86f00}
+*{box-sizing:border-box}
+html{background:#cfcfcf}
+body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Nunito","Nunito Sans","Avenir Next",ui-sans-serif,system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pagina{position:relative;width:210mm;height:297mm;margin:8mm auto;background:#fff;overflow:hidden;break-after:page;page-break-after:always;display:flex;flex-direction:column}
+@media print{html{background:none}.pagina{margin:0}}
+.cab{height:15mm;background:var(--negro);display:flex;align-items:center;justify-content:space-between;padding:0 14mm;flex:none}
+.cab img{height:8mm}
+.cab span{color:#fff;font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase;font-weight:700;border-left:2px solid var(--ambar);padding-left:3mm}
+.cuerpo{padding:9mm 14mm 0;flex:1;min-height:0}
+.pie{height:11mm;flex:none;margin:0 14mm;border-top:.6pt solid var(--claro);display:flex;align-items:center;justify-content:space-between;font-size:7pt;color:var(--gris)}
+.pie b{color:var(--negro)}
+h2{font-size:15.5pt;line-height:1.2;margin:0 0 2mm;color:var(--negro);font-weight:800;letter-spacing:-.01em}
+h3{font-size:10pt;margin:0 0 1mm;color:var(--negro);font-weight:800}
+.entra{margin:0 0 4mm;color:var(--gris);font-size:9pt}
+figure{margin:0 0 4mm;break-inside:avoid}
+figcaption{font-size:8pt;font-weight:800;color:var(--negro);text-transform:uppercase;letter-spacing:.07em;margin-bottom:1.5mm;padding-bottom:1mm;border-bottom:1.6pt solid var(--negro)}
+figure svg{width:100%;height:auto;display:block}
+.nota{margin:1mm 0 0;font-size:7.2pt;color:var(--gris);line-height:1.35}
+.rejilla{display:grid;grid-template-columns:1fr 1fr;gap:0 9mm}
+svg .et{font-size:8.6px;fill:var(--carbon);font-family:inherit}
+svg .et.res{font-weight:800;fill:var(--negro)}
+svg .val{font-size:8.6px;fill:var(--negro);font-weight:800;font-family:inherit}
+svg .eje{font-size:8px;fill:var(--gris);font-family:inherit}
+svg .eje.v{font-weight:800;fill:var(--negro)}
+.leyenda{display:flex;gap:5mm;font-size:7.6pt;color:var(--carbon);margin-top:1mm}
+.leyenda i{display:inline-block;width:3mm;height:3mm;margin-right:1.5mm;vertical-align:-.5mm;border:.4pt solid var(--medio)}
+.programas{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-top:1mm}
+.programas div{background:var(--fondo);border-left:2.2pt solid var(--ambar);padding:1.6mm 2.4mm;font-size:7.4pt;line-height:1.3}
+.programas b{display:block;color:var(--negro);font-size:8pt}
+.programas span{color:var(--gris)}
+
+/* portada */
+.portada .banda{background:var(--negro);color:#fff;padding:14mm 14mm 12mm;flex:none}
+.portada .logo{height:19mm;display:block;margin-bottom:17mm}
+.portada .kicker{font-size:8.6pt;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--ambar);margin-bottom:3mm}
+.portada h1{font-size:35pt;line-height:1.04;margin:0 0 5mm;font-weight:800;letter-spacing:-.02em}
+.portada h1 em{font-style:normal;color:var(--ambar)}
+.portada .sub{max-width:140mm;margin:0 0 11mm;font-size:10.5pt;color:#cfcfcf;line-height:1.5}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:5mm 8mm}
+.kpi{border-top:1.6pt solid var(--ambar);padding-top:2.4mm}
+.kpi .n{font-size:27pt;font-weight:800;line-height:1;color:#fff;letter-spacing:-.02em}
+.kpi .e{font-size:9pt;color:#fff;margin-top:1.6mm;line-height:1.3;font-weight:700}
+.kpi .s{font-size:8pt;color:var(--medio);margin-top:.8mm}
+.portada .cuerpo{padding-top:9mm}
+.mensajes{list-style:none;margin:3mm 0 6mm;padding:0;display:grid;gap:4mm}
+.mensajes li{display:flex;gap:4mm;align-items:flex-start}
+.mensajes .num{flex:none;width:9mm;height:9mm;border-radius:50%;background:var(--negro);color:var(--ambar);font-weight:800;font-size:12pt;display:flex;align-items:center;justify-content:center}
+.mensajes p{margin:0;font-size:9pt;color:var(--carbon)}
+.recuadro{background:var(--fondo);border-left:3pt solid var(--ambar);padding:3.5mm 5mm}
+.recuadro p{margin:0;font-size:8.6pt}
+
+/* metodologia */
+table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm}
+.fuentes th{text-align:left;font-size:7.4pt;text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--negro);padding:1.6mm 2.4mm}
+.fuentes td{vertical-align:top;padding:2mm 2.4mm;border-bottom:.6pt solid var(--claro)}
+.fuentes td:first-child{white-space:nowrap}
+.fuentes td[rowspan]{background:var(--fondo)}
+.dos{display:grid;grid-template-columns:1.25fr 1fr;gap:9mm}
+.dos ul{margin:0;padding-left:4.2mm;font-size:8.6pt}
+.dos li{margin-bottom:1.6mm}
+.dos p{margin:0 0 2mm;font-size:8.6pt}
+.web{font-size:12pt!important;font-weight:800;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
+.peq{font-size:7.4pt!important;color:var(--gris)}
+.abajo{margin-top:7mm;padding-top:5mm;border-top:.6pt solid var(--claro)}
+table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2mm}
+.fechas td{padding:1.4mm 0;border-bottom:.6pt solid var(--claro)}
+.fechas td:last-child{text-align:right;font-weight:800;color:var(--negro);white-space:nowrap}
+.cita{background:var(--fondo);border-left:3pt solid var(--ambar);padding:3mm 4mm;font-size:8.4pt!important}
+</style>
+</head>
+<body>
+
+<section class="pagina portada">
+  <div class="banda">
+    <img class="logo" src="img/ibercivis-logo.png" alt="Ibercivis · gente haciendo ciencia">
+    <div class="kicker">Factsheet · 22 de octubre de 2026</div>
+    <h1>La ciencia ciudadana<br>en <em>España</em></h1>
+    <p class="sub">Qué proyectos financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos abiertos de cada financiador.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="n">164</div><div class="e">proyectos europeos con participación española</div><div class="s">52 % de los 316 del criterio</div></div>
+      <div class="kpi"><div class="n">54</div><div class="e">proyectos europeos coordinados desde España</div><div class="s">111,8 M€ de contribución neta UE</div></div>
+      <div class="kpi"><div class="n">498</div><div class="e">proyectos financiados en convocatorias españolas</div><div class="s">138 entidades · 2009–2026</div></div>
+      <div class="kpi"><div class="n">25,9 M€</div><div class="e">concedidos en esas convocatorias</div><div class="s">23 sin importe publicado</div></div>
+    </div>
+  </div>
+  <div class="cuerpo">
+    <h2>Tres mensajes clave</h2>
+    <ol class="mensajes">
+      <li><span class="num">1</span><div><h3>España está en el 52 % de los proyectos europeos</h3><p>164 de los 316 proyectos de FP7, Horizonte 2020, Horizonte Europa y LIFE que mencionan ciencia ciudadana tienen al menos una entidad española, lo que sitúa a España en el primer puesto entre 75 países.</p></div></li><li><span class="num">2</span><div><h3>Coordina 54 y recibe 111,8 M€</h3><p>España ocupa el primer puesto en proyectos coordinados y el primer puesto en contribución neta de la UE, con 244 entidades españolas distintas participando.</p></div></li><li><span class="num">3</span><div><h3>498 proyectos nacionales, 25,9 M€ concedidos</h3><p>Entre 2009 y 2026, AEI, FECYT y la Fundación Biodiversidad han concedido ayudas a 138 entidades. Desde 2018 se financian de media unos 51 proyectos al año, frente a unos 15 entre 2013 y 2016.</p></div></li>
+    </ol>
+    <div class="recuadro">
+      <h3>Cómo leer estas cifras</h3>
+      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 4.</p>
+    </div>
+  </div>
+  <footer class="pie"><span>Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis</span><b>1 / 4</b></footer>
+</section>
+
+<section class="pagina">
+  <header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>España en los programas europeos</span></header>
+  <div class="cuerpo">
+    <h2>España está en 164 de los 316 proyectos europeos de ciencia ciudadana</h2>
+    <p class="entra">FP7, Horizonte 2020, Horizonte Europa y LIFE. Un proyecto cuenta una vez, con todo su consorcio, y se atribuye a España si tiene al menos una entidad española.</p>
+    <figure><figcaption>Proyectos por año de inicio</figcaption><svg viewBox="0 0 700 152" role="img"><line x1="24" x2="694" y1="132" y2="132" stroke="#8a8a8a" stroke-width=".6"/>
+      <text x="20" y="135" text-anchor="end" class="eje">0</text><line x1="24" x2="694" y1="108.4" y2="108.4" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="111.4" text-anchor="end" class="eje">10</text><line x1="24" x2="694" y1="84.8" y2="84.8" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="87.8" text-anchor="end" class="eje">20</text><line x1="24" x2="694" y1="61.2" y2="61.2" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="64.2" text-anchor="end" class="eje">30</text><line x1="24" x2="694" y1="37.599999999999994" y2="37.599999999999994" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="40.599999999999994" text-anchor="end" class="eje">40</text><line x1="24" x2="694" y1="14" y2="14" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="17" text-anchor="end" class="eje">50</text><rect x="29.5" y="129.6" width="28.4" height="2.4" fill="#d9d9d9"/><rect x="35.8" y="129.6" width="15.9" height="2.4" fill="#f2a900"/><text x="43.7" y="126.6" text-anchor="middle" class="eje v">1</text><text x="43.7" y="146" text-anchor="middle" class="eje">2011</text><rect x="68.9" y="127.3" width="28.4" height="4.7" fill="#d9d9d9"/><rect x="75.2" y="129.6" width="15.9" height="2.4" fill="#f2a900"/><text x="83.1" y="124.3" text-anchor="middle" class="eje v">2</text><text x="83.1" y="146" text-anchor="middle" class="eje">2012</text><rect x="108.3" y="129.6" width="28.4" height="2.4" fill="#d9d9d9"/><text x="122.5" y="126.6" text-anchor="middle" class="eje v">1</text><text x="122.5" y="146" text-anchor="middle" class="eje">2013</text><rect x="147.8" y="124.9" width="28.4" height="7.1" fill="#d9d9d9"/><text x="161.9" y="121.9" text-anchor="middle" class="eje v">3</text><text x="161.9" y="146" text-anchor="middle" class="eje">2014</text><rect x="187.2" y="120.2" width="28.4" height="11.8" fill="#d9d9d9"/><rect x="193.4" y="120.2" width="15.9" height="11.8" fill="#f2a900"/><text x="201.4" y="117.2" text-anchor="middle" class="eje v">5</text><text x="201.4" y="146" text-anchor="middle" class="eje">2015</text><rect x="226.6" y="106.0" width="28.4" height="26.0" fill="#d9d9d9"/><rect x="232.8" y="117.8" width="15.9" height="14.2" fill="#f2a900"/><text x="240.8" y="103.0" text-anchor="middle" class="eje v">11</text><text x="240.8" y="146" text-anchor="middle" class="eje">2016</text><rect x="266.0" y="120.2" width="28.4" height="11.8" fill="#d9d9d9"/><rect x="272.2" y="122.6" width="15.9" height="9.4" fill="#f2a900"/><text x="280.2" y="117.2" text-anchor="middle" class="eje v">5</text><text x="280.2" y="146" text-anchor="middle" class="eje">2017</text><rect x="305.4" y="87.2" width="28.4" height="44.8" fill="#d9d9d9"/><rect x="311.6" y="115.5" width="15.9" height="16.5" fill="#f2a900"/><text x="319.6" y="84.2" text-anchor="middle" class="eje v">19</text><text x="319.6" y="146" text-anchor="middle" class="eje">2018</text><rect x="344.8" y="94.2" width="28.4" height="37.8" fill="#d9d9d9"/><rect x="351.1" y="110.8" width="15.9" height="21.2" fill="#f2a900"/><text x="359.0" y="91.2" text-anchor="middle" class="eje v">16</text><text x="359.0" y="146" text-anchor="middle" class="eje">2019</text><rect x="384.2" y="77.7" width="28.4" height="54.3" fill="#d9d9d9"/><rect x="390.5" y="106.0" width="15.9" height="26.0" fill="#f2a900"/><text x="398.4" y="74.7" text-anchor="middle" class="eje v">23</text><text x="398.4" y="146" text-anchor="middle" class="eje">2020</text><rect x="423.6" y="28.2" width="28.4" height="103.8" fill="#d9d9d9"/><rect x="429.9" y="70.6" width="15.9" height="61.4" fill="#f2a900"/><text x="437.8" y="25.2" text-anchor="middle" class="eje v">44</text><text x="437.8" y="146" text-anchor="middle" class="eje">2021</text><rect x="463.0" y="54.1" width="28.4" height="77.9" fill="#d9d9d9"/><rect x="469.3" y="94.2" width="15.9" height="37.8" fill="#f2a900"/><text x="477.2" y="51.1" text-anchor="middle" class="eje v">33</text><text x="477.2" y="146" text-anchor="middle" class="eje">2022</text><rect x="502.5" y="65.9" width="28.4" height="66.1" fill="#d9d9d9"/><rect x="508.7" y="89.5" width="15.9" height="42.5" fill="#f2a900"/><text x="516.6" y="62.9" text-anchor="middle" class="eje v">28</text><text x="516.6" y="146" text-anchor="middle" class="eje">2023</text><rect x="541.9" y="35.2" width="28.4" height="96.8" fill="#d9d9d9"/><rect x="548.1" y="87.2" width="15.9" height="44.8" fill="#f2a900"/><text x="556.1" y="32.2" text-anchor="middle" class="eje v">41</text><text x="556.1" y="146" text-anchor="middle" class="eje">2024</text><rect x="581.3" y="56.5" width="28.4" height="75.5" fill="#d9d9d9"/><rect x="587.5" y="96.6" width="15.9" height="35.4" fill="#f2a900"/><text x="595.5" y="53.5" text-anchor="middle" class="eje v">32</text><text x="595.5" y="146" text-anchor="middle" class="eje">2025</text><rect x="620.7" y="16.4" width="28.4" height="115.6" fill="#d9d9d9"/><rect x="626.9" y="73.0" width="15.9" height="59.0" fill="#f2a900"/><text x="634.9" y="13.4" text-anchor="middle" class="eje v">49</text><text x="634.9" y="146" text-anchor="middle" class="eje">2026</text><rect x="660.1" y="124.9" width="28.4" height="7.1" fill="#d9d9d9"/><rect x="666.3" y="129.6" width="15.9" height="2.4" fill="#f2a900"/><text x="674.3" y="121.9" text-anchor="middle" class="eje v">3</text><text x="674.3" y="146" text-anchor="middle" class="eje">2027</text></svg><div class="leyenda"><span><i style="background:#d9d9d9"></i>Todos los proyectos</span><span><i style="background:#f2a900"></i>Con participación española</span></div><p class="nota">52 proyectos con inicio en 2026 o después ya están firmados; el año en curso no está cerrado.</p></figure>
+    <div class="rejilla">
+      <figure><figcaption>Proyectos por país</figcaption><svg viewBox="0 0 330 178" role="img"><text x="111" y="14" text-anchor="end" class="et res">España</text>
+      <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#f2a900"/>
+      <text x="289.0" y="14" class="val">164</text><text x="111" y="36" text-anchor="end" class="et">Italia</text>
+      <rect x="118" y="26" width="150.8" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="273.8" y="36" class="val">149</text><text x="111" y="58" text-anchor="end" class="et">Alemania</text>
+      <rect x="118" y="48" width="134.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="257.6" y="58" class="val">133</text><text x="111" y="80" text-anchor="end" class="et">Bélgica</text>
+      <rect x="118" y="70" width="107.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="230.3" y="80" class="val">106</text><text x="111" y="102" text-anchor="end" class="et">Reino Unido</text>
+      <rect x="118" y="92" width="105.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="228.3" y="102" class="val">104</text><text x="111" y="124" text-anchor="end" class="et">Países Bajos</text>
+      <rect x="118" y="114" width="103.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="226.2" y="124" class="val">102</text><text x="111" y="146" text-anchor="end" class="et">Francia</text>
+      <rect x="118" y="136" width="90.1" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="213.1" y="146" class="val">89</text><text x="111" y="168" text-anchor="end" class="et">Grecia</text>
+      <rect x="118" y="158" width="76.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="199.9" y="168" class="val">76</text></svg><p class="nota">75 países participan.</p></figure>
+      <figure><figcaption>Proyectos coordinados</figcaption><svg viewBox="0 0 330 178" role="img"><text x="111" y="14" text-anchor="end" class="et res">España</text>
+      <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#f2a900"/>
+      <text x="289.0" y="14" class="val">54</text><text x="111" y="36" text-anchor="end" class="et">Italia</text>
+      <rect x="118" y="26" width="129.1" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="252.1" y="36" class="val">42</text><text x="111" y="58" text-anchor="end" class="et">Países Bajos</text>
+      <rect x="118" y="48" width="83.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="206.0" y="58" class="val">27</text><text x="111" y="80" text-anchor="end" class="et">Alemania</text>
+      <rect x="118" y="70" width="58.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="181.4" y="80" class="val">19</text><text x="111" y="102" text-anchor="end" class="et">Bélgica</text>
+      <rect x="118" y="92" width="52.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="175.3" y="102" class="val">17</text><text x="111" y="124" text-anchor="end" class="et">Reino Unido</text>
+      <rect x="118" y="114" width="52.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="175.3" y="124" class="val">17</text><text x="111" y="146" text-anchor="end" class="et">Noruega</text>
+      <rect x="118" y="136" width="46.1" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="169.1" y="146" class="val">15</text><text x="111" y="168" text-anchor="end" class="et">Finlandia</text>
+      <rect x="118" y="158" width="43.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="166.0" y="168" class="val">14</text></svg></figure>
+      <figure><figcaption>Contribución neta de la UE (M€)</figcaption><svg viewBox="0 0 330 178" role="img"><text x="111" y="14" text-anchor="end" class="et res">España</text>
+      <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#f2a900"/>
+      <text x="289.0" y="14" class="val">111,8</text><text x="111" y="36" text-anchor="end" class="et">Alemania</text>
+      <rect x="118" y="26" width="137.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="260.3" y="36" class="val">92,5</text><text x="111" y="58" text-anchor="end" class="et">Países Bajos</text>
+      <rect x="118" y="48" width="124.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="247.2" y="58" class="val">83,7</text><text x="111" y="80" text-anchor="end" class="et">Italia</text>
+      <rect x="118" y="70" width="114.8" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="237.8" y="80" class="val">77,3</text><text x="111" y="102" text-anchor="end" class="et">Bélgica</text>
+      <rect x="118" y="92" width="87.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="210.6" y="102" class="val">59,0</text><text x="111" y="124" text-anchor="end" class="et">Francia</text>
+      <rect x="118" y="114" width="75.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="198.3" y="124" class="val">50,7</text><text x="111" y="146" text-anchor="end" class="et">Grecia</text>
+      <rect x="118" y="136" width="65.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="188.4" y="146" class="val">44,1</text><text x="111" y="168" text-anchor="end" class="et">Reino Unido</text>
+      <rect x="118" y="158" width="64.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="187.2" y="168" class="val">43,3</text></svg><p class="nota">LIFE no publica el reparto por socio: solo cuenta CORDIS.</p></figure>
+      <figure><figcaption>Entidades españolas con más proyectos</figcaption><svg viewBox="0 0 330 178" role="img"><text x="123" y="14" text-anchor="end" class="et">CSIC</text>
+      <rect x="130" y="4" width="154.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="14" class="val">39</text><text x="123" y="36" text-anchor="end" class="et">Fundacion Ibercivis</text>
+      <rect x="130" y="26" width="47.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="182.4" y="36" class="val">12</text><text x="123" y="58" text-anchor="end" class="et">Science For Change, Sl</text>
+      <rect x="130" y="48" width="39.5" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="174.5" y="58" class="val">10</text><text x="123" y="80" text-anchor="end" class="et">CREAF - CERCA</text>
+      <rect x="130" y="70" width="31.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="166.6" y="80" class="val">8</text><text x="123" y="102" text-anchor="end" class="et">UAB</text>
+      <rect x="130" y="92" width="31.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="166.6" y="102" class="val">8</text><text x="123" y="124" text-anchor="end" class="et">UB</text>
+      <rect x="130" y="114" width="27.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="162.6" y="124" class="val">7</text><text x="123" y="146" text-anchor="end" class="et">UPC</text>
+      <rect x="130" y="136" width="23.7" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="158.7" y="146" class="val">6</text><text x="123" y="168" text-anchor="end" class="et">UPF</text>
+      <rect x="130" y="158" width="23.7" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="158.7" y="168" class="val">6</text></svg></figure>
+    </div>
+    <div class="programas"><div><b>Horizonte Europa</b><span>83 de 162 · 51 %</span></div><div><b>Horizonte 2020</b><span>64 de 115 · 56 %</span></div><div><b>LIFE</b><span>15 de 35 · 43 %</span></div><div><b>FP7</b><span>2 de 4 · 50 %</span></div></div>
+  </div>
+  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>2 / 4</b></footer>
+</section>
+
+<section class="pagina">
+  <header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>Convocatorias españolas</span></header>
+  <div class="cuerpo">
+    <h2>498 proyectos y 25,9 M€ concedidos desde 2009</h2>
+    <p class="entra">AEI, FECYT y Fundación Biodiversidad. Aquí la unidad es la ayuda a una entidad, sin consorcios. Se cuentan solo proyectos: 57 contratos de personal y 12 estancias de la AEI (5,5 M€) quedan fuera porque heredan el texto de su proyecto.</p>
+    <figure><figcaption>Proyectos por año de convocatoria</figcaption><svg viewBox="0 0 700 152" role="img"><line x1="24" x2="694" y1="132" y2="132" stroke="#8a8a8a" stroke-width=".6"/>
+      <text x="20" y="135" text-anchor="end" class="eje">0</text><line x1="24" x2="694" y1="102.5" y2="102.5" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="105.5" text-anchor="end" class="eje">20</text><line x1="24" x2="694" y1="73" y2="73" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="76" text-anchor="end" class="eje">40</text><line x1="24" x2="694" y1="43.5" y2="43.5" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="46.5" text-anchor="end" class="eje">60</text><line x1="24" x2="694" y1="14" y2="14" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="17" text-anchor="end" class="eje">80</text><rect x="30.3" y="129.1" width="32.2" height="3.0" fill="#8a8a8a"/><rect x="30.3" y="127.6" width="32.2" height="1.5" fill="#d9d9d9"/><text x="46.3" y="124.6" text-anchor="middle" class="eje v">3</text><text x="46.3" y="146" text-anchor="middle" class="eje">2012</text><rect x="74.9" y="127.6" width="32.2" height="4.4" fill="#111111"/><rect x="74.9" y="111.3" width="32.2" height="16.2" fill="#8a8a8a"/><text x="91.0" y="108.3" text-anchor="middle" class="eje v">14</text><text x="91.0" y="146" text-anchor="middle" class="eje">2013</text><rect x="119.6" y="130.5" width="32.2" height="1.5" fill="#111111"/><rect x="119.6" y="111.4" width="32.2" height="19.2" fill="#8a8a8a"/><rect x="119.6" y="109.9" width="32.2" height="1.5" fill="#d9d9d9"/><text x="135.7" y="106.9" text-anchor="middle" class="eje v">15</text><text x="135.7" y="146" text-anchor="middle" class="eje">2014</text><rect x="164.3" y="129.1" width="32.2" height="3.0" fill="#111111"/><rect x="164.3" y="109.9" width="32.2" height="19.2" fill="#8a8a8a"/><rect x="164.3" y="108.4" width="32.2" height="1.5" fill="#d9d9d9"/><text x="180.3" y="105.4" text-anchor="middle" class="eje v">16</text><text x="180.3" y="146" text-anchor="middle" class="eje">2015</text><rect x="208.9" y="127.6" width="32.2" height="4.4" fill="#111111"/><rect x="208.9" y="109.9" width="32.2" height="17.7" fill="#8a8a8a"/><text x="225.0" y="106.9" text-anchor="middle" class="eje v">15</text><text x="225.0" y="146" text-anchor="middle" class="eje">2016</text><rect x="253.6" y="129.1" width="32.2" height="3.0" fill="#111111"/><rect x="253.6" y="101.0" width="32.2" height="28.0" fill="#8a8a8a"/><rect x="253.6" y="98.1" width="32.2" height="3.0" fill="#d9d9d9"/><text x="269.7" y="95.1" text-anchor="middle" class="eje v">23</text><text x="269.7" y="146" text-anchor="middle" class="eje">2017</text><rect x="298.3" y="118.7" width="32.2" height="13.3" fill="#111111"/><rect x="298.3" y="71.5" width="32.2" height="47.2" fill="#8a8a8a"/><rect x="298.3" y="68.6" width="32.2" height="3.0" fill="#d9d9d9"/><text x="314.3" y="65.6" text-anchor="middle" class="eje v">43</text><text x="314.3" y="146" text-anchor="middle" class="eje">2018</text><rect x="342.9" y="123.2" width="32.2" height="8.8" fill="#111111"/><rect x="342.9" y="77.4" width="32.2" height="45.7" fill="#8a8a8a"/><rect x="342.9" y="74.5" width="32.2" height="3.0" fill="#d9d9d9"/><text x="359.0" y="71.5" text-anchor="middle" class="eje v">39</text><text x="359.0" y="146" text-anchor="middle" class="eje">2019</text><rect x="387.6" y="118.7" width="32.2" height="13.3" fill="#111111"/><rect x="387.6" y="64.1" width="32.2" height="54.6" fill="#8a8a8a"/><rect x="387.6" y="55.3" width="32.2" height="8.8" fill="#d9d9d9"/><text x="403.7" y="52.3" text-anchor="middle" class="eje v">52</text><text x="403.7" y="146" text-anchor="middle" class="eje">2020</text><rect x="432.3" y="93.7" width="32.2" height="38.4" fill="#111111"/><rect x="432.3" y="42.0" width="32.2" height="51.6" fill="#8a8a8a"/><rect x="432.3" y="34.7" width="32.2" height="7.4" fill="#d9d9d9"/><text x="448.3" y="31.7" text-anchor="middle" class="eje v">66</text><text x="448.3" y="146" text-anchor="middle" class="eje">2021</text><rect x="476.9" y="98.1" width="32.2" height="33.9" fill="#111111"/><rect x="476.9" y="50.9" width="32.2" height="47.2" fill="#8a8a8a"/><text x="493.0" y="47.9" text-anchor="middle" class="eje v">55</text><text x="493.0" y="146" text-anchor="middle" class="eje">2022</text><rect x="521.6" y="95.1" width="32.2" height="36.9" fill="#111111"/><rect x="521.6" y="43.5" width="32.2" height="51.6" fill="#8a8a8a"/><rect x="521.6" y="40.5" width="32.2" height="3.0" fill="#d9d9d9"/><text x="537.7" y="37.5" text-anchor="middle" class="eje v">62</text><text x="537.7" y="146" text-anchor="middle" class="eje">2023</text><rect x="566.3" y="118.7" width="32.2" height="13.3" fill="#111111"/><rect x="566.3" y="78.9" width="32.2" height="39.8" fill="#8a8a8a"/><rect x="566.3" y="77.4" width="32.2" height="1.5" fill="#d9d9d9"/><text x="582.3" y="74.4" text-anchor="middle" class="eje v">37</text><text x="582.3" y="146" text-anchor="middle" class="eje">2024</text><rect x="610.9" y="120.2" width="32.2" height="11.8" fill="#111111"/><rect x="610.9" y="59.7" width="32.2" height="60.5" fill="#8a8a8a"/><rect x="610.9" y="58.3" width="32.2" height="1.5" fill="#d9d9d9"/><text x="627.0" y="55.3" text-anchor="middle" class="eje v">50</text><text x="627.0" y="146" text-anchor="middle" class="eje">2025</text><rect x="655.6" y="129.1" width="32.2" height="3.0" fill="#111111"/><rect x="655.6" y="123.2" width="32.2" height="5.9" fill="#d9d9d9"/><text x="671.7" y="120.2" text-anchor="middle" class="eje v">6</text><text x="671.7" y="146" text-anchor="middle" class="eje">2026</text></svg><div class="leyenda"><span><i style="background:#111111"></i>AEI</span><span><i style="background:#8a8a8a"></i>FECYT</span><span><i style="background:#d9d9d9"></i>Fundación Biodiversidad</span></div><p class="nota">Año de la convocatoria (AEI, FECYT) o de inicio de ejecución (Fundación Biodiversidad).</p></figure>
+    <div class="rejilla">
+      <figure><figcaption>Proyectos por comunidad autónoma</figcaption><svg viewBox="0 0 330 222" role="img"><text x="105" y="14" text-anchor="end" class="et res">Cataluña</text>
+      <rect x="112" y="4" width="172.0" height="15" rx="1.5" fill="#f2a900"/>
+      <text x="289.0" y="14" class="val">155</text><text x="105" y="36" text-anchor="end" class="et">Madrid</text>
+      <rect x="112" y="26" width="84.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="201.3" y="36" class="val">76</text><text x="105" y="58" text-anchor="end" class="et">Andalucía</text>
+      <rect x="112" y="48" width="49.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="166.9" y="58" class="val">45</text><text x="105" y="80" text-anchor="end" class="et">Aragón</text>
+      <rect x="112" y="70" width="47.7" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="164.7" y="80" class="val">43</text><text x="105" y="102" text-anchor="end" class="et">Galicia</text>
+      <rect x="112" y="92" width="28.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="145.9" y="102" class="val">26</text><text x="105" y="124" text-anchor="end" class="et">Comunidad Valenciana</text>
+      <rect x="112" y="114" width="28.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="145.9" y="124" class="val">26</text><text x="105" y="146" text-anchor="end" class="et">País Vasco</text>
+      <rect x="112" y="136" width="24.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="141.4" y="146" class="val">22</text><text x="105" y="168" text-anchor="end" class="et">Castilla y León</text>
+      <rect x="112" y="158" width="23.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="140.3" y="168" class="val">21</text><text x="105" y="190" text-anchor="end" class="et">Murcia</text>
+      <rect x="112" y="180" width="18.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="135.9" y="190" class="val">17</text><text x="105" y="212" text-anchor="end" class="et">Castilla-La Mancha</text>
+      <rect x="112" y="202" width="13.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="130.3" y="212" class="val">12</text></svg><p class="nota">Cataluña y Madrid reúnen el 46 %. 11 proyectos sin comunidad determinada.</p></figure>
+      <figure><figcaption>Importe concedido por financiador (M€)</figcaption><svg viewBox="0 0 330 68" role="img"><text x="121" y="14" text-anchor="end" class="et">FECYT</text>
+      <rect x="128" y="4" width="69.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="202.3" y="14" class="val">7,5</text><text x="121" y="36" text-anchor="end" class="et">AEI</text>
+      <rect x="128" y="26" width="156.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="36" class="val">16,9</text><text x="121" y="58" text-anchor="end" class="et">Fundación Biodiversidad</text>
+      <rect x="128" y="48" width="13.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="146.4" y="58" class="val">1,5</text></svg><p class="nota">23 proyectos, casi todos de la Fundación Biodiversidad, no publican importe.</p></figure>
+      <figure><figcaption>Entidades con más proyectos</figcaption><svg viewBox="0 0 330 178" role="img"><text x="143" y="14" text-anchor="end" class="et">CSIC</text>
+      <rect x="150" y="4" width="134.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="14" class="val">57</text><text x="143" y="36" text-anchor="end" class="et">U. de Barcelona</text>
+      <rect x="150" y="26" width="63.5" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="218.5" y="36" class="val">27</text><text x="143" y="58" text-anchor="end" class="et">Fundación Ibercivis</text>
+      <rect x="150" y="48" width="49.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="204.4" y="58" class="val">21</text><text x="143" y="80" text-anchor="end" class="et">U. Politecnica de Madrid</text>
+      <rect x="150" y="70" width="35.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="190.3" y="80" class="val">15</text><text x="143" y="102" text-anchor="end" class="et">Fundació Universitària Ba…</text>
+      <rect x="150" y="92" width="35.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="190.3" y="102" class="val">15</text><text x="143" y="124" text-anchor="end" class="et">U. de Zaragoza</text>
+      <rect x="150" y="114" width="30.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="185.6" y="124" class="val">13</text><text x="143" y="146" text-anchor="end" class="et">U. Politécnica de Cartage…</text>
+      <rect x="150" y="136" width="28.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="183.2" y="146" class="val">12</text><text x="143" y="168" text-anchor="end" class="et">U. de Castilla-la Mancha</text>
+      <rect x="150" y="158" width="25.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="180.9" y="168" class="val">11</text></svg></figure>
+      <figure><figcaption>Cómo entra cada proyecto en el criterio</figcaption><svg viewBox="0 0 330 90" role="img"><text x="123" y="14" text-anchor="end" class="et">En el resumen</text>
+      <rect x="130" y="4" width="154.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="14" class="val">267</text><text x="123" y="36" text-anchor="end" class="et">En las palabras clave</text>
+      <rect x="130" y="26" width="66.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="201.3" y="36" class="val">115</text><text x="123" y="58" text-anchor="end" class="et">En el título</text>
+      <rect x="130" y="48" width="61.1" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="196.1" y="58" class="val">106</text><text x="123" y="80" text-anchor="end" class="et">Línea FECYT</text>
+      <rect x="130" y="70" width="5.8" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="140.8" y="80" class="val">10</text></svg><p class="nota">Un proyecto entra por la primera vía que cumple. «Palabras clave»: las declara el proyecto (en la AEI, sin poder comprobarlas aquí).</p></figure>
+    </div>
+  </div>
+  <footer class="pie"><span>Datos: AEI (22 de octubre de 2026), FECYT y Fundación Biodiversidad · leídos de sus webs públicas</span><b>3 / 4</b></footer>
+</section>
+
+<section class="pagina">
+  <header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>Metodología y límites</span></header>
+  <div class="cuerpo">
+    <h2>Cómo se han obtenido estas cifras</h2>
+    <p class="entra">Todo se recalcula con un único comando a partir de los datos públicos de cada financiador; el código y los CSV de partida están en abierto.</p>
+    <table class="fuentes">
+      <thead><tr><th>Fuente</th><th>Qué se lee</th><th>Criterio</th></tr></thead>
+      <tbody>
+        <tr><td><b>CORDIS</b><br>FP7, H2020, Horizonte Europa</td><td>Volcados oficiales de datos abiertos: proyectos, organizaciones y base legal.</td><td rowspan="2"><i>citizen science</i> en título o descripción del proyecto.</td></tr>
+        <tr><td><b>LIFE</b><br>CINEA</td><td>API de su base pública y ficha de cada candidato. El país de los socios se resuelve por una cadena de fuentes anotada.</td></tr>
+        <tr><td><b>AEI</b></td><td>CSV de su buscador de ayudas concedidas, por título, resumen y palabras clave.</td><td rowspan="3"><i>ciencia ciudadana</i>, <i>citizen science</i>, <i>ciència ciutadana</i>, <i>ciencia cidadá</i>, <i>zientzia herritarra</i> en título o resumen.<br>FECYT: además, su línea de ciencia ciudadana y los descriptores.</td></tr>
+        <tr><td><b>FECYT</b></td><td>PDF de concedidas de cada año (tablas reconstruidas por coordenadas) y ficha resumen de cada proyecto.</td></tr>
+        <tr><td><b>Fundación Biodiversidad</b></td><td>API de su web y ficha de cada proyecto candidato.</td></tr>
+      </tbody>
+    </table>
+    <div class="dos">
+      <div>
+        <h3>Qué hay que tener en cuenta</h3>
+        <ul>
+          <li><b>La medida es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.</li>
+          <li><b>Dos ámbitos, dos unidades.</b> Un proyecto europeo con su consorcio no equivale a una ayuda nacional; no se suman.</li>
+          <li><b>Contratos de la AEI fuera.</b> Los contratos de personal y las estancias repiten el texto de su proyecto y se cuentan aparte.</li>
+          <li><b>Datos incompletos.</b> LIFE no da reparto por socio; la Fundación Biodiversidad no publica el importe en muchas fichas.</li>
+          <li><b>Cada dato lleva su vía.</b> Qué criterio hizo entrar cada proyecto y cómo se dedujo su país o comunidad queda anotado.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Para reproducirlo o ampliarlo</h3>
+        <p class="web">frasanz.github.io/<wbr>citizensciencecordis</p>
+        <p>Indicadores interactivos con filtros por programa, país, año, entidad y financiador; descarga en CSV de cada tabla; página de <b>metodología</b> con el detalle de cada fuente.</p>
+        <p class="peq">Datos de CORDIS: Comisión Europea, CC BY 4.0. Datos de LIFE: CINEA. Datos de AEI, FECYT y Fundación Biodiversidad: webs públicas de cada entidad.</p>
+      </div>
+    </div>
+    <div class="dos abajo">
+      <div>
+        <h3>Fecha de los datos</h3>
+        <table class="fechas">
+          <tr><td>CORDIS (Horizonte Europa, H2020)</td><td>8 de octubre de 2026</td></tr>
+          <tr><td>CORDIS (FP7, cerrado)</td><td>2 de enero de 2025</td></tr>
+          <tr><td>LIFE</td><td>22 de octubre de 2026</td></tr>
+          <tr><td>AEI, FECYT, Fundación Biodiversidad</td><td>22 de octubre de 2026</td></tr>
+        </table>
+        <p class="peq">CORDIS se actualiza a principios de cada mes y el workflow del repositorio recalcula todo el día 8.</p>
+      </div>
+      <div>
+        <h3>Cómo citar</h3>
+        <p class="cita">Ibercivis (2026). <i>La ciencia ciudadana en España. Factsheet</i>. Datos de CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad a 22 de octubre de 2026. frasanz.github.io/citizensciencecordis</p>
+      </div>
+    </div>
+  </div>
+  <footer class="pie"><span>Generado el 22 de octubre de 2026 · Elaboración: Ibercivis</span><b>4 / 4</b></footer>
+</section>
+</body>
+</html>

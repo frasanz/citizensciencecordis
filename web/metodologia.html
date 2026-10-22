@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metodología · Ciencia ciudadana en la financiación pública</title>
+<style>
+:root{
+  --fondo:#fbfaf8; --panel:#fff; --borde:#e3e0d9; --borde-fuerte:#cfcabf;
+  --texto:#1c1a17; --suave:#6b665d; --tenue:#8f8a80;
+  --acento:#1f5f5b; --acento-claro:#e6f0ef;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --fondo:#16181a; --panel:#1e2124; --borde:#2f3438; --borde-fuerte:#414750;
+  --texto:#eceae6; --suave:#a8a49c; --tenue:#7d7970;
+  --acento:#5bb3ab; --acento-claro:#17302e;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);
+  font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.envoltorio{max-width:820px;margin:0 auto;padding:28px 20px 80px}
+a{color:var(--acento)}
+.volver{font-size:13.5px;text-decoration:none}
+h1{font-size:26px;line-height:1.2;margin:14px 0 6px;letter-spacing:-.02em;font-weight:650}
+.lead{margin:0 0 22px;color:var(--suave)}
+h2{font-size:19px;margin:38px 0 6px;letter-spacing:-.01em;font-weight:640;padding-top:6px;border-top:1px solid var(--borde)}
+h3{font-size:15px;margin:22px 0 4px;font-weight:640}
+p{margin:8px 0}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:3px 0}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--acento-claro);color:var(--acento);padding:1px 5px;border-radius:4px}
+nav.indice{background:var(--panel);border:1px solid var(--borde);border-radius:10px;padding:12px 18px;margin:0 0 8px;font-size:14px}
+nav.indice ol{margin:4px 0}
+.nota{font-size:13px;color:var(--suave);border-left:3px solid var(--borde-fuerte);padding:2px 0 2px 12px;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:7px 9px;border-bottom:1px solid var(--borde)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenue);font-weight:600;border-bottom:1px solid var(--borde-fuerte)}
+.tabla{overflow-x:auto}
+.tabla table{min-width:560px}
+</style>
+</head>
+<body>
+<div class="envoltorio">
+  <a class="volver" href="./">← Volver a los indicadores</a>
+  <h1>Metodología</h1>
+  <p class="lead">Cómo se ha obtenido y analizado cada conjunto de datos: de qué fuente sale, qué se descarga, qué criterio decide si un proyecto es de ciencia ciudadana, qué se calcula con él y qué limitaciones tiene. Todo se recalcula con un único comando (<code>node scripts/snapshot.js</code>) y el código está en el <a href="https://github.com/frasanz/citizensciencecordis">repositorio</a>.</p>
+
+  <nav class="indice" aria-label="Índice">
+    <strong>Contenido</strong>
+    <ol>
+      <li><a href="#principios">Principios generales</a></li>
+      <li><a href="#cordis">CORDIS: FP7, Horizonte 2020 y Horizonte Europa</a></li>
+      <li><a href="#life">LIFE</a></li>
+      <li><a href="#aei">AEI</a></li>
+      <li><a href="#fecyt">FECYT</a></li>
+      <li><a href="#fb">Fundación Biodiversidad</a></li>
+      <li><a href="#ccaa">Comunidad autónoma de las entidades</a></li>
+      <li><a href="#indicadores">Indicadores</a></li>
+      <li><a href="#limites">Limitaciones y cómo auditar</a></li>
+      <li><a href="#factsheet">Factsheet</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="principios">1. Principios generales</h2>
+  <ul>
+    <li><strong>Reproducible.</strong> Ninguna cifra se escribe a mano. Un script descarga cada fuente, aplica el criterio y genera los ficheros de <code>web/data/</code>; la web solo los lee y filtra en el navegador.</li>
+    <li><strong>Un criterio explícito y guardado.</strong> La frase buscada y los campos donde se busca van dentro de <code>indicadores.json</code> y <code>nacional.json</code> (<code>meta.filtro</code>).</li>
+    <li><strong>Cada dato lleva su procedencia.</strong> Cada ayuda anota por qué vía entró (<code>via</code>) y cada país o comunidad autónoma deducido anota cómo se dedujo (<code>pais_via</code>, <code>ccaa_via</code>). Mejor «sin dato» que un dato inventado: lo que no se puede determinar cuenta en el total, pero no en las cifras por país o comunidad.</li>
+    <li><strong>Tipo de ayuda.</strong> En las convocatorias españolas cada ayuda lleva un <code>tipo</code>: proyecto, contrato de personal (predoctorales, Juan de la Cierva, Ramón y Cajal, Torres Quevedo…) o estancia. Solo la AEI publica los tres; FECYT y la Fundación Biodiversidad conceden proyectos. Los contratos heredan el texto del proyecto al que se vinculan, así que se pueden filtrar para contar solo proyectos; el factsheet cuenta solo proyectos.</li>
+    <li><strong>Dos ámbitos con dos unidades.</strong> En los programas europeos la unidad es el <em>proyecto con todo su consorcio</em>. En las convocatorias españolas es la <em>ayuda a una entidad</em>, sin consorcios. Por eso son dos pestañas y sus cifras no se suman.</li>
+    <li><strong>Descarga limpia.</strong> El workflow de GitHub Actions repite la descarga completa (sin caché) cada día 8 de mes, cuando CORDIS publica sus volcados, y publica el resultado.</li>
+  </ul>
+
+  <h2 id="cordis">2. CORDIS: FP7, Horizonte 2020 y Horizonte Europa</h2>
+  <h3>Obtención</h3>
+  <p>CORDIS, el servicio de la Comisión Europea que difunde los resultados de la I+D, publica un volcado de datos abiertos (CC BY 4.0) por programa marco, en ZIP con CSV. Se descargan los tres: <code>cordis-HORIZONprojects-csv.zip</code>, <code>cordis-h2020projects-csv.zip</code> y <code>cordis-fp7projects-csv.zip</code>. La fecha que muestra la web es la de la cabecera <code>Last-Modified</code> del fichero, no la de la descarga: FP7 está cerrado y no cambia desde 2025.</p>
+  <p>Los ZIP (de 30 a 55 MB) se leen en <em>streaming</em>, sin descomprimirlos en disco, con un parser CSV propio que tolera las filas malformadas que contiene CORDIS (comillas sin cerrar, saltos de línea dentro de campos). Hay casos de prueba para ello (<code>npm run test:csv</code>).</p>
+  <h3>Qué ficheros se usan</h3>
+  <div class="tabla"><table>
+    <tr><th>Fichero</th><th>Para qué</th></tr>
+    <tr><td><code>project.csv</code></td><td>Título, descripción (<code>objective</code>), fechas, esquema de financiación, aportación máxima de la UE y coste total. Es donde se aplica el criterio.</td></tr>
+    <tr><td><code>legalBasis.csv</code></td><td>El subprograma bajo el que se financia (ERC, MSCA, SwafS…). Un proyecto trae varias filas; se queda la de código más corto (el pilar) con el nombre oficial que da CORDIS.</td></tr>
+    <tr><td><code>organization.csv</code></td><td>Cada participación: entidad, país, tipo de entidad, rol (coordinador o socio) y contribución neta de la UE.</td></tr>
+  </table></div>
+  <h3>Criterio de selección</h3>
+  <p>Un proyecto entra si la expresión <code>citizen science</code> aparece, sin distinguir mayúsculas, en su <strong>título o su descripción</strong>. Se aceptan el guion y los saltos de línea entre las dos palabras (<code>citizen-science</code>). El criterio se aplica por separado a cada programa marco, de modo que cada proyecto queda etiquetado con el suyo.</p>
+  <div class="nota">Por qué estas cifras no coinciden con las del buscador web de CORDIS: ese buscador no filtra por programa marco e indexa además el texto de informes y entregables. Esta herramienta busca solo en el título y la descripción del proyecto y separa los programas explícitamente. En particular, Horizonte 2020 incluye el programa SwafS (<em>Science with and for Society</em>), donde la presencia española es muy alta y que inflaba las cifras del documento de abril de 2026.</div>
+  <h3>Qué se calcula</h3>
+  <p>Proyectos por programa, subprograma y año de inicio; participaciones y entidades únicas (por identificador de organización de CORDIS); cuota por país; proyectos coordinados; y la aportación neta de la UE por país y por entidad. Se cuentan los cuatro roles de CORDIS: coordinador, participante, socio asociado y tercero vinculado. España es el país de referencia por defecto, pero la web permite elegir cualquier otro.</p>
+
+  <h2 id="life">3. LIFE</h2>
+  <p>LIFE, el programa de medio ambiente y clima gestionado por CINEA, no está en CORDIS. Su base de datos pública tiene una API REST (sin autenticación) que es la que usa su propia web.</p>
+  <h3>Obtención</h3>
+  <ol>
+    <li><strong>Volcado completo</strong> de proyectos desde 1992 (más de 6 000), con referencia, país del coordinador, fechas, presupuesto y área prioritaria. Se comprueba contra el buscador ligero que el total cuadra, porque una caché del servidor puede devolverlo truncado.</li>
+    <li><strong>Candidatos</strong>: se pregunta al buscador de LIFE por la frase (y su variante con guion). El buscador indexa descripciones y documentos adjuntos, así que devuelve más proyectos de los que cumplen el criterio.</li>
+    <li><strong>Ficha HTML</strong> de cada candidato, donde vive la descripción (<em>Background</em> y <em>Objectives</em>), el coordinador y la tabla de socios.</li>
+  </ol>
+  <h3>Criterio</h3>
+  <p>El mismo que en CORDIS, aplicado al título y a la descripción de la ficha. La mención en <em>Results</em> no cuenta: se redacta al terminar el proyecto, no al firmarlo. Los registros de LIFE se transforman a la misma forma que los de CORDIS, de manera que todos los indicadores se calculan con el mismo código.</p>
+  <h3>El país de los socios</h3>
+  <p>LIFE no publica el PIC de los socios, su tipo, el reparto del dinero ni, desde 2021, su país. El país se resuelve con una cadena, de la fuente más fiable a la menos, y se anota la vía en cada participación:</p>
+  <ol>
+    <li><code>ficha</code>: lo trae la ficha (socios hasta 2020 y coordinadores).</li>
+    <li><code>cordis</code>: el mismo nombre legal existe en <code>organization.csv</code> de CORDIS. Un nombre visto con dos países distintos se descarta.</li>
+    <li><code>fts</code> / <code>fts-aprox</code>: el beneficiario de la misma subvención en el Sistema de Transparencia Financiera de la UE, por nombre exacto o por palabras compartidas cuando solo encaja un candidato. Solo desde 2025, cuando el FTS rellena el número de proyecto.</li>
+    <li><code>forma-juridica</code>: la forma jurídica o el gentilicio del nombre, solo si apunta a un único país («GmbH» existe en Alemania y Austria, así que no se usa).</li>
+    <li><code>manual</code>: <code>datos/life-paises.csv</code>, la única tabla que edita una persona.</li>
+    <li><code>sin-pais</code>: no determinable. Cuenta en el total, no en ningún país.</li>
+  </ol>
+  <p>Cada ejecución deja en <code>datos/life-paises-pendientes.csv</code> los nombres que quedan sin país.</p>
+  <div class="nota">Como LIFE no da fecha de volcado, la web muestra la de descarga. No hay reparto del dinero por socio, así que las cifras económicas por país solo cubren CORDIS.</div>
+
+  <h2 id="aei">4. AEI (Agencia Estatal de Investigación)</h2>
+  <h3>Obtención</h3>
+  <p>No hay volcado completo. El <a href="https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas">buscador de ayudas concedidas</a> permite buscar por título, resumen y palabras clave, y exporta el resultado a CSV con el mismo filtro. Se hace una consulta por cada campo y cada frase (<code>ciencia ciudadana</code>, <code>citizen science</code> y las variantes catalana, gallega y vasca), y los resultados se unen por referencia. El CSV trae año, convocatoria, referencia, área, título, CIF y entidad, comunidad autónoma, provincia, importe concedido y resumen.</p>
+  <p>El servidor sirve su certificado sin la CA intermedia de la FNMT, por lo que se incluye en <code>vendor/fnmt-ac-componentes.pem</code> para que Node pueda verificarlo en lugar de desactivar la verificación.</p>
+  <h3>Criterio</h3>
+  <p>Las candidatas se comprueban en local: la frase debe aparecer en el título o en el resumen (vías <code>titulo</code> y <code>resumen</code>). Una candidata que el buscador devuelve pero donde la frase no aparece se descarta y se anota como aviso. Una excepción: el buscador permite consultar por <strong>palabras clave</strong> pero no las exporta, así que lo que solo casa por ellas no se puede comprobar; se acepta anotándolo como <code>palabras-clave</code>.</p>
+  <div class="nota">La AEI incluye contratos y estancias, no solo proyectos de investigación (en esta edición, unas 70 de las 199 ayudas: contratos predoctorales, Juan de la Cierva, Ramón y Cajal, Torres Quevedo, estancias breves…). Un contrato predoctoral hereda el texto del proyecto al que se vincula, así que ese proyecto y su contrato aparecen como dos ayudas. La AEI tampoco da fechas de ejecución; el año es el de la convocatoria.</div>
+
+  <h2 id="fecyt">5. FECYT</h2>
+  <p>La Fundación Española para la Ciencia y la Tecnología publica la convocatoria de ayudas para el fomento de la cultura científica, tecnológica y de la innovación. No ofrece los proyectos concedidos en ningún formato de datos, así que se combinan dos fuentes.</p>
+  <h3>Obtención</h3>
+  <ol>
+    <li><strong>El listado de concedidas de cada año</strong> (desde 2012), un PDF enlazado desde la página de convocatorias anteriores. Hasta 2015 es un único PDF; desde 2016 hay uno de concedidas y otro de denegadas, y solo se leen las concedidas. Se convierte con <code>pdftotext -bbox-layout</code> (poppler), que da las coordenadas de cada palabra, y las tablas se reconstruyen por posición: columnas por la distribución de las coordenadas x, filas por la altura de línea. De aquí salen la comunidad autónoma, el presupuesto, lo solicitado, el <strong>importe concedido</strong> y la categoría de la convocatoria con su nombre literal.</li>
+    <li><strong>La ficha resumen de cada proyecto</strong>, una página HTML a la que apunta el enlace «Ver resumen» de cada fila. Los enlaces se extraen del PDF con <code>pdftohtml -xml</code>. De la ficha salen la referencia, el título, la entidad (con su localidad y tipo), el resumen, los descriptores y las fechas de ejecución.</li>
+  </ol>
+  <h3>Comprobaciones de la lectura</h3>
+  <p>Leer tablas de un PDF es la parte frágil del proyecto, así que se verifica cruzando las dos fuentes: cada enlace de ficha debe casar con una fila de la tabla y cada fila con un enlace, y la ficha descargada debe ser de esa misma solicitud (año y referencia). Todo lo que no cuadra se registra como aviso al final de la ejecución, y conviene revisarlo si el número crece de un mes a otro.</p>
+  <h3>Criterio</h3>
+  <p>A la frase en título o resumen se suman dos vías, porque FECYT tiene una <strong>línea propia de ciencia ciudadana</strong> desde 2018 (línea de actuación 3; desde 2022, categoría d.1):</p>
+  <ul>
+    <li><code>titulo</code> / <code>resumen</code>: la frase aparece en uno de ellos.</li>
+    <li><code>categoria</code>: la ayuda se concedió en la línea de ciencia ciudadana, aunque su texto no use la frase.</li>
+    <li><code>palabras-clave</code>: la frase está entre los descriptores de la ficha (aquí sí se pueden comprobar).</li>
+  </ul>
+  <p>Como el criterio se aplica sobre el resumen, se leen las fichas de <em>todas</em> las ayudas concedidas, no solo las candidatas. Se guardan en caché una a una.</p>
+  <div class="nota">Antes de 2012 no hay ficha resumen, y esos años no se leen. FECYT no publica el CIF de las entidades.</div>
+
+  <h2 id="fb">6. Fundación Biodiversidad</h2>
+  <h3>Obtención</h3>
+  <p>La web de la Fundación Biodiversidad (MITECO) es un WordPress con la API REST abierta, y cada proyecto financiado es una entrada de uno de varios tipos (convocatorias generales, PRTR, Empleaverde, Pleamar, FEDER, LIFE, Biodiversa+). El proceso es:</p>
+  <ol>
+    <li>La API devuelve título y descripción de <strong>todas</strong> las fichas de cada tipo.</li>
+    <li>Se consideran candidatas las que cumplen el criterio en esos campos, más las que devuelve el buscador de la web para cada frase, porque este también indexa campos que la API no entrega (los objetivos).</li>
+    <li>De cada candidata se baja la ficha HTML, que es donde están la entidad beneficiaria, el importe, el presupuesto, los años, la localización y el fondo (FEDER, FSE+, PRTR…).</li>
+  </ol>
+  <h3>Criterio</h3>
+  <p>El buscador de la web casa palabra a palabra («ciencia» y «ciudadana» sueltas), por lo que se comprueba otra vez la frase exacta sobre el título y la descripción de la ficha; lo demás se descarta. El año es el de inicio de ejecución según la ficha o, si no lo trae, el de publicación.</p>
+  <div class="nota">Los fondos europeos que gestiona la Fundación (FEDER, FSE, PRTR) se quedan en la pestaña española: la línea entre pestañas es quién concede la ayuda, no de dónde sale el dinero. Muchas fichas no traen el importe, y ninguna el CIF ni la comunidad autónoma de la entidad.</div>
+
+  <h2 id="ccaa">7. Comunidad autónoma de las entidades</h2>
+  <p>Es la de la sede de la entidad beneficiaria. AEI y FECYT la dan; para el resto se resuelve con una cadena de fuentes, y la vía queda en la columna <code>ccaa_via</code>:</p>
+  <div class="tabla"><table>
+    <tr><th>Vía</th><th>Qué es</th></tr>
+    <tr><td><code>fuente</code></td><td>La da la propia fuente (AEI y FECYT).</td></tr>
+    <tr><td><code>cruce</code></td><td>La misma entidad, por nombre normalizado, aparece en AEI o FECYT. Si el mismo nombre figura con dos comunidades, se descarta.</td></tr>
+    <tr><td><code>localizacion</code></td><td>La ficha de la Fundación Biodiversidad localiza el proyecto en una única comunidad.</td></tr>
+    <tr><td><code>localidad</code></td><td>La ficha de FECYT da la localidad de la entidad y esta nombra una comunidad, provincia o ciudad.</td></tr>
+    <tr><td><code>nombre</code></td><td>El nombre de la entidad nombra una comunidad, provincia o ciudad, y solo una. Se evitan los topónimos que son también apellidos o nombres comunes (León, Cuenca, Palma, Santander).</td></tr>
+    <tr><td><code>manual</code></td><td><code>datos/ccaa-entidades.csv</code>, la única tabla editada a mano, con la fuente consultada.</td></tr>
+    <tr><td><code>sin-ccaa</code></td><td>No determinable. Cuenta en el total, no en ninguna comunidad.</td></tr>
+  </table></div>
+  <p>Las entidades se identifican por CIF cuando la AEI lo da, y por nombre normalizado (sin acentos, mayúsculas ni puntuación) si no. Una ayuda sin CIF se engancha al CIF de otra con el mismo nombre, para que «UNIVERSIDAD DE ZARAGOZA» de FECYT y «Universidad de Zaragoza» de la Fundación Biodiversidad sean la misma entidad.</p>
+
+  <h2 id="indicadores">8. Indicadores</h2>
+  <h3>Programas europeos</h3>
+  <ul>
+    <li><strong>Proyectos</strong>: los que cumplen el criterio, por programa, subprograma y año de inicio.</li>
+    <li><strong>Participaciones y entidades</strong>: cada fila de un proyecto con una entidad; las entidades únicas se cuentan por identificador.</li>
+    <li><strong>Cuota de un país</strong>: proyectos con al menos una entidad de ese país, sobre el total del filtro activo.</li>
+    <li><strong>Coordinaciones</strong>: proyectos cuyo coordinador es de ese país.</li>
+    <li><strong>Dinero recibido</strong>: suma de la contribución neta de la UE de las entidades del país.</li>
+  </ul>
+  <h3>Convocatorias españolas</h3>
+  <ul>
+    <li><strong>Ayudas</strong> y <strong>entidades</strong> distintas.</li>
+    <li><strong>Importe concedido</strong>: suma de lo concedido. Las ayudas sin importe en la fuente cuentan como ayudas, pero no suman euros.</li>
+    <li>Reparto por financiador, convocatoria, comunidad autónoma, año y entidad, y por la vía de entrada.</li>
+  </ul>
+  <p>Todos los filtros de la web (programa, país, fechas, socio, financiador, vía…) recalculan estas cifras en el navegador a partir de los CSV/JSON originales, y cada tabla se puede descargar en CSV.</p>
+
+  <h2 id="limites">9. Limitaciones y cómo auditar</h2>
+  <ul>
+    <li><strong>El criterio es textual.</strong> Detecta los proyectos que <em>dicen</em> ser de ciencia ciudadana, no los que lo son sin llamarlo así; y detecta también los que la mencionan de pasada. Es una medida reproducible, no un juicio de calidad.</li>
+    <li><strong>Los idiomas importan.</strong> En las fuentes españolas se buscan las variantes en castellano, inglés, catalán, gallego y euskera; no hay búsqueda por sinónimos.</li>
+    <li><strong>No son comparables entre pestañas.</strong> Un proyecto europeo con cinco socios no es lo mismo que una ayuda nacional a una entidad, ni sus importes son del mismo tipo (contribución de la UE frente a importe concedido).</li>
+    <li><strong>Las fuentes cambian.</strong> Los PDF de FECYT y las webs de AEI y Fundación Biodiversidad no son APIs estables. Los avisos de lectura y las entidades sin comunidad o país se publican en cada ejecución para detectar roturas.</li>
+  </ul>
+  <p>Para auditar una cifra: la columna <code>via</code> dice por qué entró cada registro, <code>pais_via</code> y <code>ccaa_via</code> cómo se dedujo su país o comunidad, y los CSV de <code>web/data/</code> tienen todos los registros de partida. Cualquier persona puede repetir el proceso completo con <code>node scripts/snapshot.js --sin-cache</code>.</p>
+  <h2 id="factsheet">10. Factsheet</h2>
+  <p>El factsheet «La ciencia ciudadana en España» (<a href="./factsheet.pdf">PDF</a>, <a href="./factsheet.html">versión web</a>) sale de los mismos JSON que esta web: <code>node scripts/factsheet.js --pdf</code> lo regenera tras cada snapshot, de modo que sus cifras no pueden diverger de las de los indicadores. En la parte española cuenta solo proyectos (sin contratos de personal ni estancias de la AEI) y agrupa las entidades que solo se distinguen por una sigla entre paréntesis, como el CSIC.</p>
+</div>
+</body>
+</html>

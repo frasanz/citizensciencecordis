@@ -1,59 +1,127 @@
 // FECYT: Convocatoria de ayudas para el fomento de la cultura cientifica,
 // tecnologica y de la innovacion. FECYT no publica los proyectos concedidos en
-// ningun formato de datos: solo el PDF de la resolucion definitiva de cada año,
-// con una tabla por categoria. Este modulo baja esos PDF, los convierte con
-// `pdftotext -bbox-layout` (poppler) y reconstruye las tablas a partir de las
-// coordenadas de cada palabra.
+// ningun formato de datos. Lo que hay son dos cosas, y este modulo usa las dos:
 //
-// Lo que se saca de cada fila: referencia, titulo, entidad, comunidad autonoma,
-// presupuesto total, presupuesto solicitado e importe concedido. Y la categoria
-// de la convocatoria en la que se concedio, con el nombre literal que le da la
-// resolucion. Desde 2020 la convocatoria tiene una linea propia de ciencia
-// ciudadana, asi que aqui el criterio no es solo la frase: tambien la categoria.
+// 1. El "Listado de resolucion definitiva - Concedidas" de cada año, un PDF con
+//    una tabla por linea o categoria de la convocatoria, enlazado desde la
+//    pagina de convocatorias anteriores. De el se sacan la comunidad autonoma,
+//    los importes y la categoria en la que se concedio cada ayuda, con el
+//    nombre literal que le da la resolucion. Se convierte con `pdftotext
+//    -bbox-layout` (poppler) y las tablas se reconstruyen por las coordenadas
+//    de cada palabra.
+// 2. La FICHA RESUMEN de cada proyecto, a la que apunta el enlace "Ver resumen"
+//    de cada fila del PDF (desde 2012). Es una pagina HTML con el titulo, la
+//    entidad, su localidad y tipo, el resumen, los descriptores y las fechas de
+//    ejecucion. Los enlaces se leen del propio PDF con `pdftohtml -xml`, y son
+//    ademas la lista de referencias de cada año: cada enlace tiene que casar
+//    con una fila de la tabla y cada fila con un enlace.
 //
-// La resolucion no trae descripcion de los proyectos. Solo el titulo.
+// La linea propia de ciencia ciudadana existe desde 2018 (linea de actuacion 3;
+// desde 2022, categoria d.1), asi que aqui el criterio no es solo la frase:
+// tambien la categoria.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-export const URL_RESOLUCIONES = 'https://www.convocatoria.fecyt.es/publico/Resolucion/resolucion.aspx';
+export const URL_CONVOCATORIAS = 'https://www.convocatoria.fecyt.es/Publico/Convocatoria/ConvocatoriasAnteriores.aspx';
+export const PRIMER_ANIO = 2012;   // primer año con ficha resumen por proyecto
+
+// El servidor rechaza las conexiones http en claro (las cierra sin responder),
+// y la pagina enlaza muchos PDF y fichas por http.
+const aHttps = (u) => u.replace(/^http:\/\//i, 'https://');
+const CABECERAS = { 'User-Agent': 'Mozilla/5.0' };
+
+async function bajar(url, intentos = 3) {
+  for (let i = 1; ; i++) {
+    try {
+      const res = await fetch(url, { headers: CABECERAS });
+      if (!res.ok) throw new Error(`FECYT devolvio ${res.status} al pedir ${url}`);
+      return res;
+    } catch (e) {
+      if (i >= intentos) throw e;
+      await new Promise((r) => setTimeout(r, 1500 * i));
+    }
+  }
+}
 
 // ---------- descarga ----------
-export async function listarResoluciones() {
-  const res = await fetch(URL_RESOLUCIONES, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  if (!res.ok) throw new Error(`FECYT devolvio ${res.status} al pedir la lista de resoluciones`);
-  const html = await res.text();
+const desentidad = (s) => s.replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+export const quitarHtml = (s) => desentidad(String(s ?? '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')).replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, '\n').trim();
+
+// Un listado de concedidas por año. Hasta 2015 la resolucion definitiva es un
+// unico PDF sin denegadas; desde 2016 hay uno de concedidas y otro de
+// denegadas. Antes de 2012 no hay ficha resumen, y no se leen.
+export function leerListaListados(html) {
   const vistos = new Map();
-  for (const m of html.matchAll(/href="([^"]*Resolucion_definitiva_convocatoria_[^"]*?(\d{4})\.pdf)"/gi)) {
-    const anio = +m[2];
-    if (vistos.has(anio)) continue;
-    const url = new URL(m[1], URL_RESOLUCIONES).href;
-    vistos.set(anio, { anio, url, archivo: `resolucion-${anio}.pdf` });
+  for (const m of html.matchAll(/<a[^>]+href="([^"]+\.pdf)"[^>]*>([\s\S]*?)<\/a>/gi)) {
+    const texto = quitarHtml(m[2]).replace(/\s+/g, ' ');
+    const t = texto.match(/^(?:Listado resoluci[oó]n definitiva\s*-\s*Concedidas\s*-\s*Convocatoria|Resoluci[oó]n definitiva Convocatoria)\s+(\d{4})$/i);
+    if (!t) continue;
+    const anio = +t[1];
+    if (anio < PRIMER_ANIO || vistos.has(anio)) continue;
+    const url = aHttps(new URL(m[1], URL_CONVOCATORIAS).href);
+    vistos.set(anio, { anio, url, archivo: `concedidas-${anio}.pdf`, texto });
   }
   return [...vistos.values()].sort((a, b) => a.anio - b.anio);
 }
 
+export async function listarListados() {
+  const res = await bajar(URL_CONVOCATORIAS);
+  return leerListaListados(await res.text());
+}
+
 export async function descargarPdf(url) {
-  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  if (!res.ok) throw new Error(`FECYT devolvio ${res.status} al pedir ${url}`);
+  const res = await bajar(url);
   return new Uint8Array(await res.arrayBuffer());
+}
+
+export async function descargarFicha(url) {
+  const res = await bajar(url);
+  return await res.text();
+}
+
+// Descarga en paralelo, de n en n, conservando el orden.
+export async function enParalelo(items, n, fn) {
+  const out = new Array(items.length);
+  let i = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (i < items.length) { const k = i++; out[k] = await fn(items[k], k); }
+  }));
+  return out;
+}
+
+function poppler(programa, args) {
+  try {
+    return execFileSync(programa, args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+  } catch (e) {
+    if (e.code === 'ENOENT') throw new Error(`FECYT necesita ${programa} (poppler) para leer los PDF: brew install poppler / apt-get install poppler-utils`);
+    throw e;
+  }
 }
 
 // Convierte el PDF a XHTML con las coordenadas de cada palabra. Necesita
 // poppler (pdftotext); en macOS `brew install poppler`, en Debian/Ubuntu
 // `apt-get install poppler-utils`.
 export function pdfABbox(rutaPdf) {
-  try {
-    return execFileSync('pdftotext', ['-bbox-layout', rutaPdf, '-'], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
-  } catch (e) {
-    if (e.code === 'ENOENT') throw new Error('FECYT necesita pdftotext (poppler) para leer las resoluciones en PDF: brew install poppler / apt-get install poppler-utils');
-    throw e;
-  }
+  return poppler('pdftotext', ['-bbox-layout', rutaPdf, '-']);
 }
 
-// ---------- lectura del XHTML de pdftotext ----------
-const desentidad = (s) => s.replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+// Enlaces "Ver resumen" del PDF: referencia -> URL de la ficha resumen.
+// pdftohtml (poppler) es lo unico que saca las anotaciones de enlace.
+export function pdfAEnlaces(rutaPdf) {
+  return leerEnlaces(poppler('pdftohtml', ['-xml', '-i', '-stdout', rutaPdf]));
+}
+export function leerEnlaces(xml) {
+  const m = new Map();
+  for (const p of xml.matchAll(/<page number="(\d+)"[^>]*>([\s\S]*?)<\/page>/g)) {
+    for (const a of p[2].matchAll(/<a href="([^"]*?[?&]RF=(\d+)[^"]*)"/g)) if (!m.has(a[2])) m.set(a[2], { url: aHttps(desentidad(a[1])), pagina: +p[1] });
+  }
+  return m;
+}
+// Para los años cuyo PDF no lleva enlaces (2014), la ficha esta en la misma URL.
+export const urlFicha = (anio, ref) => `https://www.convocatoria.fecyt.es/Publico/${anio}/Formularios_Solicitud/Informes/Ficha_Resumen.aspx?RF=${ref}`;
 
+// ---------- lectura del XHTML de pdftotext ----------
 export function leerBbox(xhtml) {
   const paginas = [];
   for (const p of xhtml.matchAll(/<page width="([\d.]+)" height="([\d.]+)">([\s\S]*?)<\/page>/g)) {
@@ -79,6 +147,7 @@ function lineas(palabras, tol = 1.6) {
   for (const l of out) { l.palabras.sort((a, b) => a.x0 - b.x0); l.texto = l.palabras.map((w) => w.t).join(' '); }
   return out;
 }
+const texto = (ws) => lineas(ws).map((l) => l.texto).join(' ').replace(/\s+/g, ' ').trim();
 
 // Valor mas frecuente; en caso de empate, el menor (para que sea determinista).
 const moda = (valores, redondeo = 1) => {
@@ -100,13 +169,12 @@ function pico(xs, desde, hasta) {
   return mejor;
 }
 
-const ES_REF = (t) => /^\d{5}$/.test(t);
-const ES_IMPORTE = (t) => /^\d{1,3}(\.\d{3})*,\d{2}$/.test(t) || t === '-';
-const aNumero = (t) => (t === '-' ? 0 : Number(t.replace(/\./g, '').replace(',', '.')));
+const aNumero = (t) => (t === '-' ? 0 : Number(t.replace(/€/g, '').replace(/\./g, '').replace(',', '.')));
 
 // Palabras que solo aparecen en la cabecera de columnas (se comparan tal cual,
 // con mayusculas: los titulos de 2020 y 2021 van en mayusculas y no chocan).
-const VOCAB_CABECERA = /^(de|para|gastos|personal|ejecución|ejecucion|amortización|inventariable|final|total|solicitado|Solicitado|financiación|Financiación|Fiinanciación|concesión|Concesión|Propuesta|Presupuesto|Pto|Nota|NOTA|criterios|sustan-|tivos|Sustantivos|Criterios|Tipo|Ayuda|concedida|RESUMEN|Resumen|Ref\.|Referencia|Título|Entidad|CCAA|Posición|N|\.|O|orden|Categoría|Total|resolución|Resolución|provisional|en|€)$/;
+const VOCAB_CABECERA = /^(de|para|gastos|personal|ejecución|ejecucion|amortización|inventariable|final|total|solicitado|Solicitado|financiación|Financiación|Fiinanciación|concesión|Concesión|Propuesta|Presupuesto|Ppto\.?|Ppto\.Solicitado|Pto|Nota|NOTA|criterios|sustan-|tivos|Sustantivos|Criterios|Tipo|Ayuda|concedida|concedido|CONCEDIDO|Importe|IMPORTE|RESUMEN|Resumen|Ficha|FICHA|Ref\.?|REF\.?|Refe-|rencia|Referencia|Título|TÍTULO|TITULO|Entidad|ENTIDAD|CCAA|Posi-|ción|Posición|Mod\.?|MOD\.?|N|\.|O|orden|Categoría|Total|resolución|Resolución|provisional|en|€)$/;
+const ES_CABECERA_REF = (t) => /^(Ref\.?|REF\.?|Refe-|Referencia)$/.test(t);
 
 // ---------- comunidades autonomas ----------
 // Nombres oficiales y las variantes con que las escriben FECYT y la AEI.
@@ -127,183 +195,288 @@ export const CCAA = [
 export const normalizaTexto = (s) => String(s ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 const CCAA_POR_ALIAS = new Map();
 for (const [oficial, ...alias] of CCAA) { CCAA_POR_ALIAS.set(normalizaTexto(oficial), oficial); for (const a of alias) CCAA_POR_ALIAS.set(a, oficial); }
-const CCAA_SIN_ESPACIOS = new Map([...CCAA_POR_ALIAS].map(([k, v]) => [k.replace(/[\s.]/g, ''), v]));
+const CCAA_SIN_ESPACIOS = new Map([...CCAA_POR_ALIAS].map(([k, v]) => [k.replace(/[\s.-]/g, ''), v]));
 export const ccaaDe = (s) => {
   const n = normalizaTexto(s).replace(/\.$/, '');
-  return CCAA_POR_ALIAS.get(n) ?? CCAA_SIN_ESPACIOS.get(n.replace(/[\s.]/g, '')) ?? null;
+  return CCAA_POR_ALIAS.get(n) ?? CCAA_SIN_ESPACIOS.get(n.replace(/[\s.-]/g, '')) ?? null;
 };
 
 // ---------- reconstruccion de las tablas ----------
-// Devuelve las filas de todas las secciones "SOLICITUDES CONCEDIDAS" del PDF.
-// Cada fila: { ref, titulo, entidad, ccaa, presupuesto, solicitado, importe,
-// categoria, pagina }. `avisos` recoge lo que no ha cuadrado, para revisarlo.
-export function extraerConcedidas(paginas) {
+// Devuelve las filas de todas las tablas de concedidas del PDF. Cada fila:
+// { ref, titulo, entidad, ccaa, presupuesto, solicitado, importe, categoria,
+// pagina, enlace }. `enlaces` (referencia -> { url, pagina }) son los enlaces
+// "Ver resumen" del PDF: sirven de lista de referencias del año, y cada uno
+// tiene que casar con una fila. Una referencia es tambien cualquier numero de
+// cuatro o cinco cifras en la columna Ref (2014 no lleva enlaces, y en 2018
+// hay una fila sin el suyo). `avisos` recoge lo que no ha cuadrado.
+//
+// De la tabla solo son imprescindibles la referencia, la CCAA, los importes y
+// la categoria: el titulo y la entidad los da mejor la ficha resumen, y aqui
+// se leen solo por si falta.
+const EXCLUYE_SECCION = /NO\s+CONCEDID|PRECONCEDID|RENUNC|DESIST|DENEGAD|EXCLUID/i;
+export function extraerConcedidas(paginas, enlaces = new Map()) {
   const avisos = [];
-  const secciones = [];   // paginas consecutivas con la misma cabecera de seccion
+  const esRef = (t) => enlaces.has(t) || /^\d{4,5}$/.test(t);
+  const paginasUtiles = [];
 
-  // Capa de datos: el PDF de 2021 trae todo el texto duplicado en dos cuerpos
-  // de letra distintos, y cada pagina tiene que leerse de la misma capa que las
-  // demas o las columnas no casan. Se elige una vez para todo el documento: el
-  // cuerpo mas frecuente entre las referencias de cinco digitos.
-  const hDoc = moda(paginas.flatMap((p) => p.palabras.filter((w) => ES_REF(w.t)).map((w) => w.h)), 0.1);
+  // Cuerpo de letra de los datos: el de las referencias enlazadas. Se admite
+  // hasta 1.4 puntos de diferencia, porque 2018 y 2024 mezclan cuerpos de 8 y
+  // 9 puntos en la misma fila; las cabeceras de seccion (11-12) quedan fuera.
+  const hDoc = moda(paginas.flatMap((p) => p.palabras.filter((w) => enlaces.size ? enlaces.has(w.t) : /^\d{4,5}$/.test(w.t)).map((w) => w.h)), 0.1);
 
   for (let i = 0; i < paginas.length; i++) {
     const pag = paginas[i];
-    const lns = lineas(pag.palabras);
-    const cab = lns.find((l) => /SOLICITUDES\s+CONCEDIDAS/i.test(l.texto) && l.y < 130);
-    if (!cab) continue;
-
-    const refs = pag.palabras.filter((w) => ES_REF(w.t));
-    if (!refs.length) continue;
-    const hCapa = refs.some((w) => Math.abs(w.h - hDoc) <= 0.6) ? hDoc : moda(refs.map((w) => w.h), 0.1);
-    // Tolerancia de 0.6: en 2024 la columna Entidad va medio punto mas pequeña que
-    // el resto; las dos capas duplicadas de 2021 distan mas de un punto.
-    const capa = pag.palabras.filter((w) => Math.abs(w.h - hCapa) <= 0.6);
-    const cabRef = capa.find((w) => /^(Ref\.?|Referencia)$/.test(w.t));
-    if (!cabRef) { avisos.push(`p${i + 1}: sin cabecera Ref.`); continue; }
+    const cabRef = pag.palabras.find((w) => ES_CABECERA_REF(w.t));
+    if (!cabRef) continue;
     const yCols = cabRef.y0;
+    // La referencia esta en su columna, debajo de la cabecera: se descartan
+    // numeros iguales en otras columnas.
+    const cand = pag.palabras.filter((w) => esRef(w.t) && w.y0 > yCols + 4);
+    if (!cand.length) continue;
+    const refEdge = moda(cand.filter((w) => enlaces.size ? enlaces.has(w.t) : true).map((w) => w.x0)) ?? moda(cand.map((w) => w.x0));
+    const refs0 = cand.filter((w) => Math.abs(w.x0 - refEdge) <= 6);
+    if (!refs0.length) continue;
+    const hCapa = refs0.some((w) => Math.abs(w.h - hDoc) <= 1.4) ? hDoc : moda(refs0.map((w) => w.h), 0.1);
+    const capa = pag.palabras.filter((w) => Math.abs(w.h - hCapa) <= 1.4);
+    const refs = refs0.filter((w) => Math.abs(w.h - hCapa) <= 1.4);
+    if (!refs.length) continue;
 
-    // Etiqueta de la seccion: la linea "SOLICITUDES CONCEDIDAS ..." y las
-    // sublineas entre ella y la cabecera de columnas (Modalidad, Categoría, d.1 ...).
-    const hCab = moda(cab.palabras.map((w) => w.h), 0.1);
-    const enCapa = (w) => Math.abs(w.h - hCapa) <= 0.6 || Math.abs(w.h - hCab) <= 0.35;
-    const sub = lineas(pag.palabras.filter(enCapa)).filter((l) => l.y > cab.y + 2 && l.y < yCols - 12
-      && !/SOLICITUDES\s+CONCEDIDAS|^RESOLUCI|^INFORME|^Código|^https?:/i.test(l.texto)
-      && !l.palabras.every((w) => VOCAB_CABECERA.test(w.t)));
-    const textos = [cab.texto.replace(/^.*?CONCEDIDAS\s*/i, ''), ...sub.map((l) => l.texto)]
-      .map((t) => t.replace(/\s+/g, ' ').replace(/\s*\.\s*$/, '').trim()).filter(Boolean);
-    const categoria = [...new Set(textos)].join(' · ');
+    // Etiqueta de la seccion: la linea "... CONCEDIDAS ..." de encima de la
+    // cabecera de columnas y las sublineas entre ella y la cabecera (Modalidad,
+    // Categoría, d.1 ...). Las paginas de renuncias, desistimientos y denegadas
+    // se saltan. Hasta 2015 no hay secciones: la categoria la da la ficha.
+    const lns = lineas(pag.palabras.filter((w) => w.y0 < yCols - 4));
+    if (lns.some((l) => EXCLUYE_SECCION.test(l.texto))) continue;
+    const cab = lns.find((l) => /CONCEDID[AO]S/i.test(l.texto));
+    let categoria = '';
+    if (cab) {
+      const hCab = moda(cab.palabras.map((w) => w.h), 0.1);
+      const enCapa = (w) => Math.abs(w.h - hCapa) <= 1.4 || Math.abs(w.h - hCab) <= 0.35;
+      const sub = lineas(pag.palabras.filter(enCapa)).filter((l) => l.y > cab.y + 2 && l.y < yCols - 12
+        && !/CONCEDID[AO]S|^RESOLUCI|^INFORME|^Código|^https?:|^\d+\s*(\/|de)\s*\d+$/i.test(l.texto)
+        && !l.palabras.every((w) => VOCAB_CABECERA.test(w.t)));
+      const textos = [cab.texto.replace(/^.*?CONCEDID[AO]S[\s.:]*/i, ''), ...sub.map((l) => l.texto)]
+        .map((t) => t.replace(/\s+/g, ' ').replace(/\s*\.\s*$/, '').trim()).filter(Boolean);
+      categoria = [...new Set(textos)].join(' · ');
+    } else if (!lns.some((l) => /RESOLUCI[OÓ]N\s+DEFINITIVA/i.test(l.texto))) {
+      avisos.push(`p${i + 1}: tabla sin cabecera de concedidas ni de resolución definitiva; se salta`);
+      continue;
+    }
 
-    const ult = secciones[secciones.length - 1];
-    const pagina = { n: i + 1, capa, yCols, cabRef, refs: refs.filter((w) => Math.abs(w.h - hCapa) <= 0.6), cabResumen: capa.find((w) => /^(RESUMEN|Resumen)$/.test(w.t)) };
-    if (ult && ult.categoria === categoria && ult.paginas[ult.paginas.length - 1].n === i) ult.paginas.push(pagina);
-    else secciones.push({ categoria, paginas: [pagina] });
-  }
+    const centros = [...new Map(refs.map((r) => [r.t, r])).values()].sort((a, b) => a.y0 - b.y0);   // primera aparicion de cada ref
+    const desde = centros[0].y0 - 24, hasta = centros[centros.length - 1].y0 + 40;   // la ultima celda no pasa de cuatro lineas
+    // El numero de pagina ("1/18", "3 de 25") cae dentro de la zona de la ultima fila.
+    const zona = capa.filter((w) => w.y0 >= desde && w.y0 < hasta && w.y0 > yCols + 4);
+    // Tambien las frases del pie ("La resolución de concesión definitiva está
+    // supeditada...", hasta 2015): lineas sin referencia, de varias palabras,
+    // que empiezan a la izquierda de la columna del titulo y siguen como una
+    // frase (la segunda palabra pegada a la primera; una celda "Mod." junto al
+    // titulo deja un hueco).
+    const xTitulo = pico(zona.filter((w) => !esRef(w.t) && !/^[\d.,€-]+$/.test(w.t)).map((w) => w.x0), refEdge + 8, refEdge + 110) ?? refEdge + 8;
+    const pie = new Set(lineas(zona).filter((l) => /^(\d+\s*\/\s*\d+|\d+\s+de\s+\d+|P[aá]gina\s+\d+.*|Fecha documento:.*)$/i.test(l.texto)
+      || (l.palabras.length >= 4 && l.palabras[0].x0 < xTitulo - 3 && !l.palabras.some((w) => esRef(w.t) && Math.abs(w.x0 - refEdge) <= 6)
+        && l.palabras[1].x0 - l.palabras[0].x1 < 10)).flatMap((l) => l.palabras));
+    const palabras = zona.filter((w) => !pie.has(w) && !(w.y0 < centros[0].y0 - 3 && VOCAB_CABECERA.test(w.t)));
 
-  const filas = [];
-  for (const sec of secciones) {
-    // Bordes de columna por seccion: la referencia, el titulo y la entidad van
-    // alineados a la izquierda, asi que su borde es el x mas repetido.
-    const refEdge = moda(sec.paginas.flatMap((p) => p.refs.map((w) => w.x0)));
-    const datos = sec.paginas.flatMap((p) => p.capa.filter((w) => w.y0 > p.yCols + 6 && w.x0 >= refEdge - 6));
-    const xs = datos.map((w) => w.x0);
-    const xCcaa = moda(sec.paginas.map((p) => p.capa.find((w) => w.t === 'CCAA')?.x0).filter((v) => v != null));
-    const titleEdge = pico(xs, refEdge + 10, refEdge + 70);
-    const entityEdge = pico(xs, titleEdge + 60, (xCcaa ?? titleEdge + 320) - 20);
-    // El borde de los importes se fija con cifras de verdad: el guion ("-", cero)
-    // tambien aparece suelto dentro de nombres de entidad y no puede marcar el borde.
-    const importes = datos.filter((w) => ES_IMPORTE(w.t) && w.t !== '-' && w.x0 > entityEdge + 60);
-    const amountsStart = importes.length ? Math.min(...importes.map((w) => w.x0)) - 4 : Infinity;
-    if (!titleEdge || !entityEdge || !importes.length) { avisos.push(`"${sec.categoria}": no se reconocen las columnas`); continue; }
-    if (process.env.FECYT_DEBUG) console.error(`[fecyt] "${sec.categoria.slice(0, 50)}" p${sec.paginas.map((p) => p.n).join(',')} ref=${refEdge} titulo=${titleEdge} entidad=${entityEdge} ccaa=${xCcaa} importes=${amountsStart} palabras=${datos.length}`);
+    // Importes: cifras con decimales, o cifras y guiones seguidos de "€" en la misma linea.
+    const euros = palabras.filter((w) => w.t === '€');
+    const conEuro = (w) => euros.some((e) => Math.abs(e.y0 - w.y0) < 3 && e.x0 >= w.x1 - 1 && e.x0 - w.x1 < 12);
+    const esImporte = (w) => /^\d{1,3}(\.\d{3})*,\d{2}€?$/.test(w.t) || (/^(\d{1,3}(\.\d{3})*€?|-)$/.test(w.t) && (w.t.endsWith('€') || conEuro(w)));
+    const importes = palabras.filter(esImporte);
+    const cifras = importes.filter((w) => w.t !== '-');
+    if (!cifras.length) { avisos.push(`p${i + 1}: sin importes`); continue; }
+    const amountsStart = Math.min(...cifras.map((w) => w.x0)) - 4;
+    const textuales = palabras.filter((w) => !esImporte(w) && w.t !== '€' && w.x0 < amountsStart && w.x0 > refEdge + 8);
 
-    // Alineacion vertical de las celdas de varias lineas: hasta 2021 van
-    // centradas en la fila; desde 2022, pegadas arriba. Se detecta buscando
-    // una fila cuyo titulo no tenga linea a la altura de la referencia.
-    const centrado = sec.paginas.some((p) => p.refs.some((r) => {
-      const tit = p.capa.filter((w) => w.x0 >= titleEdge - 3 && w.x0 < entityEdge - 3 && Math.abs(w.y0 - r.y0) < 14);
-      return tit.length && !tit.some((w) => Math.abs(w.y0 - r.y0) < 3);
-    }));
+    // Zona de la columna CCAA: la cabecera "CCAA" va centrada sobre la columna
+    // y los valores tambien, asi que no hay un borde fiable por coordenadas. Se
+    // toma una zona generosa a la izquierda de la cabecera y la CCAA se
+    // reconoce por su nombre (ver abajo); lo que sobra es de la entidad.
+    const xCab = capa.find((w) => w.t === 'CCAA')?.x0 ?? null;
+    const xCcaa = xCab != null ? xCab - 80 : amountsStart - 100;
+    // Titulo y entidad, solo por si falta la ficha: bordes izquierdos de las dos columnas.
+    const xsTe = textuales.filter((w) => w.x0 < xCcaa).map((w) => w.x0);
+    const titleEdge = pico(xsTe, refEdge + 8, refEdge + 110);
+    const entityEdge = titleEdge != null ? pico(xsTe, titleEdge + 60, xCcaa - 10) : null;
+    const celdas = textuales.filter((w) => w.x0 >= (titleEdge ?? refEdge + 8) - 3);
 
-    for (const p of sec.paginas) {
-      const centros = [...new Map(p.refs.map((r) => [r.t, r])).values()].sort((a, b) => a.y0 - b.y0);  // primera aparicion de cada ref
-      if (!centros.length) continue;
-      const desde = centros[0].y0 - (centrado ? 24 : 4);
-      const xResumen = p.cabResumen ? p.cabResumen.x0 - 8 : Infinity;
-      const hasta = centros[centros.length - 1].y0 + 40;   // la ultima celda no pasa de cuatro lineas
-      // El numero de pagina ("1/18", "3 de 25") cae dentro de la zona de la ultima fila.
-      const pie = new Set(lineas(p.capa.filter((w) => w.y0 >= desde && w.y0 < hasta))
-        .filter((l) => /^(\d+\s*\/\s*\d+|\d+\s+de\s+\d+|P[aá]gina\s+\d+.*)$/i.test(l.texto)).flatMap((l) => l.palabras));
-      const palabras = p.capa.filter((w) => w.y0 >= desde && w.y0 < hasta && w.x0 >= refEdge - 6 && w.x0 < xResumen
-        && !pie.has(w)
-        && !(w.y0 < centros[0].y0 - 3 && VOCAB_CABECERA.test(w.t)));
-
-      const filasPag = centros.map((r) => ({ ref: r.t, y: r.y0, pagina: p.n, categoria: sec.categoria,
-        titulo: [], entidadCcaa: [], importes: [] }));
-
-      // Asigna cada linea de una columna de texto a su fila.
-      const asignar = (col, palabrasCol) => {
-        const lns = lineas(palabrasCol);
-        if (!centrado) {
-          for (const l of lns) {
-            let f = null;
-            for (const c of filasPag) if (c.y <= l.y + 3) f = c;
-            if (f) f[col].push(...l.palabras);
-          }
-          return;
-        }
-        // Centrado: cada celda tiene tantas lineas por encima de la referencia como por debajo.
-        let i = 0;
-        for (const f of filasPag) {
-          let arriba = 0;
-          while (i + arriba < lns.length && lns[i + arriba].y < f.y - 3) arriba++;
-          const centro = i + arriba < lns.length && Math.abs(lns[i + arriba].y - f.y) < 3 ? 1 : 0;
-          const n = arriba * 2 + centro;
-          for (let k = 0; k < n && i < lns.length; k++, i++) f[col].push(...lns[i].palabras);
-        }
-        if (i < lns.length) {
-          avisos.push(`p${p.n}: ${lns.length - i} lineas de ${col} sin fila (ref ${filasPag[filasPag.length - 1].ref})`);
-          for (; i < lns.length; i++) filasPag[filasPag.length - 1][col].push(...lns[i].palabras);
-        }
-      };
-      asignar('titulo', palabras.filter((w) => w.x0 >= titleEdge - 3 && w.x0 < entityEdge - 3 && !ES_REF(w.t)));
-      asignar('entidadCcaa', palabras.filter((w) => w.x0 >= entityEdge - 3 && w.x0 < amountsStart && !ES_IMPORTE(w.t)));
-      for (const w of palabras.filter((w) => ES_IMPORTE(w.t) && w.x0 >= amountsStart)) {
-        let f = null, d = 4;
-        for (const c of filasPag) if (Math.abs(c.y - w.y0) < d) { f = c; d = Math.abs(c.y - w.y0); }
-        if (f) f.importes.push(w);
-      }
-
-      for (const f of filasPag) {
-        const texto = (ws) => lineas(ws).map((l) => l.texto).join(' ').replace(/\s+/g, ' ').trim();
-        // La CCAA son las ultimas palabras por la derecha que formen un nombre conocido.
-        const porX = [...f.entidadCcaa].sort((a, b) => b.x0 - a.x0 || a.y0 - b.y0);
-        let ccaa = null, k = 0;
-        for (let n = 1; n <= Math.min(4, porX.length); n++) {
-          const c = ccaaDe(texto(porX.slice(0, n)));
-          if (c) { ccaa = c; k = n; }
-        }
-        const usadas = new Set(porX.slice(0, k));
-        const entidad = texto(f.entidadCcaa.filter((w) => !usadas.has(w)));
-        const imp = f.importes.sort((a, b) => a.x0 - b.x0).map((w) => aNumero(w.t));
-        const fila = {
-          ref: f.ref, pagina: f.pagina, categoria: f.categoria,
-          titulo: texto(f.titulo), entidad, ccaa: ccaa ?? '',
-          presupuesto: imp[0] ?? null, solicitado: imp[1] ?? null, importe: imp[2] ?? null,
-        };
-        if (!fila.titulo) avisos.push(`p${f.pagina} ref ${f.ref}: sin titulo`);
-        if (!fila.entidad) avisos.push(`p${f.pagina} ref ${f.ref}: sin entidad`);
-        if (!ccaa) avisos.push(`p${f.pagina} ref ${f.ref}: sin CCAA reconocida en "${texto(f.entidadCcaa)}"`);
-        if (imp.length < 3) avisos.push(`p${f.pagina} ref ${f.ref}: solo ${imp.length} importes`);
-        else if (imp.length >= 5 && Math.abs(imp.slice(3).reduce((a, b) => a + b, 0) - imp[2]) > 1)
-          avisos.push(`p${f.pagina} ref ${f.ref}: el desglose (${imp.slice(3).join(' + ')}) no suma el importe concedido ${imp[2]}`);
-        filas.push(fila);
+    // Evidencia de la alineacion vertical de las celdas de varias lineas (ver
+    // abajo), columna a columna: celdas con lineas encima de la referencia y
+    // ninguna a su altura (centradas) frente a celdas con lineas debajo y
+    // ninguna encima (pegadas arriba).
+    let evCentrado = 0, evArriba = 0;
+    const columnas = [[titleEdge ?? 0, entityEdge ?? xCcaa], [entityEdge ?? xCcaa, xCcaa], [xCcaa, Infinity]];
+    for (const r of centros) {
+      for (const [x0, x1] of columnas) {
+        const cerca = celdas.filter((w) => w.x0 >= x0 - 3 && w.x0 < x1 - 3 && Math.abs(w.y0 - r.y0) < 14);
+        const enRef = cerca.some((w) => Math.abs(w.y0 - r.y0) < 3);
+        const encima = cerca.some((w) => r.y0 - w.y0 >= 3), debajo = cerca.some((w) => w.y0 - r.y0 >= 3);
+        if (encima && !enRef) evCentrado++;
+        else if (enRef && debajo && !encima) evArriba++;
       }
     }
+    paginasUtiles.push({ n: i + 1, categoria, centros, celdas, importes, refEdge, titleEdge, entityEdge, xCcaa, amountsStart, evCentrado, evArriba, todas: pag.palabras });
   }
-  return { filas, secciones: secciones.map((s) => ({ categoria: s.categoria, paginas: s.paginas.map((p) => p.n) })), avisos };
+
+  // Alineacion vertical de las celdas de varias lineas: hasta 2021 van
+  // centradas en la fila; desde 2022, pegadas arriba. Se decide para todo el
+  // documento, porque una pagina de filas de una sola linea no da pistas.
+  const centrado = paginasUtiles.reduce((s, p) => s + p.evCentrado, 0) > paginasUtiles.reduce((s, p) => s + p.evArriba, 0);
+
+  const filasCrudas = [];
+  for (const p of paginasUtiles) {
+    const filaMasCercana = (y) => {
+      let f = null, d = Infinity;
+      for (const c of p.centros) if (Math.abs(c.y0 - y) < d) { f = c; d = Math.abs(c.y0 - y); }
+      return f;
+    };
+    const filaDeArriba = (y) => { let f = null; for (const c of p.centros) if (c.y0 <= y + 3) f = c; return f; };
+    const asignaLinea = centrado ? filaMasCercana : filaDeArriba;
+    const filas = new Map(p.centros.map((r) => [r.t, { ref: r.t, y: r.y0, pagina: p.n, categoria: p.categoria, titulo: [], entidad: [], ccaa: [], importes: [] }]));
+    for (const l of lineas(p.celdas)) {
+      const f = filas.get(asignaLinea(l.y)?.t);
+      if (!f) continue;
+      for (const w of l.palabras) {
+        if (w.x0 >= p.xCcaa) f.ccaa.push(w);
+        else if (p.entityEdge != null && w.x0 >= p.entityEdge - 3) f.entidad.push(w);
+        else f.titulo.push(w);
+      }
+    }
+    // Los importes van a la altura de la referencia. Los que no tienen fila son
+    // la linea TOTAL de cada seccion; cualquier otro caso se avisa.
+    for (const l of lineas(p.importes)) {
+      const f = filas.get(filaMasCercana(l.y)?.t);
+      if (f && Math.abs(f.y - l.y) < 8) f.importes.push(...l.palabras);
+      else if (!p.todas.some((w) => Math.abs(w.y0 - l.y) < 6 && /^TOTAL:?$/i.test(w.t))) avisos.push(`p${p.n}: importes sin fila (${l.texto})`);
+    }
+    if (process.env.FECYT_DEBUG) console.error(`[fecyt] p${p.n} "${p.categoria.slice(0, 40)}" ref=${p.refEdge} titulo=${p.titleEdge} entidad=${p.entityEdge} ccaa=${p.xCcaa} importes=${p.amountsStart} ${centrado ? 'centrado' : 'arriba'} (${p.evCentrado}/${p.evArriba}) filas=${p.centros.length}`);
+    filasCrudas.push(...filas.values());
+  }
+
+  // Formato de los importes, votado en todo el documento. Tras el presupuesto
+  // total y el solicitado hay dos disposiciones: hasta 2017 el concedido va el
+  // ultimo y antes su desglose (personal + ejecucion); desde 2018 va el tercero
+  // y despues su desglose (dos partidas, tres en 2023).
+  const suma = (xs) => xs.reduce((a, b) => a + b, 0);
+  const cuadraTercero = (imp) => Math.abs(suma(imp.slice(3)) - imp[2]) <= 1;
+  const cuadraUltimo = (imp) => Math.abs(suma(imp.slice(2, -1)) - imp[imp.length - 1]) <= 1;
+  let concedidoUltimo = 0, concedidoTercero = 0;
+  for (const f of filasCrudas) {
+    const imp = f.importes.sort((a, b) => a.x0 - b.x0).map((w) => aNumero(w.t));
+    if (imp.length < 5) continue;
+    const a = cuadraTercero(imp), b = cuadraUltimo(imp);
+    if (a && !b) concedidoTercero++;
+    else if (b && !a) concedidoUltimo++;
+  }
+  const ultimo = concedidoUltimo > concedidoTercero;
+
+  const filas = [];
+  for (const f of filasCrudas) {
+    // La CCAA son las ultimas palabras por la derecha que formen un nombre
+    // conocido. Si no cuadra, se reintenta solo con las que estan a la altura
+    // de la fila: en 2015 hay una celda partida entre dos paginas.
+    let porX = [...f.ccaa].sort((a, b) => b.x0 - a.x0 || a.y0 - b.y0);
+    let ccaa = null, k = 0;
+    for (const cerca of [false, true]) {
+      if (cerca) porX = porX.filter((w) => Math.abs(w.y0 - f.y) <= 14);
+      for (let n = 1; n <= Math.min(4, porX.length); n++) {
+        const c = ccaaDe(texto(porX.slice(0, n)));
+        if (c) { ccaa = c; k = n; }
+      }
+      if (ccaa) break;
+    }
+    const sobra = [...f.ccaa].filter((w) => !porX.slice(0, k).includes(w));
+    const imp = f.importes.map((w) => aNumero(w.t));
+    let presupuesto = null, solicitado = null, importe = null;
+    if (imp.length === 1) importe = imp[0];
+    else if (imp.length >= 3) {
+      [presupuesto, solicitado] = imp;
+      importe = ultimo && imp.length >= 4 ? imp[imp.length - 1] : imp[2];
+      if (imp.length >= 5) {
+        const cuadra = ultimo ? cuadraUltimo(imp) : cuadraTercero(imp);
+        if (!cuadra) avisos.push(`p${f.pagina} ref ${f.ref}: el desglose (${imp.join(', ')}) no cuadra con el importe concedido ${importe}`);
+      } else if (imp.length === 4) avisos.push(`p${f.pagina} ref ${f.ref}: cuatro importes (${imp.join(', ')}), falta una celda del desglose; concedido ${importe}`);
+    }
+    if (imp.length === 2) avisos.push(`p${f.pagina} ref ${f.ref}: solo dos importes (${imp.join(', ')})`);
+    if (!imp.length) avisos.push(`p${f.pagina} ref ${f.ref}: sin importes`);
+    if (!ccaa) avisos.push(`p${f.pagina} ref ${f.ref}: sin CCAA reconocida en "${texto(f.ccaa)}"`);
+    const enlace = enlaces.get(f.ref)?.url ?? null;
+    if (enlaces.size && !enlace) avisos.push(`p${f.pagina} ref ${f.ref}: sin enlace "Ver resumen" en el PDF; se usa la URL estándar de la ficha`);
+    filas.push({
+      ref: f.ref, pagina: f.pagina, categoria: f.categoria, enlace,
+      titulo: texto(f.titulo), entidad: texto([...f.entidad, ...sobra]), ccaa: ccaa ?? '',
+      presupuesto, solicitado, importe,
+    });
+  }
+
+  // Cada enlace de una pagina leida tiene que tener su fila, y cada fila su enlace.
+  const vistas = new Set(filas.map((f) => f.ref));
+  const leidas = new Set(paginasUtiles.map((p) => p.n));
+  for (const [ref, e] of enlaces) if (leidas.has(e.pagina) && !vistas.has(ref)) avisos.push(`p${e.pagina} ref ${ref}: tiene enlace "Ver resumen" pero no se ha leído su fila`);
+  const repetidas = filas.map((f) => f.ref).filter((r, i, a) => a.indexOf(r) !== i);
+  for (const r of new Set(repetidas)) avisos.push(`ref ${r}: aparece en más de una fila`);
+
+  const secciones = [];
+  for (const p of paginasUtiles) {
+    const u = secciones[secciones.length - 1];
+    if (u && u.categoria === p.categoria) u.paginas.push(p.n); else secciones.push({ categoria: p.categoria, paginas: [p.n] });
+  }
+  return { filas, secciones, avisos };
 }
+
+// ---------- ficha resumen ----------
+// Campos por el id de su <span>, estables desde 2012.
+// El id del valor es el nombre solo o con un prefijo acabado en "_"; el de
+// la etiqueta lleva una "L" delante (LTBSolicitudesTitulo) y no vale.
+const campoFicha = (html, id) => {
+  const m = html.match(new RegExp(`id="(?:[^"]*_)?${id}"[^>]*>([\\s\\S]*?)</span>`));
+  return m ? quitarHtml(m[1]) : '';
+};
+const fechaIso = (s) => { const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+export function leerFicha(html) {
+  if (!/FICHA RESUMEN/.test(html)) return null;
+  const f = {
+    referencia: campoFicha(html, 'lblReferencia'),
+    modalidad: campoFicha(html, 'TBSolicitudesModalidad'),
+    titulo: campoFicha(html, 'TBSolicitudesTitulo'),
+    entidad: campoFicha(html, 'TBEntidadEntidad'),
+    centro: campoFicha(html, 'TBCentrosCentro'),
+    localidad: campoFicha(html, 'TBCentrosLocalidad'),
+    tipoEntidad: campoFicha(html, 'TBEntidadTipoInstitucion'),
+    caracter: campoFicha(html, 'TBEntidadNaturalezaJuridica'),
+    resumen: campoFicha(html, 'TBSolicitudesResumen'),
+    descriptores: campoFicha(html, 'TBSolicitudesTags').replace(/;\s*$/, ''),
+    inicio: fechaIso(campoFicha(html, 'TBSolicitudesFechaIni')),
+    fin: fechaIso(campoFicha(html, 'TBSolicitudesFechaFin')),
+  };
+  return f.referencia && f.titulo ? f : null;
+}
+// La referencia de la ficha (FCT-18-14225) tiene que ser la de la fila y del año.
+export const fichaCasa = (ficha, anio, ref) => new RegExp(`-${String(anio).slice(-2)}-0*${ref}$`).test(ficha?.referencia ?? '');
 
 // ---------- integracion ----------
 export const ES_CIENCIA_CIUDADANA = /ciencia\s+ciudadana/i;
 
-export function registroFecyt(fila, anio, url) {
+export function registroFecyt(fila, anio, ficha, url) {
   return {
     id: `FECYT:${anio}-${fila.ref}`,
     financiador: 'FECYT',
     convocatoria: `Fomento de la cultura científica ${anio}`,
     anio,
-    referencia: `${anio}/${fila.ref}`,
-    titulo: fila.titulo,
-    resumen: '',
-    categoria: fila.categoria,
-    entidad: fila.entidad,
+    referencia: ficha?.referencia || `${anio}/${fila.ref}`,
+    titulo: ficha?.titulo || fila.titulo,
+    resumen: ficha?.resumen || '',
+    palabrasClave: ficha?.descriptores || '',
+    categoria: fila.categoria || ficha?.modalidad || '',
+    entidad: ficha?.entidad || fila.entidad,
+    tipoEntidad: [ficha?.tipoEntidad, ficha?.caracter].filter(Boolean).join(', '),
     cif: '',
     ccaa: fila.ccaa,
     ccaaVia: fila.ccaa ? 'fuente' : 'sin-ccaa',
+    localidad: ficha?.localidad || '',
     localizacion: '',
-    inicio: '',
-    fin: '',
+    inicio: ficha?.inicio || '',
+    fin: ficha?.fin || '',
     importe: fila.importe ?? 0,
     presupuesto: fila.presupuesto ?? 0,
     fondo: '',

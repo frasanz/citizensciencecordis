@@ -107,12 +107,15 @@ export const TABLAS_NACIONAL = {
     { titulo: 'anio', valor: (a) => a.anio ?? '' },
     { titulo: 'referencia', valor: (a) => a.referencia },
     { titulo: 'titulo', valor: (a) => a.titulo },
+    { titulo: 'tipo', valor: (a) => a.tipo || 'proyecto' },
     { titulo: 'categoria', valor: (a) => a.categoria || '' },
     { titulo: 'entidad', valor: (a) => a.entidad },
+    { titulo: 'tipo_entidad', valor: (a) => a.tipoEntidad || '' },
     { titulo: 'cif', valor: (a) => a.cif || '' },
     { titulo: 'ccaa', valor: (a) => a.ccaa || '' },
     { titulo: 'ccaa_via', valor: (a) => a.ccaaVia || '' },
     { titulo: 'provincia', valor: (a) => a.provincia || '' },
+    { titulo: 'localidad', valor: (a) => a.localidad || '' },
     { titulo: 'localizacion', valor: (a) => a.localizacion || '' },
     { titulo: 'inicio', valor: (a) => a.inicio || '' },
     { titulo: 'fin', valor: (a) => a.fin || '' },
@@ -122,6 +125,7 @@ export const TABLAS_NACIONAL = {
     { titulo: 'via', valor: (a) => a.via },
     { titulo: 'url', valor: (a) => a.url || '' },
     { titulo: 'resumen', valor: (a) => a.resumen || '' },
+    { titulo: 'palabras_clave', valor: (a) => a.palabrasClave || '' },
   ]),
 
   'entidades-es': (r) => aCsv(r.entidades, [

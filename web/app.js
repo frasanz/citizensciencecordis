@@ -280,7 +280,7 @@ function pintar() {
 
   el('#pie').innerHTML = `Generado el ${fecha(r.meta.generado)} · `
     + 'Datos: <a href="https://cordis.europa.eu/datalab/browse.html" target="_blank" rel="noopener">CORDIS</a>, '
-    + 'Comisión Europea (CC BY 4.0) · Cifras recalculadas en el navegador a partir de los datos originales.';
+    + 'Comisión Europea (CC BY 4.0) · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
 }
 
 function pintarGrafico() {

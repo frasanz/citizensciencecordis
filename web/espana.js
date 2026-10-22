@@ -1,7 +1,7 @@
 // Pestaña de convocatorias españolas: AEI, FECYT y Fundacion Biodiversidad.
 // La unidad es la ayuda a una entidad, no el consorcio: por eso los filtros y
 // las cifras no son los de la pestaña europea.
-import { recomputarNacional, crearClaveEntidadNacional, FINANCIADORES, ETIQUETA_FINANCIADOR, VIAS, CCAA_VIAS } from './src/nacional.js';
+import { recomputarNacional, crearClaveEntidadNacional, FINANCIADORES, ETIQUETA_FINANCIADOR, VIAS, CCAA_VIAS, TIPOS } from './src/nacional.js';
 import { TABLAS_NACIONAL } from './src/exportar.js';
 import {
   num, pc, millones, euros, el, esc, normaliza, fecha, tile, boton, registrarAyuda,
@@ -10,11 +10,11 @@ import {
 
 const COLOR = { AEI: 'var(--aei)', FECYT: 'var(--fecyt)', FB: 'var(--fb)' };
 const VIA_CORTA = { titulo: 'título', resumen: 'resumen', categoria: 'línea FECYT', 'palabras-clave': 'palabras clave' };
-const CCAA_VIA_CORTA = { fuente: 'fuente', cruce: 'cruce', localizacion: 'localización', nombre: 'nombre', manual: 'manual', 'sin-ccaa': 'sin determinar' };
+const CCAA_VIA_CORTA = { fuente: 'fuente', cruce: 'cruce', localizacion: 'localización', localidad: 'localidad', nombre: 'nombre', manual: 'manual', 'sin-ccaa': 'sin determinar' };
 
 const estado = {
   base: null, vista: null,
-  financiadores: [], vias: [],
+  financiadores: [], vias: [], tipos: [],
   anios: null, limites: null,   // [desde, hasta], años inclusive
   ccaa: null, entidad: null,
   entidades: [], claveEntidad: null,
@@ -45,6 +45,7 @@ function fijarBase(datos) {
   const disponibles = FINANCIADORES.map((f) => f.codigo).filter((c) => datos.ayudas.some((a) => a.financiador === c));
   estado.financiadores = [...disponibles];
   estado.vias = [...new Set(datos.ayudas.map((a) => a.via))];
+  estado.tipos = Object.keys(TIPOS).filter((t) => datos.ayudas.some((a) => (a.tipo || 'proyecto') === t));
   const anios = datos.ayudas.map((a) => a.anio).filter(Boolean);
   estado.limites = [Math.min(...anios), Math.max(...anios)];
   estado.anios = [...estado.limites];
@@ -136,6 +137,9 @@ function construirFiltros(disponibles) {
     <div class="grupo"><span>Vía de entrada${boton('esFiltroVia')}</span><div class="opciones">${
       Object.keys(VIA_CORTA).filter((v) => estado.base.ayudas.some((a) => a.via === v)).map((v) =>
         `<label class="chip on" data-via="${v}"><input type="checkbox" checked>${esc(VIA_CORTA[v])}</label>`).join('')}</div></div>
+    <div class="grupo"><span>Tipo de ayuda${boton('esFiltroTipo')}</span><div class="opciones">${
+      Object.keys(TIPOS).filter((t) => estado.tipos.includes(t)).map((t) =>
+        `<label class="chip on" data-tipo="${t}"><input type="checkbox" checked>${esc(TIPOS[t])}</label>`).join('')}</div></div>
     <div class="grupo socio"><span>Entidad${boton('esFiltroEntidad')}</span><div id="f-entidad-cont"></div></div>`;
   pintarEntidad();
 
@@ -154,6 +158,7 @@ function construirFiltros(disponibles) {
   });
   chips('fin', estado.financiadores);
   chips('via', estado.vias);
+  chips('tipo', estado.tipos);
   el('#f-ccaa').addEventListener('change', (e) => { estado.ccaa = e.target.value || null; aplicar(); });
   const alCambiarAnio = () => {
     const d = +el('#f-anio-desde').value, h = +el('#f-anio-hasta').value;
@@ -175,13 +180,13 @@ function construirFiltros(disponibles) {
 function aplicar() {
   estado.limite = 50;
   estado.vista = recomputarNacional(estado.base, {
-    financiadores: estado.financiadores, vias: estado.vias, anios: estado.anios,
+    financiadores: estado.financiadores, vias: estado.vias, tipos: estado.tipos, anios: estado.anios,
     ccaa: estado.ccaa === 'sin' ? '' : estado.ccaa, entidad: estado.entidad, claveEntidad: estado.claveEntidad,
   });
   // `ccaa: ''` significa "sin determinar"; null, todas.
   if (estado.ccaa === 'sin') {
     estado.vista = recomputarNacional({ ...estado.base, ayudas: estado.base.ayudas.filter((a) => !a.ccaa) }, {
-      financiadores: estado.financiadores, vias: estado.vias, anios: estado.anios, entidad: estado.entidad, claveEntidad: estado.claveEntidad,
+      financiadores: estado.financiadores, vias: estado.vias, tipos: estado.tipos, anios: estado.anios, entidad: estado.entidad, claveEntidad: estado.claveEntidad,
     });
   }
   pintar();
@@ -243,9 +248,9 @@ function pintar() {
 
   el('#pie-es').innerHTML = `Generado el ${fecha(r.meta.generado)} · Datos: `
     + '<a href="https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas" target="_blank" rel="noopener">AEI</a>, '
-    + '<a href="https://www.convocatoria.fecyt.es/publico/Resolucion/resolucion.aspx" target="_blank" rel="noopener">FECYT</a> y '
+    + '<a href="https://www.convocatoria.fecyt.es/Publico/Convocatoria/ConvocatoriasAnteriores.aspx" target="_blank" rel="noopener">FECYT</a> y '
     + '<a href="https://fundacion-biodiversidad.es/buscador-de-proyectos/" target="_blank" rel="noopener">Fundación Biodiversidad</a>'
-    + ' · Cifras recalculadas en el navegador a partir de los datos originales.';
+    + ' · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
 }
 
 function pintarGrafico() {
@@ -279,7 +284,10 @@ function detalle(a) {
   if (a.categoria) partes.push(`<b>Categoría o área:</b> ${esc(a.categoria)}`);
   if (a.referencia) partes.push(`<b>Referencia:</b> ${esc(a.referencia)}`);
   if (a.cif) partes.push(`<b>CIF:</b> ${esc(a.cif)}`);
+  partes.push(`<b>Tipo:</b> ${esc(TIPOS[a.tipo || 'proyecto'])}`);
+  if (a.tipoEntidad) partes.push(`<b>Tipo de entidad:</b> ${esc(a.tipoEntidad)}`);
   if (a.provincia) partes.push(`<b>Provincia:</b> ${esc(a.provincia)}`);
+  if (a.localidad) partes.push(`<b>Localidad de la entidad:</b> ${esc(a.localidad)}`);
   if (a.localizacion) partes.push(`<b>Localización del proyecto:</b> ${esc(a.localizacion)}`);
   if (a.inicio || a.fin) partes.push(`<b>Ejecución:</b> ${esc(a.inicio || '?')} → ${esc(a.fin || '?')}`);
   if (a.presupuesto) partes.push(`<b>Presupuesto total:</b> ${euros(a.presupuesto)}`);
@@ -289,7 +297,8 @@ function detalle(a) {
   partes.push(`<b>CCAA por:</b> ${esc(CCAA_VIAS[a.ccaaVia] || a.ccaaVia)}`);
   const resumen = a.resumen ? `<p class="resumen">${esc(a.resumen).replace(/\n/g, '<br>')}</p>`
     : '<p class="resumen mas">Esta fuente no publica descripción del proyecto.</p>';
-  return `<div class="detalle-ayuda"><p class="datos">${partes.join(' · ')}</p>${resumen}</div>`;
+  const claves = a.palabrasClave ? `<p class="datos"><b>Palabras clave:</b> ${esc(a.palabrasClave)}</p>` : '';
+  return `<div class="detalle-ayuda"><p class="datos">${partes.join(' · ')}</p>${resumen}${claves}</div>`;
 }
 
 function tablaAyudas() {
@@ -348,7 +357,7 @@ function tablaAyudas() {
 registrarAyuda({
   esAyudas: ['Ayudas concedidas',
     'Cada fila es una <b>ayuda a una entidad</b>: no hay consorcios ni socios. Por eso esta pestaña no se puede sumar a la europea, donde la unidad es el proyecto con todos sus participantes.',
-    'Entran las que mencionan <code>ciencia ciudadana</code> (o <code>citizen science</code>, o sus variantes en catalán, gallego y euskera) en el título o el resumen; en FECYT también las concedidas en la línea de ciencia ciudadana de la convocatoria, y en la AEI las que la declaran entre sus palabras clave.',
+    'Entran las que mencionan <code>ciencia ciudadana</code> (o <code>citizen science</code>, o sus variantes en catalán, gallego y euskera) en el título o el resumen; en FECYT también las concedidas en la línea de ciencia ciudadana de la convocatoria, y en la AEI y FECYT las que la declaran entre sus palabras clave.',
     'En la AEI se incluyen contratos y estancias, no solo proyectos, porque su buscador los publica juntos y el criterio se aplica igual. La tabla de convocatorias permite separarlos.'],
   esEntidades: ['Entidades beneficiarias',
     'Entidades distintas que reciben alguna ayuda. La AEI da el CIF; FECYT y la Fundación Biodiversidad solo el nombre, que se cruza con el CIF cuando coincide sin acentos ni mayúsculas.',
@@ -371,11 +380,11 @@ registrarAyuda({
   esTablaEntidades: ['Entidades más activas',
     'Entidades ordenadas por número de ayudas. <b>Financiadores</b> dice de quién las reciben. Pulsa un nombre para quedarte solo con sus ayudas.'],
   esTablaVias: ['Trazabilidad',
-    'Cada ayuda lleva anotada la <b>vía</b> por la que entra: la frase en el título, en el resumen, la línea de ciencia ciudadana de FECYT o las palabras clave de la AEI. Las palabras clave no se pueden exportar del buscador de la AEI, así que son la única vía que no se comprueba aquí; el filtro de arriba permite quitarlas.',
+    'Cada ayuda lleva anotada la <b>vía</b> por la que entra: la frase en el título, en el resumen, la línea de ciencia ciudadana de FECYT o las palabras clave declaradas. Las de FECYT vienen en la ficha de cada proyecto y se comprueban; las de la AEI no se pueden exportar de su buscador, así que son la única vía que no se comprueba aquí. El filtro de arriba permite quitarlas.',
     'Y la vía por la que se ha resuelto su <b>comunidad autónoma</b>. Las que quedan sin determinar se listan en <code>datos/ccaa-entidades-pendientes.csv</code> para completarlas a mano.'],
   esTablaAyudas: ['Ayudas',
     'La lista completa que cumple el criterio. El título enlaza a la fuente: la ficha del buscador de la AEI, el PDF de la resolución de FECYT o la ficha de la Fundación Biodiversidad.',
-    'El botón ▸ despliega el resumen (la AEI y la Fundación Biodiversidad lo publican; FECYT no), la categoría, la referencia y el resto de datos de la fuente.'],
+    'El botón ▸ despliega el resumen (la AEI y la Fundación Biodiversidad lo publican en sus fichas; FECYT, en la ficha resumen de cada solicitud), las palabras clave, la categoría, la referencia y el resto de datos de la fuente.'],
   esFiltroFinanciador: ['Financiador',
     '<b>AEI</b>, la Agencia Estatal de Investigación, con todas sus convocatorias desde 2009. <b>FECYT</b>, con su convocatoria anual de fomento de la cultura científica, que tiene línea propia de ciencia ciudadana desde 2020. <b>Fundación Biodiversidad</b>, del MITECO, con sus convocatorias de ayudas y programas (PRTR, Empleaverde, Pleamar, FEDER, Biodiversa+).',
     'Los fondos europeos que gestiona la Fundación Biodiversidad (FEDER, FSE, PRTR) se quedan aquí y no en la pestaña europea: la línea entre pestañas es quién concede la ayuda, no de dónde sale el dinero.'],
@@ -385,7 +394,10 @@ registrarAyuda({
     'Año de la convocatoria (AEI, FECYT) o de inicio de ejecución (Fundación Biodiversidad), ambos extremos incluidos.',
     'Las ayudas sin año no se descartan nunca.'],
   esFiltroVia: ['Vía de entrada',
-    'Permite quedarse solo con las ayudas que entran por una vía concreta. Desmarca <i>palabras clave</i> para ver únicamente las que se pueden comprobar sobre el título o el resumen.'],
+    'Permite quedarse solo con las ayudas que entran por una vía concreta. Desmarca <i>palabras clave</i> para quitar las que entran solo por ellas; las de la AEI son las únicas que no se pueden comprobar aquí.'],
+  esFiltroTipo: ['Tipo de ayuda',
+    'La AEI publica juntos <b>proyectos</b>, <b>contratos de personal</b> (predoctorales, Juan de la Cierva, Ramón y Cajal, Torres Quevedo…) y <b>estancias</b>. Un contrato hereda el título y el resumen del proyecto al que se vincula, así que proyecto y contrato cuentan como dos ayudas con el mismo texto.',
+    'Quédate solo con <i>proyecto</i> para contar ideas distintas. FECYT y la Fundación Biodiversidad solo conceden proyectos.'],
   esFiltroEntidad: ['Entidad',
     'Escribe parte del nombre de una entidad y elígela: todas las cifras y tablas pasan a contar solo sus ayudas. Búsqueda sin acentos y por cualquier palabra.'],
 });

@@ -9,7 +9,7 @@
 
 export const FINANCIADORES = [
   { codigo: 'AEI',   etiqueta: 'AEI',                     nombre: 'Agencia Estatal de Investigación', periodo: '2009-' },
-  { codigo: 'FECYT', etiqueta: 'FECYT',                   nombre: 'Fundación Española para la Ciencia y la Tecnología', periodo: '2020-' },
+  { codigo: 'FECYT', etiqueta: 'FECYT',                   nombre: 'Fundación Española para la Ciencia y la Tecnología', periodo: '2012-' },
   { codigo: 'FB',    etiqueta: 'Fundación Biodiversidad', nombre: 'Fundación Biodiversidad (MITECO)', periodo: '' },
 ];
 export const ETIQUETA_FINANCIADOR = Object.fromEntries(FINANCIADORES.map((f) => [f.codigo, f.etiqueta]));
@@ -19,14 +19,30 @@ export const VIAS = {
   titulo: 'la frase aparece en el título',
   resumen: 'la frase aparece en el resumen o descripción',
   categoria: 'concedida en la línea de ciencia ciudadana de la convocatoria (FECYT)',
-  'palabras-clave': 'la frase está entre las palabras clave declaradas (AEI; no exportables, no comprobables aquí)',
+  'palabras-clave': 'la frase está entre las palabras clave declaradas (en la AEI no son exportables ni comprobables aquí; en FECYT son los descriptores de la ficha)',
 };
+
+// Que se ha concedido: la AEI publica juntos proyectos, contratos de personal y
+// estancias, y un contrato hereda el titulo y el resumen del proyecto al que se
+// vincula. Sin separarlos, una misma idea cuenta varias veces.
+export const TIPOS = {
+  proyecto: 'proyecto',
+  personal: 'contrato de personal',
+  estancia: 'estancia',
+};
+const RE_PERSONAL = /contrato|predoctoral|posdoctoral|juan de la cierva|ram[oó]n y cajal|torres quevedo|personal t[eé]cnico|empleo joven|doctorados? industrial/i;
+export function tipoDeConvocatoria(convocatoria) {
+  if (/estancia/i.test(convocatoria)) return 'estancia';
+  if (RE_PERSONAL.test(convocatoria)) return 'personal';
+  return 'proyecto';
+}
 
 // Como se ha resuelto la comunidad autonoma de la entidad.
 export const CCAA_VIAS = {
   fuente: 'la da la propia fuente (AEI y FECYT)',
   cruce: 'misma entidad, por nombre, en AEI o FECYT',
   localizacion: 'la ficha de la Fundación Biodiversidad localiza el proyecto en una única comunidad',
+  localidad: 'la ficha de FECYT da la localidad de la entidad, y esta nombra una comunidad, provincia o ciudad',
   nombre: 'el nombre de la entidad nombra la comunidad, provincia o ciudad',
   manual: 'tabla datos/ccaa-entidades.csv, revisada a mano',
   'sin-ccaa': 'no se ha podido determinar',
@@ -56,7 +72,8 @@ export function crearFiltroNacional({ frases = FRASES_NACIONAL, campos = ['titul
 // la misma entidad que la de la AEI.
 // Se quitan antes el guion blando y los espacios de anchura cero, que alguna
 // ficha arrastra en medio de una palabra ("Ornitologí­a").
-export const claveNombre = (s) => sinAcentos(s).replace(/[\u00AD\u200B-\u200D\uFEFF]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+// Una sigla final entre parentesis no distingue entidades ("... (CSIC)"), asi que no cuenta.
+export const claveNombre = (s) => sinAcentos(s).replace(/[\u00AD\u200B-\u200D\uFEFF]/g, '').replace(/\s*\([A-Za-z.\s]{2,12}\)\s*$/, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
 export function crearClaveEntidadNacional(ayudas) {
   const cifPorNombre = new Map();
   for (const a of ayudas) if (a.cif && a.entidad && !cifPorNombre.has(claveNombre(a.entidad))) cifPorNombre.set(claveNombre(a.entidad), a.cif);
@@ -98,6 +115,7 @@ export function construirNacional(ayudas, { filtro = null, fuentes = [], claveEn
   const convocatorias = agrupa((a) => `${a.financiador}|${a.convocatoria}`, (a) => a.convocatoria);
   const ccaa = agrupa((a) => a.ccaa || '', (a) => a.ccaa);
   const vias = agrupa((a) => a.via, (a) => VIAS[a.via] || a.via);
+  const tipos = agrupa((a) => a.tipo || 'proyecto', (a) => TIPOS[a.tipo || 'proyecto']);
   const ccaaVias = agrupa((a) => a.ccaaVia, (a) => CCAA_VIAS[a.ccaaVia] || a.ccaaVia);
 
   // Entidades: una fila por entidad, con sus ayudas y su dinero.
@@ -135,6 +153,7 @@ export function construirNacional(ayudas, { filtro = null, fuentes = [], claveEn
     meta: { generado: new Date().toISOString(), filtro: filtro?.definicion ?? filtro ?? null, fuentes },
     resumen: {
       totalAyudas: lista.length,
+      proyectos: tipos.find((t) => t.clave === 'proyecto')?.ayudas ?? 0,
       entidades: porEntidad.size,
       importeTotal,
       conImporte, sinImporte: lista.length - conImporte,
@@ -145,21 +164,23 @@ export function construirNacional(ayudas, { filtro = null, fuentes = [], claveEn
       desde: serie.length ? serie[0].anio : null,
       hasta: serie.length ? serie[serie.length - 1].anio : null,
     },
-    financiadores, convocatorias, ccaa, vias, ccaaVias, entidades, serie,
+    financiadores, convocatorias, ccaa, vias, tipos, ccaaVias, entidades, serie,
     ayudas: lista,
   };
 }
 
 // Recalculo en el navegador a partir de nacional.json ya generado.
 // `anios` son dos años inclusive; `entidad` es una clave de claveEntidad.
-export function recomputarNacional(datos, { financiadores = null, anios = null, ccaa = null, entidad = null, vias = null, claveEntidad = null } = {}) {
+export function recomputarNacional(datos, { financiadores = null, anios = null, ccaa = null, entidad = null, vias = null, tipos = null, claveEntidad = null } = {}) {
   const finOk = financiadores && financiadores.length ? new Set(financiadores) : null;
   const viasOk = vias && vias.length ? new Set(vias) : null;
+  const tiposOk = tipos && tipos.length ? new Set(tipos) : null;
   const [desde, hasta] = anios ?? [null, null];
   claveEntidad ??= crearClaveEntidadNacional(datos.ayudas);
   const lista = datos.ayudas.filter((a) => {
     if (finOk && !finOk.has(a.financiador)) return false;
     if (viasOk && !viasOk.has(a.via)) return false;
+    if (tiposOk && !tiposOk.has(a.tipo || 'proyecto')) return false;
     if (ccaa && a.ccaa !== ccaa) return false;
     if (entidad && claveEntidad(a) !== entidad) return false;
     // Sin año no se descarta: no hay motivo para ocultar una ayuda por un dato que falta.
