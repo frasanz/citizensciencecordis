@@ -46,6 +46,9 @@ node scripts/snapshot.js --sin-cache      # ignora lo ya descargado en .cache/
 `node scripts/factsheet.js --pdf` genera `web/factsheet.html` y `web/factsheet.pdf`: cuatro páginas A4,
 «La ciencia ciudadana en España», con la identidad de Ibercivis (logo en `web/img/`). Lee los mismos
 JSON que la web, así que las cifras no pueden diverger; en la parte española cuenta solo proyectos.
+La comparación por habitante usa `datos/poblacion.csv` (población a 1 de enero, Eurostat `demo_pjan`),
+que se refresca a mano con `node scripts/poblacion.js` (cambia una vez al año). Solo entran los países con
+al menos 15 proyectos, y Reino Unido queda fuera porque Eurostat ya no publica su población.
 El PDF necesita Playwright y Chromium (`npx playwright install chromium`); el HTML, solo Node.
 
 ## Criterio de selección

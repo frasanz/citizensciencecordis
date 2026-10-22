@@ -43,7 +43,7 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 
 /* portada */
 .portada .banda{background:var(--negro);color:#fff;padding:14mm 14mm 12mm;flex:none}
-.portada .logo{height:19mm;display:block;margin-bottom:17mm}
+.portada .logo{height:19mm;display:block;margin-bottom:12mm}
 .portada .kicker{font-size:8.6pt;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--ambar);margin-bottom:3mm}
 .portada h1{font-size:36pt;line-height:1.06;margin:0 0 5mm;font-weight:700;letter-spacing:-.01em}
 .portada h1 em{font-style:normal;color:var(--ambar)}
@@ -62,6 +62,7 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .recuadro p{margin:0;font-size:8.6pt}
 
 /* panorama y posicion */
+.subtit{font-size:9.5pt;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin:1mm 0 3mm;font-family:inherit}
 .kps{display:grid;grid-template-columns:repeat(5,1fr);gap:3mm;margin:0 0 4mm}
 .kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
 .kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
@@ -108,7 +109,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
   <div class="cuerpo">
     <h2>Tres mensajes clave</h2>
     <ol class="mensajes">
-      <li><span class="num">1</span><div><h3>España está en el 52 % de los proyectos europeos</h3><p>164 de los 316 proyectos de FP7, Horizonte 2020, Horizonte Europa y LIFE que mencionan ciencia ciudadana tienen al menos una entidad española, lo que sitúa a España en el primer puesto entre 75 países.</p></div></li><li><span class="num">2</span><div><h3>Coordina 54 y recibe 111,8 M€</h3><p>España ocupa el primer puesto en proyectos coordinados y el primer puesto en contribución neta de la UE, con 244 entidades españolas distintas participando.</p></div></li><li><span class="num">3</span><div><h3>498 proyectos nacionales, 25,9 M€ concedidos</h3><p>Entre 2009 y 2026, AEI, FECYT y la Fundación Biodiversidad han concedido ayudas a 138 entidades. Desde 2018 se financian de media unos 51 proyectos al año, frente a unos 15 entre 2013 y 2016.</p></div></li>
+      <li><span class="num">1</span><div><h3>España está en el 52 % de los proyectos europeos</h3><p>164 de los 316 proyectos de FP7, Horizonte 2020, Horizonte Europa y LIFE que mencionan ciencia ciudadana tienen al menos una entidad española, lo que sitúa a España en el primer puesto entre 75 países en cifras absolutas. Por habitante, en cambio, baja al puesto 18 de 26 en proyectos (países con al menos 15).</p></div></li><li><span class="num">2</span><div><h3>Coordina 54 y recibe 111,8 M€</h3><p>España ocupa el primer puesto en proyectos coordinados y el primer puesto en contribución neta de la UE, con 244 entidades españolas distintas participando.</p></div></li><li><span class="num">3</span><div><h3>498 proyectos nacionales, 25,9 M€ concedidos</h3><p>Entre 2009 y 2026, AEI, FECYT y la Fundación Biodiversidad han concedido ayudas a 138 entidades. Desde 2018 se financian de media unos 51 proyectos al año, frente a unos 15 entre 2013 y 2016.</p></div></li>
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
@@ -173,24 +174,47 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <text x="208.5" y="146" class="val">15</text><text x="171" y="168" text-anchor="end" class="et">Gobernanza e información ambiental</text>
       <rect x="178" y="158" width="15.3" height="15" rx="1.5" fill="#2b2b2b"/>
       <text x="198.3" y="168" class="val">9</text></svg><p class="nota">Subprograma bajo el que se financia, con el nombre oficial de CORDIS traducido.</p></figure>
-      <figure><figcaption>Proyectos por programa</figcaption><svg viewBox="0 0 330 90" role="img"><text x="103" y="14" text-anchor="end" class="et">FP7</text>
-      <rect x="110" y="4" width="4.3" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="119.3" y="14" class="val">4</text><text x="103" y="36" text-anchor="end" class="et">Horizonte 2020</text>
-      <rect x="110" y="26" width="123.5" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="238.5" y="36" class="val">115</text><text x="103" y="58" text-anchor="end" class="et">Horizonte Europa</text>
-      <rect x="110" y="48" width="174.0" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="289.0" y="58" class="val">162</text><text x="103" y="80" text-anchor="end" class="et">LIFE</text>
-      <rect x="110" y="70" width="37.6" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="152.6" y="80" class="val">35</text></svg></figure>
-      <figure><figcaption>Aportación de la UE por programa (M€)</figcaption><svg viewBox="0 0 330 90" role="img"><text x="103" y="14" text-anchor="end" class="et">FP7</text>
-      <rect x="110" y="4" width="1.9" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="116.9" y="14" class="val">6,8</text><text x="103" y="36" text-anchor="end" class="et">Horizonte 2020</text>
-      <rect x="110" y="26" width="78.3" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="193.3" y="36" class="val">282,1</text><text x="103" y="58" text-anchor="end" class="et">Horizonte Europa</text>
-      <rect x="110" y="48" width="174.0" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="289.0" y="58" class="val">627,2</text><text x="103" y="80" text-anchor="end" class="et">LIFE</text>
-      <rect x="110" y="70" width="27.0" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="142.0" y="80" class="val">97,4</text></svg><p class="nota">Aportación máxima de la UE a los proyectos; LIFE, la contribución de CINEA.</p></figure>
+    </div>
+    <h3 class="subtit">Comparación por habitante</h3>
+    <div class="rejilla">
+      <figure><figcaption>Proyectos por millón de habitantes</figcaption><svg viewBox="0 0 330 200" role="img"><text x="111" y="14" text-anchor="end" class="et">Chipre</text>
+      <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="14" class="val">20,3</text><text x="111" y="36" text-anchor="end" class="et">Eslovenia</text>
+      <rect x="118" y="26" width="145.5" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="268.5" y="36" class="val">17,8</text><text x="111" y="58" text-anchor="end" class="et">Estonia</text>
+      <rect x="118" y="48" width="107.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="230.2" y="58" class="val">13,1</text><text x="111" y="80" text-anchor="end" class="et">Dinamarca</text>
+      <rect x="118" y="70" width="76.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="199.2" y="80" class="val">9,3</text><text x="111" y="102" text-anchor="end" class="et">Noruega</text>
+      <rect x="118" y="92" width="72.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="195.9" y="102" class="val">8,9</text><text x="111" y="124" text-anchor="end" class="et">Bélgica</text>
+      <rect x="118" y="114" width="72.8" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="195.8" y="124" class="val">8,9</text><text x="111" y="146" text-anchor="end" class="et">Finlandia</text>
+      <rect x="118" y="136" width="70.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="193.9" y="146" class="val">8,7</text><text x="111" y="168" text-anchor="end" class="et">Austria</text>
+      <rect x="118" y="158" width="63.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="186.0" y="168" class="val">7,7</text><text x="111" y="190" text-anchor="end" class="et res">España (18.º)</text>
+      <rect x="118" y="180" width="27.2" height="15" rx="1.5" fill="#f2a900"/>
+      <text x="150.2" y="190" class="val">3,3</text></svg><p class="nota">Países con al menos 15 proyectos (26). Población a 1 de enero de 2025, Eurostat. Sin Reino Unido: Eurostat no publica su población.</p></figure>
+      <figure><figcaption>Contribución neta de la UE por habitante (€)</figcaption><svg viewBox="0 0 330 200" role="img"><text x="111" y="14" text-anchor="end" class="et">Noruega</text>
+      <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="14" class="val">7,4</text><text x="111" y="36" text-anchor="end" class="et">Dinamarca</text>
+      <rect x="118" y="26" width="135.5" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="258.5" y="36" class="val">6,1</text><text x="111" y="58" text-anchor="end" class="et">Chipre</text>
+      <rect x="118" y="48" width="133.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="256.3" y="58" class="val">6,0</text><text x="111" y="80" text-anchor="end" class="et">Finlandia</text>
+      <rect x="118" y="70" width="126.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="249.2" y="80" class="val">5,6</text><text x="111" y="102" text-anchor="end" class="et">Eslovenia</text>
+      <rect x="118" y="92" width="112.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="235.6" y="102" class="val">5,0</text><text x="111" y="124" text-anchor="end" class="et">Bélgica</text>
+      <rect x="118" y="114" width="111.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="234.2" y="124" class="val">5,0</text><text x="111" y="146" text-anchor="end" class="et">Estonia</text>
+      <rect x="118" y="136" width="106.1" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="229.1" y="146" class="val">4,7</text><text x="111" y="168" text-anchor="end" class="et">Países Bajos</text>
+      <rect x="118" y="158" width="103.8" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="226.8" y="168" class="val">4,6</text><text x="111" y="190" text-anchor="end" class="et res">España (14.º)</text>
+      <rect x="118" y="180" width="51.0" height="15" rx="1.5" fill="#f2a900"/>
+      <text x="174.0" y="190" class="val">2,3</text></svg><p class="nota">Solo CORDIS: LIFE y los programas complementarios no reparten el dinero por socio.</p></figure>
     </div>
   </div>
   <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>2 / 5</b></footer>
@@ -202,9 +226,9 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
     <h2>España está en 164 de los 316 proyectos: 52 % del total</h2>
     <p class="entra">Un proyecto se atribuye a España si tiene al menos una entidad española en su consorcio.</p>
     <div class="posicion">
-      <div><b>1.º</b><span>en proyectos<br>(164)</span></div>
+      <div><b>1.º</b><span>en proyectos<br>(164); 18.º por habitante</span></div>
       <div><b>1.º</b><span>en proyectos coordinados<br>(54)</span></div>
-      <div><b>1.º</b><span>en contribución neta UE<br>(111,8 M€)</span></div>
+      <div><b>1.º</b><span>en contribución neta UE<br>(111,8 M€, 12 %); 14.º por habitante</span></div>
       <div><b>244</b><span>entidades españolas<br>distintas</span></div>
     </div>
     <figure><figcaption>Proyectos por año de inicio</figcaption><svg viewBox="0 0 700 140" role="img"><line x1="24" x2="694" y1="120" y2="120" stroke="#8a8a8a" stroke-width=".6"/>

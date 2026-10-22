@@ -108,6 +108,25 @@ const paises = eu.paises;
 const rango = (campo, cod = 'ES') => [...paises].sort((a, b) => b[campo] - a[campo]).findIndex((p) => p.pais === cod) + 1;
 const es = paises.find((p) => p.pais === 'ES');
 const rProy = rango('proyectos'), rCoord = rango('coordinados'), rDin = rango('aportacionNeta');
+// Comparacion por habitante: paises con poblacion en Eurostat y al menos 15 proyectos (con menos, un solo
+// proyecto mueve el ranking). Reino Unido no esta porque Eurostat ya no publica su poblacion.
+const poblacion = Object.fromEntries(fs.readFileSync(path.join(RAIZ, 'datos', 'poblacion.csv'), 'utf8').trim().split('\n').slice(1)
+  .map((l) => { const [p, n, a] = l.split(';'); return [p, { n: Number(n), anio: a }]; }));
+const MIN_PROYECTOS_HAB = 15;
+const habitantes = paises.filter((p) => poblacion[p.pais] && p.proyectos >= MIN_PROYECTOS_HAB)
+  .map((p) => ({ pais: p.pais, permm: p.proyectos / poblacion[p.pais].n * 1e6, eurHab: p.aportacionNeta / poblacion[p.pais].n }));
+const rangoHab = (campo) => [...habitantes].sort((a, b) => b[campo] - a[campo]).findIndex((p) => p.pais === 'ES') + 1;
+const rHabProy = rangoHab('permm'), rHabDin = rangoHab('eurHab');
+const sinPoblacion = paises.filter((p) => !poblacion[p.pais] && p.proyectos >= MIN_PROYECTOS_HAB).map((p) => pais(p.pais));
+const anioPob = poblacion.ES?.anio ?? '';
+// Los n primeros y, si no esta entre ellos, Espana con su puesto.
+function topConEs(campo, n, fmtEt = pais) {
+  const orden = [...habitantes].sort((a, b) => b[campo] - a[campo]);
+  const items = orden.slice(0, n).map((p) => ({ et: fmtEt(p.pais), v: p[campo], resaltar: p.pais === 'ES' }));
+  const i = orden.findIndex((p) => p.pais === 'ES');
+  if (i >= n) items.push({ et: `España (${i + 1}.º)`, v: orden[i][campo], resaltar: true });
+  return items;
+}
 const fuenteEu = Object.fromEntries(eu.meta.fuentes.map((f) => [f.codigo, f]));
 const fuenteEs = Object.fromEntries(nacTodo.meta.fuentes.map((f) => [f.codigo, f]));
 const top = (arr, n, f) => [...arr].sort((a, b) => f(b) - f(a)).slice(0, n);
@@ -129,7 +148,7 @@ const concentracion = (ccaaTop[0].ayudas + ccaaTop[1].ayudas) / S.totalAyudas * 
 const mensajes = [
   { n: 1,
     t: `España está en el ${pct(es.pctSobreTotal)} de los proyectos europeos`,
-    p: `${num(es.proyectos)} de los ${num(E.totalProyectos)} proyectos de FP7, Horizonte 2020, Horizonte Europa y LIFE que mencionan ciencia ciudadana tienen al menos una entidad española, lo que sitúa a España en ${ordinal(rProy)} entre ${paises.length} países.` },
+    p: `${num(es.proyectos)} de los ${num(E.totalProyectos)} proyectos de FP7, Horizonte 2020, Horizonte Europa y LIFE que mencionan ciencia ciudadana tienen al menos una entidad española, lo que sitúa a España en ${ordinal(rProy)} entre ${paises.length} países en cifras absolutas. Por habitante, en cambio, baja al puesto ${rHabProy} de ${habitantes.length} en proyectos (países con al menos ${MIN_PROYECTOS_HAB}).` },
   { n: 2,
     t: `Coordina ${num(es.coordinados)} y recibe ${meur(es.aportacionNeta)}`,
     p: `España ocupa ${ordinal(rCoord)} en proyectos coordinados y ${ordinal(rDin)} en contribución neta de la UE, con ${num(es.organizaciones)} entidades españolas distintas participando.` },
@@ -211,9 +230,13 @@ const p2 = `
     <div class="rejilla">
       ${fig('Proyectos por país', barrasH(topPaises('proyectos', 10)), 'Con al menos una entidad del país en el consorcio.')}
       ${fig('Áreas temáticas con más proyectos', barrasH(areasTop, { etAncho: 178, ancho: 360 }), 'Subprograma bajo el que se financia, con el nombre oficial de CORDIS traducido.')}
-      ${fig('Proyectos por programa', barrasH(progOrden.map((c) => ({ et: etProg[c], v: eu.programas.find((p) => p.clave === c).proyectos })), { etAncho: 110 }))}
-      ${fig('Aportación de la UE por programa (M€)', barrasH(progOrden.map((c) => ({ et: etProg[c], v: eu.programas.find((p) => p.clave === c).aportacionUE / 1e6 })), { etAncho: 110, fmt: (v) => dec1(v) }),
-        'Aportación máxima de la UE a los proyectos; LIFE, la contribución de CINEA.')}
+    </div>
+    <h3 class="subtit">Comparación por habitante</h3>
+    <div class="rejilla">
+      ${fig('Proyectos por millón de habitantes', barrasH(topConEs('permm', 8), { fmt: dec1 }),
+        `Países con al menos ${MIN_PROYECTOS_HAB} proyectos (${habitantes.length}). Población a 1 de enero de ${anioPob}, Eurostat.${sinPoblacion.length ? ` Sin ${sinPoblacion.join(', ')}: Eurostat no publica su población.` : ''}`)}
+      ${fig('Contribución neta de la UE por habitante (€)', barrasH(topConEs('eurHab', 8), { fmt: (v) => dec1(v) }),
+        'Solo CORDIS: LIFE y los programas complementarios no reparten el dinero por socio.')}
     </div>
   </div>
   ${pie(2, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
@@ -228,9 +251,9 @@ const p3 = `
     <h2>España está en ${num(es.proyectos)} de los ${num(E.totalProyectos)} proyectos: ${pct(es.pctSobreTotal)} del total</h2>
     <p class="entra">Un proyecto se atribuye a España si tiene al menos una entidad española en su consorcio.</p>
     <div class="posicion">
-      <div><b>${rProy}.º</b><span>en proyectos<br>(${num(es.proyectos)})</span></div>
+      <div><b>${rProy}.º</b><span>en proyectos<br>(${num(es.proyectos)}); ${rHabProy}.º por habitante</span></div>
       <div><b>${rCoord}.º</b><span>en proyectos coordinados<br>(${num(es.coordinados)})</span></div>
-      <div><b>${rDin}.º</b><span>en contribución neta UE<br>(${meur(es.aportacionNeta)})</span></div>
+      <div><b>${rDin}.º</b><span>en contribución neta UE<br>(${meur(es.aportacionNeta)}, ${pct(es.pctAportacion)}); ${rHabDin}.º por habitante</span></div>
       <div><b>${num(es.organizaciones)}</b><span>entidades españolas<br>distintas</span></div>
     </div>
     ${fig('Proyectos por año de inicio', columnas(serieEu.map((s) => ({ anio: s.anio, total: s.total, foco: s.foco })), [{ clave: 'total', color: C.claro }, { clave: 'foco', color: C.ambar }], { superpuesta: true, alto: 140 })
@@ -367,7 +390,7 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 
 /* portada */
 .portada .banda{background:var(--negro);color:#fff;padding:14mm 14mm 12mm;flex:none}
-.portada .logo{height:19mm;display:block;margin-bottom:17mm}
+.portada .logo{height:19mm;display:block;margin-bottom:12mm}
 .portada .kicker{font-size:8.6pt;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--ambar);margin-bottom:3mm}
 .portada h1{font-size:36pt;line-height:1.06;margin:0 0 5mm;font-weight:700;letter-spacing:-.01em}
 .portada h1 em{font-style:normal;color:var(--ambar)}
@@ -386,6 +409,7 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .recuadro p{margin:0;font-size:8.6pt}
 
 /* panorama y posicion */
+.subtit{font-size:9.5pt;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin:1mm 0 3mm;font-family:inherit}
 .kps{display:grid;grid-template-columns:repeat(5,1fr);gap:3mm;margin:0 0 4mm}
 .kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
 .kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
