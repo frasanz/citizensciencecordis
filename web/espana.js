@@ -123,7 +123,7 @@ function construirFiltros(disponibles) {
     <div class="grupo"><span>Financiador${boton('esFiltroFinanciador')}</span><div class="opciones">${
       disponibles.map((c) => {
         const f = FINANCIADORES.find((x) => x.codigo === c);
-        return `<label class="chip on" data-fin="${c}" style="color:${COLOR[c]}">
+        return `<label class="chip on" data-fin="${c}">
                  <i class="punto" style="background:${COLOR[c]}"></i><input type="checkbox" checked>
                  ${esc(f?.etiqueta || c)}</label>`;
       }).join('')}</div></div>
@@ -151,7 +151,6 @@ function construirFiltros(disponibles) {
       if (i >= 0) { if (lista.length === 1) return; lista.splice(i, 1); }
       else lista.push(c);
       lab.classList.toggle('on');
-      if (attr === 'fin') lab.style.color = lab.classList.contains('on') ? COLOR[c] : '';
       lab.querySelector('input').checked = lab.classList.contains('on');
       aplicar();
     });
@@ -222,14 +221,14 @@ function pintar() {
   tabla('#p-convocatorias', 'Convocatorias', 'Nombre de la convocatoria tal como lo da cada financiador.', 'convocatorias',
     ['Convocatoria', 'Ayudas', 'Entidades', 'Años', 'Importe'],
     r.convocatorias.slice(0, 16), (c) => [
-      `<span class="nom" title="${esc(c.etiqueta)}"><span style="color:${COLOR[c.financiadores[0]]}">${esc(ETIQUETA_FINANCIADOR[c.financiadores[0]] || c.financiadores[0])}</span> · ${esc(c.etiqueta)}</span>`,
+      `<span class="nom" title="${esc(c.etiqueta)}"><span class="prog"><i style="background:${COLOR[c.financiadores[0]]}"></i>${esc(ETIQUETA_FINANCIADOR[c.financiadores[0]] || c.financiadores[0])}</span> · ${esc(c.etiqueta)}</span>`,
       num(c.ayudas), num(c.entidades), c.desde === c.hasta ? c.desde ?? '—' : `${c.desde}–${c.hasta}`, c.importe ? millones(c.importe) : '—'], 'esTablaConvocatorias', descargar);
 
   tabla('#p-entidades-es', 'Entidades más activas', 'Por número de ayudas. Pulsa una para quedarte con las suyas.', 'entidades-es',
     ['Entidad', 'CCAA', 'Ayudas', 'Financiadores', 'Importe'],
     r.entidades.slice(0, 14), (e) => [
       `<a href="#" class="nom" data-entidad="${esc(e.clave)}" title="${esc(e.nombre)}">${esc(e.nombre)}</a>`,
-      esc(e.ccaa || '—'), num(e.ayudas), e.financiadores.map((x) => `<span style="color:${COLOR[x]}">${esc(ETIQUETA_FINANCIADOR[x] || x)}</span>`).join(', '),
+      esc(e.ccaa || '—'), num(e.ayudas), e.financiadores.map((x) => `<span class="prog"><i style="background:${COLOR[x]}"></i>${esc(ETIQUETA_FINANCIADOR[x] || x)}</span>`).join(', '),
       e.importe ? euros(e.importe) : '—'], 'esTablaEntidades', descargar);
   el('#p-entidades-es').querySelectorAll('[data-entidad]').forEach((a) =>
     a.addEventListener('click', (ev) => { ev.preventDefault(); elegirEntidad(a.dataset.entidad); }));
@@ -271,7 +270,7 @@ function columnasAyudas() {
     { id: 'ccaa', t: 'CCAA', v: (a) => a.ccaa || '', izq: true,
       c: (a) => a.ccaa ? `<span title="CCAA por: ${esc(CCAA_VIAS[a.ccaaVia] || a.ccaaVia)}">${esc(a.ccaa)}</span>` : '<span class="mas">—</span>' },
     { id: 'financiador', t: 'Financiador', v: (a) => `${a.financiador} ${a.convocatoria}`, izq: true,
-      c: (a) => `<span class="ent" title="${esc(a.convocatoria)}"><span style="color:${COLOR[a.financiador]}">${esc(ETIQUETA_FINANCIADOR[a.financiador] || a.financiador)}</span>`
+      c: (a) => `<span class="ent" title="${esc(a.convocatoria)}"><span class="prog"><i style="background:${COLOR[a.financiador]}"></i>${esc(ETIQUETA_FINANCIADOR[a.financiador] || a.financiador)}</span>`
         + `<span class="pct"> · ${esc(a.convocatoria)}</span></span>` },
     { id: 'anio', t: 'Año', v: (a) => a.anio || 0, c: (a) => a.anio ?? '—' },
     { id: 'importe', t: 'Importe', v: (a) => a.importe || 0, c: (a) => euros(a.importe) },

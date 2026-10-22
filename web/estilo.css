@@ -1,0 +1,72 @@
+/* Estilo común del sitio: indicadores, metodología y factsheet comparten paleta, tipografía y
+   cabecera. Identidad de Ibercivis: negros y grises con un acento ámbar. Las series de los
+   gráficos llevan colores apagados para poder distinguir hasta ocho programas. */
+@import url('fonts/fuentes.css');
+
+:root{
+  --tinta:#111111; --filete:#111111;
+  --ambar:#f2a900; --acento:#a86f00; --acento-texto:#6b4500; --acento-claro:#fdf1d3;
+  --fondo:#f4f4f2; --panel:#ffffff; --borde:#dcdcd8; --borde-fuerte:#bdbdb8;
+  --texto:#161616; --suave:#555555; --tenue:#767676;
+  --primario-bg:#111111; --primario-tx:#ffffff;
+  --he:#1f1f1f; --h2020:#777777; --fp7:#a5a5a5; --fp6:#c4c4c4;
+  --life:#5b7a3a; --erasmus:#3d6a94; --crea:#9b4a68; --kohesio:#8a7a2e;
+  --aei:#1f1f1f; --fecyt:#8a8a8a; --fb:#5b7a3a;
+  --destacado:#b03a2e;
+  --r:6px;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"Source Sans 3","Segoe UI",Roboto,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --filete:#ececec;
+  --acento:#f2a900; --acento-texto:#f2a900; --acento-claro:#33290c;
+  --fondo:#131313; --panel:#1c1c1c; --borde:#2e2e2e; --borde-fuerte:#474747;
+  --texto:#ececec; --suave:#b0b0b0; --tenue:#8c8c8c;
+  --primario-bg:#f2a900; --primario-tx:#111111;
+  --he:#ececec; --h2020:#a8a8a8; --fp7:#787878; --fp6:#5e5e5e;
+  --life:#8fc063; --erasmus:#6fa8e0; --crea:#e0809f; --kohesio:#b5c96a;
+  --aei:#ececec; --fecyt:#a8a8a8; --fb:#8fc063;
+  --destacado:#e8705f;
+}}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);font:15.5px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif)}
+
+/* ---------- cabecera del sitio ---------- */
+.sitio{background:#111;color:#fff}
+.sitio-in{max-width:1120px;margin:0 auto;padding:18px 20px 0;display:flex;align-items:center;gap:20px}
+.sitio .marca{flex:none;display:block}
+.sitio .marca img{height:40px;width:auto;display:block}
+.sitio .titulo{min-width:0;border-left:2px solid var(--ambar);padding-left:18px}
+.sitio .titulo h1{margin:0;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.005em;color:#fff}
+.sitio .titulo p{margin:3px 0 0;font-size:13.5px;line-height:1.4;color:#c9c9c9}
+
+/* navegación: las cuatro secciones al mismo nivel; las dos primeras son pestañas de la misma página */
+.pestanas{max-width:1120px;margin:16px auto 0;padding:0 20px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.pestanas::-webkit-scrollbar{display:none}
+.pestanas button,.pestanas a.pestana{flex:none;border:none;border-bottom:3px solid transparent;border-radius:0;margin:0;
+  background:transparent;color:#bdbdbd;font:700 14.5px/1.2 var(--sans);padding:11px 16px;cursor:pointer;
+  text-decoration:none;transition:color .12s,background .12s;white-space:nowrap}
+.pestanas button:hover,.pestanas a.pestana:hover{color:#fff;background:#1f1f1f}
+.pestanas button[aria-selected=true],.pestanas a.pestana[aria-current=page]{color:#fff;border-bottom-color:var(--ambar)}
+.pestanas .pct{display:block;margin:2px 0 0;font:400 11.5px/1.2 var(--sans);color:#9a9a9a}
+.pestanas .div{flex:none;width:1px;background:#3a3a3a;margin:9px 8px}
+.pestanas .corto{display:none}
+
+@media(max-width:760px){
+  .sitio-in{padding:14px 14px 0;gap:12px;flex-wrap:wrap}
+  .sitio .marca img{height:32px}
+  .sitio .titulo{padding-left:12px}
+  .sitio .titulo h1{font-size:18px}
+  .sitio .titulo p{display:none}
+  .pestanas{margin-top:12px;padding:0 6px}
+  .pestanas button,.pestanas a.pestana{padding:10px 11px;font-size:13.5px}
+  .pestanas .pct{display:none}
+  .pestanas .largo{display:none}
+  .pestanas .corto{display:inline}
+}
+
+/* ---------- pie común ---------- */
+.pie-sitio{margin-top:40px;padding:16px 0 0;border-top:1px solid var(--borde);font-size:12.5px;color:var(--tenue)}
+.pie-sitio a{color:inherit}

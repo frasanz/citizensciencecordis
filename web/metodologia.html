@@ -4,45 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Metodología · Ciencia ciudadana en la financiación pública</title>
+<link rel="stylesheet" href="./estilo.css">
 <style>
-:root{
-  --fondo:#fbfaf8; --panel:#fff; --borde:#e3e0d9; --borde-fuerte:#cfcabf;
-  --texto:#1c1a17; --suave:#6b665d; --tenue:#8f8a80;
-  --acento:#1f5f5b; --acento-claro:#e6f0ef;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --fondo:#16181a; --panel:#1e2124; --borde:#2f3438; --borde-fuerte:#414750;
-  --texto:#eceae6; --suave:#a8a49c; --tenue:#7d7970;
-  --acento:#5bb3ab; --acento-claro:#17302e;
-}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--fondo);color:var(--texto);
-  font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-.envoltorio{max-width:820px;margin:0 auto;padding:28px 20px 80px}
-a{color:var(--acento)}
-.volver{font-size:13.5px;text-decoration:none}
-h1{font-size:26px;line-height:1.2;margin:14px 0 6px;letter-spacing:-.02em;font-weight:650}
-.lead{margin:0 0 22px;color:var(--suave)}
-h2{font-size:19px;margin:38px 0 6px;letter-spacing:-.01em;font-weight:640;padding-top:6px;border-top:1px solid var(--borde)}
-h3{font-size:15px;margin:22px 0 4px;font-weight:640}
+.envoltorio{max-width:1120px;margin:0 auto;padding:10px 20px 80px}
+.envoltorio>*{max-width:860px}
+a{color:var(--acento-texto)}
+.envoltorio h2.titulo-pagina{font-size:30px;line-height:1.15;margin:26px 0 6px;letter-spacing:-.01em;font-weight:700;border:none;padding:0}
+.lead{margin:0 0 22px;color:var(--suave);font-size:16px}
+.envoltorio h2:not(.titulo-pagina){font-size:21px;margin:40px 0 6px;font-weight:700;padding-top:10px;border-top:2px solid var(--filete)}
+.envoltorio h3{font-size:15.5px;margin:22px 0 4px;font-weight:700}
 p{margin:8px 0}
 ul,ol{padding-left:22px;margin:8px 0}
 li{margin:3px 0}
-code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--acento-claro);color:var(--acento);padding:1px 5px;border-radius:4px}
-nav.indice{background:var(--panel);border:1px solid var(--borde);border-radius:10px;padding:12px 18px;margin:0 0 8px;font-size:14px}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--acento-claro);color:var(--acento-texto);padding:1px 5px;border-radius:4px}
+nav.indice{background:var(--panel);border:1px solid var(--borde);border-top:3px solid var(--filete);border-radius:var(--r);padding:12px 18px;margin:0 0 8px;font-size:14.5px}
 nav.indice ol{margin:4px 0}
-.nota{font-size:13px;color:var(--suave);border-left:3px solid var(--borde-fuerte);padding:2px 0 2px 12px;margin:12px 0}
-table{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}
+.nota{font-size:13.5px;color:var(--suave);border-left:3px solid var(--ambar);padding:2px 0 2px 12px;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
 th,td{text-align:left;vertical-align:top;padding:7px 9px;border-bottom:1px solid var(--borde)}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenue);font-weight:600;border-bottom:1px solid var(--borde-fuerte)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--suave);font-weight:700;border-bottom:2px solid var(--filete)}
 .tabla{overflow-x:auto}
 .tabla table{min-width:560px}
 </style>
 </head>
 <body>
+<header class="sitio">
+  <div class="sitio-in">
+    <a class="marca" href="./" aria-label="Ibercivis, gente haciendo ciencia"><img src="img/ibercivis-logo.png" alt="Ibercivis · gente haciendo ciencia"></a>
+    <div class="titulo">
+      <h1>Ciencia ciudadana en la financiación pública</h1>
+      <p>Qué proyectos de ciencia ciudadana financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos que publica cada financiador.</p>
+    </div>
+  </div>
+  <nav class="pestanas" aria-label="Secciones">
+    <a class="pestana" href="./#europa"><span class="largo">Programas europeos</span><span class="corto">Europa</span><span class="pct">CORDIS, LIFE y fondos complementarios</span></a>
+    <a class="pestana" href="./#espana"><span class="largo">Convocatorias españolas</span><span class="corto">España</span><span class="pct">AEI, FECYT y Fundación Biodiversidad</span></a>
+    <span class="div" aria-hidden="true"></span>
+    <a class="pestana" href="./metodologia.html" aria-current="page">Metodología<span class="pct">cómo se obtiene cada dato</span></a>
+    <a class="pestana" href="./factsheet.html">Factsheet<span class="pct">informe de 6 páginas · PDF</span></a>
+  </nav>
+</header>
 <div class="envoltorio">
-  <a class="volver" href="./">← Volver a los indicadores</a>
-  <h1>Metodología</h1>
+  <h2 class="titulo-pagina">Metodología</h2>
   <p class="lead">Cómo se ha obtenido y analizado cada conjunto de datos: de qué fuente sale, qué se descarga, qué criterio decide si un proyecto es de ciencia ciudadana, qué se calcula con él y qué limitaciones tiene. Todo se recalcula con un único comando (<code>node scripts/snapshot.js</code>) y el código está en el <a href="https://github.com/frasanz/citizensciencecordis">repositorio</a>.</p>
 
   <nav class="indice" aria-label="Índice">
@@ -122,7 +125,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   </ul>
   <div class="nota">Como LIFE no da fecha de volcado, la web muestra la de descarga. El importe por socio es el del panel de CINEA, con la fecha en que se extrajo (22 de octubre de 2026).</div>
 
-  <h2 id="erasmus">Erasmus+ y Europa Creativa</h2>
+  <h2 id="erasmus">4. Erasmus+ y Europa Creativa</h2>
   <p>Programas de educación, juventud, deporte y cultura, no de investigación. Se incorporan como <strong>programas complementarios</strong>: están en los datos y se pueden marcar en el filtro de programa, pero quedan fuera de las cifras de partida y del factsheet.</p>
   <h3>Obtención</h3>
   <p>Las dos usan la misma plataforma de resultados de proyectos de la Comisión (<a href="https://erasmus-plus.ec.europa.eu/projects">Erasmus+</a>, <a href="https://culture.ec.europa.eu/creative-europe/projects">Europa Creativa</a>). Su buscador carga los datos de una API JSON sin autenticación, la que usa el propio front-end. Se pide la frase entre comillas (<code>"citizen science"</code>) a los índices <code>eplus2021</code> (Erasmus+, 2014-2020 y 2021-2027) y <code>ce2021</code> (Europa Creativa). Cada documento trae el proyecto y todos sus socios con país y rol.</p>
@@ -138,7 +141,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
     <li><strong>Licencia.</strong> Las condiciones de la plataforma no dan una licencia de reutilización explícita para los datos. Se citan con su origen y conviene confirmarlo antes de reutilizarlos.</li>
   </ul>
 
-  <h2 id="kohesio">Kohesio</h2>
+  <h2 id="kohesio">5. Kohesio</h2>
   <p>Kohesio es el portal de proyectos de la política de cohesión de la UE (FEDER, FSE+, Fondo de Cohesión, Interreg). Entra como <strong>programa complementario</strong>, igual que Erasmus+: está en los datos y se marca en el filtro de programa, pero queda fuera de las cifras de partida y del factsheet.</p>
   <h3>Obtención</h3>
   <p>Su web usa una API JSON sin autenticación. La búsqueda por la frase entre comillas (<code>"citizen science"</code>) da la lista, con título, descripción, fechas, presupuesto total, aportación de la UE y países del proyecto. El detalle de cada proyecto añade los <strong>beneficiarios</strong>, el <strong>fondo</strong> y el programa. El criterio se vuelve a aplicar en local sobre el título y la descripción en inglés.</p>
@@ -153,7 +156,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
     <li><strong>Licencia.</strong> Los datos proceden de las listas oficiales de operaciones de cada autoridad de gestión, pero no se ha confirmado una licencia de reutilización de la plataforma; se cita el origen.</li>
   </ul>
 
-  <h2 id="aei">4. AEI (Agencia Estatal de Investigación)</h2>
+  <h2 id="aei">6. AEI (Agencia Estatal de Investigación)</h2>
   <h3>Obtención</h3>
   <p>No hay volcado completo. El <a href="https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas">buscador de ayudas concedidas</a> permite buscar por título, resumen y palabras clave, y exporta el resultado a CSV con el mismo filtro. Se hace una consulta por cada campo y cada frase (<code>ciencia ciudadana</code>, <code>citizen science</code> y las variantes catalana, gallega y vasca), y los resultados se unen por referencia. El CSV trae año, convocatoria, referencia, área, título, CIF y entidad, comunidad autónoma, provincia, importe concedido y resumen.</p>
   <p>El servidor sirve su certificado sin la CA intermedia de la FNMT, por lo que se incluye en <code>vendor/fnmt-ac-componentes.pem</code> para que Node pueda verificarlo en lugar de desactivar la verificación.</p>
@@ -161,7 +164,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   <p>Las candidatas se comprueban en local: la frase debe aparecer en el título o en el resumen (vías <code>titulo</code> y <code>resumen</code>). Una candidata que el buscador devuelve pero donde la frase no aparece se descarta y se anota como aviso. Una excepción: el buscador permite consultar por <strong>palabras clave</strong> pero no las exporta, así que lo que solo casa por ellas no se puede comprobar; se acepta anotándolo como <code>palabras-clave</code>.</p>
   <div class="nota">La AEI incluye contratos y estancias, no solo proyectos de investigación (en esta edición, unas 70 de las 199 ayudas: contratos predoctorales, Juan de la Cierva, Ramón y Cajal, Torres Quevedo, estancias breves…). Un contrato predoctoral hereda el texto del proyecto al que se vincula, así que ese proyecto y su contrato aparecen como dos ayudas. La AEI tampoco da fechas de ejecución; el año es el de la convocatoria.</div>
 
-  <h2 id="fecyt">5. FECYT</h2>
+  <h2 id="fecyt">7. FECYT</h2>
   <p>La Fundación Española para la Ciencia y la Tecnología publica la convocatoria de ayudas para el fomento de la cultura científica, tecnológica y de la innovación. No ofrece los proyectos concedidos en ningún formato de datos, así que se combinan dos fuentes.</p>
   <h3>Obtención</h3>
   <ol>
@@ -180,7 +183,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   <p>Como el criterio se aplica sobre el resumen, se leen las fichas de <em>todas</em> las ayudas concedidas, no solo las candidatas. Se guardan en caché una a una.</p>
   <div class="nota">Antes de 2012 no hay ficha resumen, y esos años no se leen. FECYT no publica el CIF de las entidades.</div>
 
-  <h2 id="fb">6. Fundación Biodiversidad</h2>
+  <h2 id="fb">8. Fundación Biodiversidad</h2>
   <h3>Obtención</h3>
   <p>La web de la Fundación Biodiversidad (MITECO) es un WordPress con la API REST abierta, y cada proyecto financiado es una entrada de uno de varios tipos (convocatorias generales, PRTR, Empleaverde, Pleamar, FEDER, LIFE, Biodiversa+). El proceso es:</p>
   <ol>
@@ -192,7 +195,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   <p>El buscador de la web casa palabra a palabra («ciencia» y «ciudadana» sueltas), por lo que se comprueba otra vez la frase exacta sobre el título y la descripción de la ficha; lo demás se descarta. El año es el de inicio de ejecución según la ficha o, si no lo trae, el de publicación.</p>
   <div class="nota">Los fondos europeos que gestiona la Fundación (FEDER, FSE, PRTR) se quedan en la pestaña española: la línea entre pestañas es quién concede la ayuda, no de dónde sale el dinero. Muchas fichas no traen el importe, y ninguna el CIF ni la comunidad autónoma de la entidad.</div>
 
-  <h2 id="ccaa">7. Comunidad autónoma de las entidades</h2>
+  <h2 id="ccaa">9. Comunidad autónoma de las entidades</h2>
   <p>Es la de la sede de la entidad beneficiaria. AEI y FECYT la dan; para el resto se resuelve con una cadena de fuentes, y la vía queda en la columna <code>ccaa_via</code>:</p>
   <div class="tabla"><table>
     <tr><th>Vía</th><th>Qué es</th></tr>
@@ -206,7 +209,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   </table></div>
   <p>Las entidades se identifican por CIF cuando la AEI lo da, y por nombre normalizado (sin acentos, mayúsculas ni puntuación) si no. Una ayuda sin CIF se engancha al CIF de otra con el mismo nombre, para que «UNIVERSIDAD DE ZARAGOZA» de FECYT y «Universidad de Zaragoza» de la Fundación Biodiversidad sean la misma entidad.</p>
 
-  <h2 id="indicadores">8. Indicadores</h2>
+  <h2 id="indicadores">10. Indicadores</h2>
   <h3>Programas europeos</h3>
   <ul>
     <li><strong>Proyectos</strong>: los que cumplen el criterio, por programa, subprograma y año de inicio.</li>
@@ -224,7 +227,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   </ul>
   <p>Todos los filtros de la web (programa, país, fechas, socio, financiador, vía…) recalculan estas cifras en el navegador a partir de los CSV/JSON originales, y cada tabla se puede descargar en CSV.</p>
 
-  <h2 id="limites">9. Limitaciones y cómo auditar</h2>
+  <h2 id="limites">11. Limitaciones y cómo auditar</h2>
   <ul>
     <li><strong>El criterio es textual.</strong> Detecta los proyectos que <em>dicen</em> ser de ciencia ciudadana, no los que lo son sin llamarlo así; y detecta también los que la mencionan de pasada. Es una medida reproducible, no un juicio de calidad.</li>
     <li><strong>Los idiomas importan.</strong> En las fuentes españolas se buscan las variantes en castellano, inglés, catalán, gallego y euskera; no hay búsqueda por sinónimos.</li>
@@ -233,10 +236,10 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
     <li><strong>Las fuentes cambian.</strong> Los PDF de FECYT y las webs de AEI y Fundación Biodiversidad no son APIs estables. Los avisos de lectura y las entidades sin comunidad o país se publican en cada ejecución para detectar roturas.</li>
   </ul>
   <p>Para auditar una cifra: la columna <code>via</code> dice por qué entró cada registro, <code>pais_via</code> y <code>ccaa_via</code> cómo se dedujo su país o comunidad, y los CSV de <code>web/data/</code> tienen todos los registros de partida. Cualquier persona puede repetir el proceso completo con <code>node scripts/snapshot.js --sin-cache</code>.</p>
-  <h2 id="licencias">Licencias y reutilización</h2>
+  <h2 id="licencias">12. Licencias y reutilización</h2>
   <p>Los datos de CORDIS y de LIFE son © Unión Europea y se reutilizan bajo CC BY 4.0. Los de la AEI, FECYT y la Fundación Biodiversidad son información pública que se reutiliza según la Ley 37/2007, sobre reutilización de la información del sector público. Este sitio y el factsheet son un análisis independiente elaborado por Fundación Ibercivis y no una publicación oficial de ninguno de los financiadores. Los datos de Erasmus+ y Europa Creativa salen de una API interna de la plataforma de resultados de proyectos, cuya licencia de reutilización no está confirmada.</p>
 
-  <h2 id="factsheet">10. Factsheet</h2>
+  <h2 id="factsheet">13. Factsheet</h2>
   <p>El factsheet «La ciencia ciudadana en España» (<a href="./factsheet.pdf">PDF</a>, <a href="./factsheet.html">versión web</a>) sale de los mismos JSON que esta web: <code>node scripts/factsheet.js --pdf</code> lo regenera tras cada snapshot, de modo que sus cifras no pueden diverger de las de los indicadores. Las páginas 3 y 4 añaden: la tendencia de los proyectos con España en los dos últimos tramos de tres años cerrados, las áreas temáticas con la parte española, las entidades españolas más activas y los proyectos en curso coordinados desde España (empezados y no terminados a la fecha de los datos). La página 2 compara países por habitante (proyectos por millón de habitantes y euros de contribución neta por habitante) con la población a 1 de enero de Eurostat (<code>demo_pjan</code>), solo para los países con al menos 15 proyectos; Reino Unido queda fuera porque Eurostat ya no publica su población, y el dinero por habitante solo cuenta CORDIS. En la parte española cuenta solo proyectos (sin contratos de personal ni estancias de la AEI) y agrupa las entidades que solo se distinguen por una sigla entre paréntesis, como el CSIC.</p>
 </div>
 </body>

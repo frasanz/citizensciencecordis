@@ -48,7 +48,7 @@ const comprobaciones = [
     const e = q('[data-prog="ERASMUS"]'), c = q('[data-prog="CREA"]');
     return !!e && !!c && !e.classList.contains('on') && !c.classList.contains('on') && q('[data-prog="HORIZON"]').classList.contains('on');
   }],
-  ['límites de los datos visibles', () => !!q('#limites details.limites[open]') && /Erasmus\+/.test(q('#limites').textContent) && /por proyecto, no por socio/.test(q('#limites').textContent)],
+  ['límites de los datos visibles', () => !!q('#limites details.limites') && /Erasmus\+/.test(q('#limites').textContent) && /por proyecto, no por socio/.test(q('#limites').textContent)],
   ['selector de pais', () => q('#f-pais').options.length > 20],
   ['filtro por mes', () => {
     const d = q('#f-desde') || q('#f-desde-a');

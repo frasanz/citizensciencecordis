@@ -185,7 +185,12 @@ pestaña española: la línea entre pestañas es quién concede la ayuda, no de 
 
 ```
 web/                 sitio estático (es la raíz publicada en GitHub Pages)
-  index.html         las dos pestañas
+  index.html         indicadores: las pestañas de programas europeos y convocatorias españolas
+  metodologia.html   cómo se obtiene y analiza cada conjunto de datos
+  factsheet.html/pdf informe de 6 páginas (lo genera scripts/factsheet.js)
+  estilo.css         paleta, tipografía y cabecera comunes a las cuatro secciones
+  fonts/             Source Sans 3 y Source Serif 4 (OFL), alojadas aquí para no usar Google Fonts
+  img/               logo de Ibercivis
   app.js             pestaña europea: filtros, cifras, tablas y ayuda contextual
   espana.js          pestaña española: lo mismo sobre las ayudas nacionales
   comun.js           lo que comparten: formato, tablas, gráfico, buscador de entidad, ayuda
@@ -197,7 +202,9 @@ web/                 sitio estático (es la raíz publicada en GitHub Pages)
     exportar.js      generación de CSV
   data/              resultados que genera snapshot.js (indicadores.json, nacional.json y los CSV)
 datos/
-  life-paises.csv    países de socios de LIFE resueltos a mano
+  life-paises.csv    países de socios de LIFE resueltos a mano, con la fuente de cada uno
+  life-importes.csv  contribución de la UE por socio de LIFE, extraída del panel público de CINEA
+  poblacion.csv      población por país (Eurostat), para las comparaciones por habitante
   life-paises-pendientes.csv   los que quedan sin país (lo regenera snapshot.js)
   ccaa-entidades.csv           comunidad autónoma de entidades resuelta a mano
   ccaa-entidades-pendientes.csv   las que quedan sin comunidad (lo regenera snapshot.js)

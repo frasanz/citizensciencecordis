@@ -167,7 +167,7 @@ function construirFiltros(disponibles) {
       disponibles.map((c) => {
         const p = PROGRAMAS.find((x) => x.codigo === c);
         const on = estado.programas.includes(c);
-        return `<label class="chip ${on ? 'on' : ''}" data-prog="${c}" style="color:${on ? COLOR[c] : ''}">
+        return `<label class="chip ${on ? 'on' : ''}" data-prog="${c}">
                  <i class="punto" style="background:${COLOR[c]}"></i>
                  <input type="checkbox" ${on ? 'checked' : ''}>
                  ${esc(p?.etiqueta || c)}<span class="pct">${esc(p?.periodo || '')}</span></label>`;
@@ -190,7 +190,6 @@ function construirFiltros(disponibles) {
       if (i >= 0) { if (estado.programas.length === 1) return; estado.programas.splice(i, 1); }
       else estado.programas.push(c);
       lab.classList.toggle('on');
-      lab.style.color = lab.classList.contains('on') ? COLOR[c] : '';
       lab.querySelector('input').checked = lab.classList.contains('on');
       aplicar();
     });
@@ -334,7 +333,7 @@ function limitesEuropa(fuentes) {
     if (kh) li.push(`<b>Kohesio</b> (fondos de cohesión: FEDER, FSE+, Interreg…) sale también de una API interna sin documentar. Trae ${num(kh.aceptados)} proyectos, ${num(kh.interreg)} de ellos Interreg. <b>No da el país de cada beneficiario</b>, solo los del proyecto: las entidades de los proyectos de un solo país lo heredan y las de los Interreg multinacionales quedan sin país. Tampoco indica el socio principal ni reparte el dinero entre beneficiarios (solo hay importe por entidad cuando el proyecto tiene una). Los importes son asignados, no pagados; el texto en inglés de los proyectos no ingleses es traducción automática de Kohesio. Pueden solaparse con los Interreg de KEEP (aún no incorporado) y con ayudas de la pestaña española cofinanciadas con FEDER, así que no se suma a las demás cifras.`);
     li.push('<b>No hay licencia de reutilización explícita para esos datos</b>: se citan con su origen y conviene confirmarlo antes de reutilizarlos.');
   }
-  return `<details class="limites" open><summary>Límites de estos datos</summary><ul>${li.map((x) => `<li>${x}</li>`).join('')}</ul></details>`;
+  return `<details class="limites"><summary>Límites de estos datos <span class="resumen-limites">· lo que estas cifras no recogen o recogen a medias</span></summary><ul>${li.map((x) => `<li>${x}</li>`).join('')}</ul></details>`;
 }
 
 // ---------- ayuda contextual ----------
@@ -436,7 +435,7 @@ function columnasProyectos(pais, socio) {
         return vis + (e.length > 2 ? `<span class="mas">+${e.length - 2} más</span>` : '');
       } },
     { id: 'programa', t: 'Programa', v: (p) => p.programa, izq: true, movil: false,
-      c: (p) => `<span style="color:${COLOR[p.programa]}">${esc(ETIQUETA_PROGRAMA[p.programa] || p.programa)}</span>` },
+      c: (p) => `<span class="prog"><i style="background:${COLOR[p.programa]}"></i>${esc(ETIQUETA_PROGRAMA[p.programa] || p.programa)}</span>` },
     { id: 'aportacion', t: 'Aportación UE', v: (p) => p.aportacionUE, movil: false, c: (p) => millones(p.aportacionUE) },
   ];
 }

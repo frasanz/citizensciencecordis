@@ -447,16 +447,44 @@ const p5 = `
   ${pie(6, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
 </section>`;
 
+// ---------- cabecera del sitio (solo en pantalla) ----------
+// El CSS sale de estilo.css para que la cabecera sea la misma que la del resto del sitio; en el PDF no se imprime.
+const estiloSitio = fs.readFileSync(path.join(WEB, 'estilo.css'), 'utf8');
+const cssCabecera = estiloSitio.slice(estiloSitio.indexOf('/* ---------- cabecera del sitio'), estiloSitio.indexOf('/* ---------- pie común'));
+const cabeceraSitio = `<header class="sitio no-imprimir">
+  <div class="sitio-in">
+    <a class="marca" href="./" aria-label="Ibercivis, gente haciendo ciencia"><img src="img/ibercivis-logo.png" alt="Ibercivis · gente haciendo ciencia"></a>
+    <div class="titulo">
+      <h1>Ciencia ciudadana en la financiación pública</h1>
+      <p>Qué proyectos de ciencia ciudadana financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos que publica cada financiador.</p>
+    </div>
+  </div>
+  <nav class="pestanas" aria-label="Secciones">
+    <a class="pestana" href="./#europa"><span class="largo">Programas europeos</span><span class="corto">Europa</span><span class="pct">CORDIS, LIFE y fondos complementarios</span></a>
+    <a class="pestana" href="./#espana"><span class="largo">Convocatorias españolas</span><span class="corto">España</span><span class="pct">AEI, FECYT y Fundación Biodiversidad</span></a>
+    <span class="div" aria-hidden="true"></span>
+    <a class="pestana" href="./metodologia.html">Metodología<span class="pct">cómo se obtiene cada dato</span></a>
+    <a class="pestana" href="./factsheet.html" aria-current="page">Factsheet<span class="pct">informe de 6 páginas · PDF</span></a>
+  </nav>
+</header>
+<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>6 páginas A4 · generado el ${esc(fecha(eu.meta.generado))}</span></div>`;
+
 // ---------- documento ----------
 const css = `
 @page{size:A4;margin:0}
-:root{--negro:${C.negro};--carbon:${C.carbon};--gris:${C.gris};--medio:${C.medio};--claro:${C.claro};--fondo:${C.fondo};--ambar:${C.ambar};--ambar-osc:${C.ambarOsc}}
+:root{--serif:"Source Serif 4",Georgia,"Times New Roman",serif;--sans:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif;--negro:${C.negro};--carbon:${C.carbon};--gris:${C.gris};--medio:${C.medio};--claro:${C.claro};--fondo:${C.fondo};--ambar:${C.ambar};--ambar-osc:${C.ambarOsc}}
 *{box-sizing:border-box}
 .serif,h1,h2,.kpi .n,.kp b,.posicion b,.mensajes .num{font-family:"Source Serif 4","Source Serif Pro",Georgia,"Times New Roman",serif}
 html{background:#cfcfcf}
 body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Source Sans 3","Source Sans Pro","Segoe UI",Helvetica,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .pagina{position:relative;width:210mm;height:297mm;margin:8mm auto;background:#fff;overflow:hidden;break-after:page;page-break-after:always;display:flex;flex-direction:column}
-@media print{html{background:none}.pagina{margin:0}}
+@media print{html{background:none}.pagina{margin:0}.no-imprimir{display:none!important}}
+.pagina h3{font-family:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif}
+.fs-barra{max-width:210mm;margin:12px auto 0;padding:0 4px;display:flex;justify-content:space-between;align-items:center;gap:12px;font:13px var(--sans)}
+.fs-barra a{background:#111;color:#fff;text-decoration:none;font-weight:700;padding:8px 14px;border-radius:6px}
+.fs-barra span{color:#555}
+body{background:transparent}
+.sitio h1{font-family:var(--serif)}
 .cab{height:15mm;background:var(--negro);display:flex;align-items:center;justify-content:space-between;padding:0 14mm;flex:none}
 .cab img{height:8mm}
 .cab span{color:#fff;font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase;font-weight:700;border-left:2px solid var(--ambar);padding-left:3mm}
@@ -558,11 +586,12 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La ciencia ciudadana en España · Factsheet</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&family=Source+Serif+4:wght@600;700;800&display=swap" rel="stylesheet">
-<style>${css}</style>
+<link rel="stylesheet" href="fonts/fuentes.css">
+<style>${cssCabecera}
+${css}</style>
 </head>
 <body>
+${cabeceraSitio}
 ${p1}
 ${p2}
 ${p3}

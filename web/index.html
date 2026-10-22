@@ -4,42 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ciencia ciudadana en la financiación pública</title>
+<link rel="stylesheet" href="./estilo.css">
 <style>
-:root{
-  --fondo:#fbfaf8; --panel:#fff; --borde:#e3e0d9; --borde-fuerte:#cfcabf;
-  --texto:#1c1a17; --suave:#6b665d; --tenue:#8f8a80;
-  --acento:#1f5f5b; --acento-claro:#e6f0ef;
-  --he:#1f5f5b; --h2020:#c07a2b; --fp7:#7a6ea8; --fp6:#a8536e; --life:#4f7d2c; --erasmus:#2f6fa8; --crea:#a8365e; --kohesio:#6b7f2a;
-  --aei:#1f5f5b; --fecyt:#c07a2b; --fb:#4f7d2c;
-  --destacado:#b03a2e;
-  --r:10px;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --fondo:#16181a; --panel:#1e2124; --borde:#2f3438; --borde-fuerte:#414750;
-  --texto:#eceae6; --suave:#a8a49c; --tenue:#7d7970;
-  --acento:#5bb3ab; --acento-claro:#17302e;
-  --he:#5bb3ab; --h2020:#e0a05a; --fp7:#a99ce0; --fp6:#d9829a; --life:#8fc063; --erasmus:#6fa8e0; --crea:#e0809f; --kohesio:#b5c96a;
-  --aei:#5bb3ab; --fecyt:#e0a05a; --fb:#8fc063;
-  --destacado:#e8705f;
-}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--fondo);color:var(--texto);
-  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  -webkit-font-smoothing:antialiased}
-.envoltorio{max-width:1120px;margin:0 auto;padding:28px 20px 80px}
+.envoltorio{max-width:1120px;margin:0 auto;padding:6px 20px 80px}
 
-header h1{font-size:26px;line-height:1.2;margin:0 0 6px;letter-spacing:-.02em;font-weight:650}
-header p{margin:0;color:var(--suave);font-size:14px}
 
 .barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 18px}
-button{font:inherit;font-size:13.5px;padding:7px 14px;border-radius:8px;cursor:pointer;
+button{font:inherit;font-size:13.5px;padding:7px 14px;border-radius:var(--r);cursor:pointer;
   border:1px solid var(--borde-fuerte);background:var(--panel);color:var(--texto);transition:.12s}
 button:hover:not(:disabled){border-color:var(--acento);color:var(--acento)}
 button:disabled{opacity:.5;cursor:default}
-button.primario{background:var(--acento);border-color:var(--acento);color:#fff;font-weight:550}
-button.primario:hover:not(:disabled){filter:brightness(1.1);color:#fff}
+button.primario{background:var(--primario-bg);border-color:var(--primario-bg);color:var(--primario-tx);font-weight:650}
+button.primario:hover:not(:disabled){filter:brightness(1.25);color:var(--primario-tx)}
 
-.panel{background:var(--panel);border:1px solid var(--borde);border-radius:var(--r);padding:16px 18px;margin-bottom:18px}
+.panel{background:var(--panel);border:1px solid var(--borde);border-top:3px solid var(--filete);border-radius:var(--r);padding:16px 18px;margin-bottom:18px}
 .filtros{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
 .grupo{display:flex;flex-direction:column;gap:7px}
 .grupo>span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--tenue);font-weight:600}
@@ -48,7 +26,7 @@ button.primario:hover:not(:disabled){filter:brightness(1.1);color:#fff}
   border:1px solid var(--borde-fuerte);cursor:pointer;user-select:none;background:transparent;transition:.12s}
 .chip input{display:none}
 .chip:hover{border-color:var(--acento)}
-.chip.on{background:var(--acento-claro);border-color:var(--acento);color:var(--acento);font-weight:550}
+.chip.on{background:var(--acento-claro);border-color:var(--acento);color:var(--acento-texto);font-weight:600}
 .chip .punto{width:8px;height:8px;border-radius:99px;background:currentColor;opacity:.75}
 select,input[type=number],input[type=month]{font:inherit;font-size:13.5px;padding:6px 9px;border-radius:7px;
   border:1px solid var(--borde-fuerte);background:var(--panel);color:var(--texto)}
@@ -99,19 +77,20 @@ input[type=search]:focus{outline:none;border-color:var(--acento)}
 
 .cifras{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
 @media(max-width:860px){.cifras{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.cifra{background:var(--panel);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px}
-.cifra .n{font-size:27px;font-weight:640;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.cifra{background:var(--panel);border:1px solid var(--borde);border-top:3px solid var(--filete);border-radius:var(--r);padding:14px 16px}
+.cifra .n{font-family:var(--serif);font-size:28px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.1}
 .cifra .et{font-size:12.5px;color:var(--suave);margin-top:3px}
 .cifra .sub{font-size:12px;color:var(--tenue);margin-top:2px}
+.cifra.foco{border-top-color:var(--ambar)}
 .cifra.foco .n{color:var(--acento)}
 
-h2{font-size:15px;font-weight:620;margin:0 0 3px;letter-spacing:-.01em}
+h2{font-size:17px;font-weight:700;margin:0 0 3px;letter-spacing:-.005em}
 h2+.nota{margin:0 0 14px;font-size:12.5px;color:var(--tenue)}
 
 table{width:100%;border-collapse:collapse;font-size:13.5px}
 th,td{text-align:right;padding:6px 9px;border-bottom:1px solid var(--borde)}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenue);font-weight:600;
-  border-bottom:1px solid var(--borde-fuerte);white-space:nowrap}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--suave);font-weight:700;
+  border-bottom:2px solid var(--filete);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
 td{font-variant-numeric:tabular-nums}
 tbody tr:last-child td{border-bottom:none}
@@ -212,25 +191,20 @@ footer code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:v
 
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* ---------- pestañas ---------- */
-.pestanas{display:flex;gap:4px;margin:18px 0 0;border-bottom:1px solid var(--borde-fuerte)}
-.pestanas button{border:none;border-bottom:2px solid transparent;border-radius:8px 8px 0 0;margin-bottom:-1px;
-  background:transparent;color:var(--suave);font-size:14px;font-weight:550;padding:9px 14px}
-.pestanas button:hover{color:var(--acento);background:var(--acento-claro)}
-.pestanas button[aria-selected=true]{color:var(--acento);border-bottom-color:var(--acento)}
-.pestanas button .pct{margin-left:6px;font-weight:400}
+/* ---------- vistas ---------- */
 .vista>p.intro{margin:16px 0 0;color:var(--suave);font-size:14px}
 .vista .fuente{margin-top:8px;font-size:12.5px;color:var(--tenue)}
 .vista .fuente code{background:var(--acento-claro);color:var(--acento);padding:1px 5px;border-radius:4px;
   font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
 .vista .fuente a{color:inherit}
 .limites{margin:10px 0 0;font-size:12.5px;color:var(--suave);background:var(--panel);border:1px solid var(--borde);
-  border-left:3px solid var(--destacado);border-radius:8px;padding:8px 14px}
-.limites summary{cursor:pointer;font-weight:600;color:var(--texto)}
+  border-left:3px solid var(--ambar);border-radius:var(--r);padding:8px 14px}
+.limites summary{cursor:pointer;font-weight:700;color:var(--texto)}
+.limites .resumen-limites{font-weight:400;color:var(--tenue)}
+@media(max-width:640px){.limites .resumen-limites{display:none}}
 .limites ul{margin:8px 0 2px;padding-left:18px}
 .limites li{margin:5px 0}
 .limites code{background:var(--acento-claro);color:var(--acento);padding:1px 5px;border-radius:4px;font:11.5px ui-monospace,monospace}
-@media(max-width:640px){.pestanas button{flex:1 1 auto;padding:8px 6px;font-size:13px}.pestanas button .pct{display:none}}
 
 /* ---------- detalle de una ayuda (pestaña española) ---------- */
 .desplegar{padding:0 5px;margin-right:4px;border:none;background:transparent;color:var(--tenue);font-size:12px;vertical-align:1px}
@@ -244,6 +218,8 @@ footer code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:v
 .detalle-ayuda .datos b{color:var(--texto);font-weight:600}
 .detalle-ayuda .resumen{margin:0;line-height:1.5;overflow-wrap:anywhere}
 .via{font-size:12px;color:var(--suave)}
+.prog{display:inline-flex;align-items:center;gap:6px}
+.prog i{width:8px;height:8px;border-radius:99px;flex:none;display:inline-block}
 .dos-tablas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
 @media(max-width:640px){.dos-tablas{grid-template-columns:minmax(0,1fr)}#p-ayudas td.izq a.nom{max-width:48vw}}
 /* Convocatorias y Entidades tienen nombres largos y cinco columnas: a media
@@ -276,16 +252,23 @@ td.izq{text-align:left}
 </style>
 </head>
 <body>
-<div class="envoltorio">
-  <header>
-    <h1>Ciencia ciudadana en la financiación pública</h1>
-    <p>Qué proyectos de ciencia ciudadana financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos que publica cada financiador. <a href="./metodologia.html">Cómo se obtiene y analiza cada conjunto de datos →</a> · <a href="./factsheet.pdf">Factsheet (PDF)</a></p>
-  </header>
-
-  <nav class="pestanas" role="tablist" aria-label="Ámbito">
-    <button type="button" role="tab" id="pestana-europa" data-pestana="europa" aria-controls="vista-europa" aria-selected="true">Programas europeos<span class="pct">CORDIS, LIFE y fondos complementarios</span></button>
-    <button type="button" role="tab" id="pestana-espana" data-pestana="espana" aria-controls="vista-espana" aria-selected="false">Convocatorias españolas<span class="pct">AEI, FECYT y Fundación Biodiversidad</span></button>
+<header class="sitio">
+  <div class="sitio-in">
+    <a class="marca" href="./" aria-label="Ibercivis, gente haciendo ciencia"><img src="img/ibercivis-logo.png" alt="Ibercivis · gente haciendo ciencia"></a>
+    <div class="titulo">
+      <h1>Ciencia ciudadana en la financiación pública</h1>
+      <p>Qué proyectos de ciencia ciudadana financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos que publica cada financiador.</p>
+    </div>
+  </div>
+  <nav class="pestanas" role="tablist" aria-label="Secciones">
+    <button type="button" role="tab" id="pestana-europa" data-pestana="europa" aria-controls="vista-europa" aria-selected="true"><span class="largo">Programas europeos</span><span class="corto">Europa</span><span class="pct">CORDIS, LIFE y fondos complementarios</span></button>
+    <button type="button" role="tab" id="pestana-espana" data-pestana="espana" aria-controls="vista-espana" aria-selected="false"><span class="largo">Convocatorias españolas</span><span class="corto">España</span><span class="pct">AEI, FECYT y Fundación Biodiversidad</span></button>
+    <span class="div" aria-hidden="true"></span>
+    <a class="pestana" href="./metodologia.html">Metodología<span class="pct">cómo se obtiene cada dato</span></a>
+    <a class="pestana" href="./factsheet.html">Factsheet<span class="pct">informe de 6 páginas · PDF</span></a>
   </nav>
+</header>
+<div class="envoltorio">
 
   <section class="vista" id="vista-europa" role="tabpanel" aria-labelledby="pestana-europa">
     <p class="intro">Proyectos que mencionan <em>citizen science</em> en su título o descripción, según los datos abiertos de CORDIS y de LIFE (y, si se marcan, Erasmus+, Europa Creativa y Kohesio). La unidad es el proyecto con todo su consorcio.</p>

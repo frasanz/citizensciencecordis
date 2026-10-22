@@ -4,17 +4,57 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La ciencia ciudadana en España · Factsheet</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&family=Source+Serif+4:wght@600;700;800&display=swap" rel="stylesheet">
-<style>
+<link rel="stylesheet" href="fonts/fuentes.css">
+<style>/* ---------- cabecera del sitio ---------- */
+.sitio{background:#111;color:#fff}
+.sitio-in{max-width:1120px;margin:0 auto;padding:18px 20px 0;display:flex;align-items:center;gap:20px}
+.sitio .marca{flex:none;display:block}
+.sitio .marca img{height:40px;width:auto;display:block}
+.sitio .titulo{min-width:0;border-left:2px solid var(--ambar);padding-left:18px}
+.sitio .titulo h1{margin:0;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.005em;color:#fff}
+.sitio .titulo p{margin:3px 0 0;font-size:13.5px;line-height:1.4;color:#c9c9c9}
+
+/* navegación: las cuatro secciones al mismo nivel; las dos primeras son pestañas de la misma página */
+.pestanas{max-width:1120px;margin:16px auto 0;padding:0 20px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.pestanas::-webkit-scrollbar{display:none}
+.pestanas button,.pestanas a.pestana{flex:none;border:none;border-bottom:3px solid transparent;border-radius:0;margin:0;
+  background:transparent;color:#bdbdbd;font:700 14.5px/1.2 var(--sans);padding:11px 16px;cursor:pointer;
+  text-decoration:none;transition:color .12s,background .12s;white-space:nowrap}
+.pestanas button:hover,.pestanas a.pestana:hover{color:#fff;background:#1f1f1f}
+.pestanas button[aria-selected=true],.pestanas a.pestana[aria-current=page]{color:#fff;border-bottom-color:var(--ambar)}
+.pestanas .pct{display:block;margin:2px 0 0;font:400 11.5px/1.2 var(--sans);color:#9a9a9a}
+.pestanas .div{flex:none;width:1px;background:#3a3a3a;margin:9px 8px}
+.pestanas .corto{display:none}
+
+@media(max-width:760px){
+  .sitio-in{padding:14px 14px 0;gap:12px;flex-wrap:wrap}
+  .sitio .marca img{height:32px}
+  .sitio .titulo{padding-left:12px}
+  .sitio .titulo h1{font-size:18px}
+  .sitio .titulo p{display:none}
+  .pestanas{margin-top:12px;padding:0 6px}
+  .pestanas button,.pestanas a.pestana{padding:10px 11px;font-size:13.5px}
+  .pestanas .pct{display:none}
+  .pestanas .largo{display:none}
+  .pestanas .corto{display:inline}
+}
+
+
+
 @page{size:A4;margin:0}
-:root{--negro:#111111;--carbon:#2b2b2b;--gris:#555555;--medio:#8a8a8a;--claro:#d9d9d9;--fondo:#f4f4f2;--ambar:#f2a900;--ambar-osc:#a86f00}
+:root{--serif:"Source Serif 4",Georgia,"Times New Roman",serif;--sans:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif;--negro:#111111;--carbon:#2b2b2b;--gris:#555555;--medio:#8a8a8a;--claro:#d9d9d9;--fondo:#f4f4f2;--ambar:#f2a900;--ambar-osc:#a86f00}
 *{box-sizing:border-box}
 .serif,h1,h2,.kpi .n,.kp b,.posicion b,.mensajes .num{font-family:"Source Serif 4","Source Serif Pro",Georgia,"Times New Roman",serif}
 html{background:#cfcfcf}
 body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Source Sans 3","Source Sans Pro","Segoe UI",Helvetica,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .pagina{position:relative;width:210mm;height:297mm;margin:8mm auto;background:#fff;overflow:hidden;break-after:page;page-break-after:always;display:flex;flex-direction:column}
-@media print{html{background:none}.pagina{margin:0}}
+@media print{html{background:none}.pagina{margin:0}.no-imprimir{display:none!important}}
+.pagina h3{font-family:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif}
+.fs-barra{max-width:210mm;margin:12px auto 0;padding:0 4px;display:flex;justify-content:space-between;align-items:center;gap:12px;font:13px var(--sans)}
+.fs-barra a{background:#111;color:#fff;text-decoration:none;font-weight:700;padding:8px 14px;border-radius:6px}
+.fs-barra span{color:#555}
+body{background:transparent}
+.sitio h1{font-family:var(--serif)}
 .cab{height:15mm;background:var(--negro);display:flex;align-items:center;justify-content:space-between;padding:0 14mm;flex:none}
 .cab img{height:8mm}
 .cab span{color:#fff;font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase;font-weight:700;border-left:2px solid var(--ambar);padding-left:3mm}
@@ -111,6 +151,23 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm
 </style>
 </head>
 <body>
+<header class="sitio no-imprimir">
+  <div class="sitio-in">
+    <a class="marca" href="./" aria-label="Ibercivis, gente haciendo ciencia"><img src="img/ibercivis-logo.png" alt="Ibercivis · gente haciendo ciencia"></a>
+    <div class="titulo">
+      <h1>Ciencia ciudadana en la financiación pública</h1>
+      <p>Qué proyectos de ciencia ciudadana financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos que publica cada financiador.</p>
+    </div>
+  </div>
+  <nav class="pestanas" aria-label="Secciones">
+    <a class="pestana" href="./#europa"><span class="largo">Programas europeos</span><span class="corto">Europa</span><span class="pct">CORDIS, LIFE y fondos complementarios</span></a>
+    <a class="pestana" href="./#espana"><span class="largo">Convocatorias españolas</span><span class="corto">España</span><span class="pct">AEI, FECYT y Fundación Biodiversidad</span></a>
+    <span class="div" aria-hidden="true"></span>
+    <a class="pestana" href="./metodologia.html">Metodología<span class="pct">cómo se obtiene cada dato</span></a>
+    <a class="pestana" href="./factsheet.html" aria-current="page">Factsheet<span class="pct">informe de 6 páginas · PDF</span></a>
+  </nav>
+</header>
+<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>6 páginas A4 · generado el 22 de octubre de 2026</span></div>
 
 <section class="pagina portada">
   <div class="banda">
