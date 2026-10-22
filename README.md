@@ -126,6 +126,14 @@ cruza con las fichas por nombre. Lo que no se puede atribuir a un socio (filas s
 filtrar por `&select=Project%20acronym,<valores>` con los acrónimos de los proyectos (los recientes con el formato
 `LIFE21-NAT-BE-LIFE HARWIN`; los antiguos con `<referencia>-<acrónimo>`) y exportar o copiar la tabla.
 
+## Kohesio
+
+`scripts/kohesio.js` lee la API JSON de la web de Kohesio (proyectos de la política de cohesión: FEDER, FSE+,
+Interreg…): lista por la frase exacta y detalle de cada proyecto (beneficiarios, fondo, programa). Es un
+programa **complementario**, como Erasmus+: fuera de las cifras de partida y del factsheet. No da el país de
+cada beneficiario (solo el del proyecto), ni el socio principal, ni el reparto del dinero. Límites completos en
+la web y en la metodología.
+
 ## Convocatorias españolas
 
 Ninguno de los tres financiadores publica un volcado de datos. `scripts/nacional.js` orquesta lo

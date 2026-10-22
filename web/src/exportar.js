@@ -81,7 +81,7 @@ export const TABLAS = {
     { titulo: 'proyectos', valor: (s) => s.total },
     { titulo: 'proyectos_pais_foco', valor: (s) => s.foco },
     { titulo: 'aportacion_ue_eur', valor: (s) => dec(s.aportacionUE) },
-    ...['HORIZON', 'H2020', 'FP7', 'FP6', 'LIFE', 'ERASMUS', 'CREA'].map((p) => ({
+    ...['HORIZON', 'H2020', 'FP7', 'FP6', 'LIFE', 'ERASMUS', 'CREA', 'KOHESIO'].map((p) => ({
       titulo: `proyectos_${p}`, valor: (s) => s.porPrograma[p] || 0,
     })),
   ]),

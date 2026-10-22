@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { crearAnalisis, crearFiltro, recomputar, PROGRAMAS, PROGRAMAS_BASE } from '../web/src/compute.js';
+import { listarKohesio, detalleKohesio, registroProyecto as registroKohesio, registroBaseLegal as baseLegalKohesio, registrosParticipacion as participacionesKohesio, esInterreg } from './kohesio.js';
 import { PLATAFORMAS, descargarProyectosErasmus, registroProyecto as registroErasmus, registroBaseLegal as baseLegalErasmus, registrosParticipacion as participacionesErasmus } from './erasmus.js';
 import { procesarPrograma, descargarPrograma } from './cordis.js';
 import {
@@ -28,7 +29,7 @@ const SALIDA = path.join(RAIZ, 'web', 'data');
 const arg = (n, d) => (process.argv.find((a) => a.startsWith(`--${n}=`)) || `=${d}`).split('=')[1];
 const flag = (n) => process.argv.includes(`--${n}`);
 
-const todos = arg('programas', 'HORIZON,H2020,FP7,LIFE,ERASMUS,CREA,AEI,FECYT,FB').split(',').filter(Boolean);
+const todos = arg('programas', 'HORIZON,H2020,FP7,LIFE,ERASMUS,CREA,KOHESIO,AEI,FECYT,FB').split(',').filter(Boolean);
 const nacionales = todos.filter((c) => FINANCIADORES.some((f) => f.codigo === c));
 const quiero = todos.filter((c) => !nacionales.includes(c));
 const frase = arg('frase', 'citizen science');
@@ -93,6 +94,52 @@ for (const codigo of quiero) {
 
 if (quiero.includes('LIFE')) await procesarLife();
 for (const codigo of Object.keys(PLATAFORMAS)) if (quiero.includes(codigo)) await procesarErasmus(codigo);
+if (quiero.includes('KOHESIO')) await procesarKohesio();
+
+// ---------- Kohesio ----------
+// Lista por la frase exacta y detalle de cada proyecto (beneficiarios, fondo, programa). El criterio
+// se vuelve a aplicar aqui sobre el titulo y la descripcion en ingles que entrega Kohesio.
+async function procesarKohesio() {
+  const p = PROGRAMAS.find((x) => x.codigo === 'KOHESIO');
+  const t0 = Date.now();
+  const dir = path.join(CACHE, 'kohesio');
+  fs.mkdirSync(path.join(dir, 'detalles'), { recursive: true });
+  const fl = path.join(dir, 'lista.json');
+  let cache = usarCache && fs.existsSync(fl) ? JSON.parse(fs.readFileSync(fl, 'utf8')) : null;
+  if (!cache) {
+    process.stdout.write(`  ${p.etiqueta}: descargando `);
+    cache = { descargado: new Date().toISOString(), lista: (await listarKohesio(frase)).map((x) => x.item) };
+    fs.writeFileSync(fl, JSON.stringify(cache));
+    console.log(`${cache.lista.length} candidatos`);
+  }
+  const detalles = new Map();
+  let bajados = 0;
+  const cola = [...new Set(cache.lista)];
+  await Promise.all(Array.from({ length: 4 }, async () => {
+    while (cola.length) {
+      const q = cola.shift();
+      const f = path.join(dir, 'detalles', `${q}.json`);
+      let d = usarCache && fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null;
+      if (!d) { d = await detalleKohesio(q); fs.writeFileSync(f, JSON.stringify(d)); bajados++; }
+      detalles.set(q, d);
+    }
+  }));
+  let aceptados = 0, interreg = 0, conBeneficiario = 0;
+  for (const q of [...new Set(cache.lista)]) {
+    const d = detalles.get(q);
+    const rec = registroKohesio(q, d);
+    analisis.proyecto(rec, 'KOHESIO');
+    analisis.baseLegal(baseLegalKohesio(q, d));
+    if (!filtro(rec)) continue;
+    aceptados++;
+    if (esInterreg(d)) interreg++;
+    const socios = participacionesKohesio(q, d);
+    if (socios.length) conBeneficiario++;
+    for (const s of socios) analisis.participacion(s);
+  }
+  fuentes.push({ codigo: 'KOHESIO', etiqueta: p.etiqueta, periodo: p.periodo, archivo: 'Kohesio (API de su web)', actualizado: cache.descargado, candidatos: cache.lista.length, aceptados, interreg });
+  console.log(`  ${p.etiqueta}: ${cache.lista.length} candidatos, ${aceptados} cumplen el criterio (${interreg} Interreg), ${conBeneficiario} con beneficiarios${bajados ? `, ${bajados} detalles descargados` : ''}, en ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+}
 
 // ---------- Erasmus+ y Europa Creativa ----------
 // Buscador de la plataforma de resultados de proyectos de la Comision, con la

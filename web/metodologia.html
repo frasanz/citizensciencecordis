@@ -52,6 +52,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
       <li><a href="#cordis">CORDIS: FP7, Horizonte 2020 y Horizonte Europa</a></li>
       <li><a href="#life">LIFE</a></li>
       <li><a href="#erasmus">Erasmus+ y Europa Creativa</a></li>
+      <li><a href="#kohesio">Kohesio</a></li>
       <li><a href="#aei">AEI</a></li>
       <li><a href="#fecyt">FECYT</a></li>
       <li><a href="#fb">Fundación Biodiversidad</a></li>
@@ -135,6 +136,21 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
     <li><strong>Movilidades individuales.</strong> Las acciones de movilidad de personas no tienen socios con país: cuentan como proyecto pero no aportan participaciones.</li>
     <li><strong>Entidades sin PIC.</strong> La plataforma usa su propio identificador, no el PIC de CORDIS; las entidades se unen a las de CORDIS por nombre.</li>
     <li><strong>Licencia.</strong> Las condiciones de la plataforma no dan una licencia de reutilización explícita para los datos. Se citan con su origen y conviene confirmarlo antes de reutilizarlos.</li>
+  </ul>
+
+  <h2 id="kohesio">Kohesio</h2>
+  <p>Kohesio es el portal de proyectos de la política de cohesión de la UE (FEDER, FSE+, Fondo de Cohesión, Interreg). Entra como <strong>programa complementario</strong>, igual que Erasmus+: está en los datos y se marca en el filtro de programa, pero queda fuera de las cifras de partida y del factsheet.</p>
+  <h3>Obtención</h3>
+  <p>Su web usa una API JSON sin autenticación. La búsqueda por la frase entre comillas (<code>"citizen science"</code>) da la lista, con título, descripción, fechas, presupuesto total, aportación de la UE y países del proyecto. El detalle de cada proyecto añade los <strong>beneficiarios</strong>, el <strong>fondo</strong> y el programa. El criterio se vuelve a aplicar en local sobre el título y la descripción en inglés.</p>
+  <h3>Límites</h3>
+  <ul>
+    <li><strong>API interna.</strong> No está documentada como pública y puede cambiar sin aviso.</li>
+    <li><strong>Sin país por beneficiario.</strong> Kohesio da los países del proyecto, no los de cada entidad. Si el proyecto tiene un solo país, sus beneficiarios lo heredan; en los Interreg multinacionales (46 de 91 en esta edición) las entidades quedan sin país y no entran en ninguna cifra por país.</li>
+    <li><strong>Sin socio principal ni reparto del dinero.</strong> Todos los beneficiarios cuentan como participantes. Solo hay importe por entidad cuando el proyecto tiene un único beneficiario; si no, el importe es el del proyecto entero.</li>
+    <li><strong>Importes asignados, no pagados.</strong> Kohesio no publica lo efectivamente pagado, y el importe de la UE no siempre figura (8 de 91 sin él).</li>
+    <li><strong>Texto traducido.</strong> En proyectos no ingleses, el inglés es traducción automática de Kohesio.</li>
+    <li><strong>Solapes.</strong> Los proyectos Interreg también están en KEEP (aún no incorporado), y los españoles incluyen proyectos cofinanciados con FEDER que pueden ser los mismos que ya concede la AEI (por ejemplo, el de economía circular de la moda de la Universidad de Granada). Por eso no se suma a las cifras de partida.</li>
+    <li><strong>Licencia.</strong> Los datos proceden de las listas oficiales de operaciones de cada autoridad de gestión, pero no se ha confirmado una licencia de reutilización de la plataforma; se cita el origen.</li>
   </ul>
 
   <h2 id="aei">4. AEI (Agencia Estatal de Investigación)</h2>

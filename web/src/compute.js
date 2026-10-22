@@ -13,6 +13,7 @@ export const PROGRAMAS = [
   // buscador es una API interna. Quedan fuera de las cifras de partida; la web los deja a un clic.
   { codigo: 'ERASMUS', etiqueta: 'Erasmus+',         archivo: null,                             periodo: '2014-2027', fuente: 'Comisión Europea', complementario: true },
   { codigo: 'CREA',    etiqueta: 'Europa Creativa',  archivo: null,                             periodo: '2014-2027', fuente: 'Comisión Europea', complementario: true },
+  { codigo: 'KOHESIO', etiqueta: 'Fondos de cohesión (Kohesio)', archivo: null,                 periodo: '2014-2027', fuente: 'Comisión Europea', complementario: true },
 ];
 
 // Los que entran en las cifras de partida.

@@ -14,7 +14,7 @@ let regiones = null;
 try { regiones = new Intl.DisplayNames(['es'], { type: 'region' }); } catch { /* navegador antiguo */ }
 const nombrePais = (c) => PAIS_ESPECIAL[c] || (() => { try { return regiones?.of(c) || c; } catch { return c; } })();
 
-const COLOR = { HORIZON: 'var(--he)', H2020: 'var(--h2020)', FP7: 'var(--fp7)', FP6: 'var(--fp6)', LIFE: 'var(--life)', ERASMUS: 'var(--erasmus)', CREA: 'var(--crea)' };
+const COLOR = { HORIZON: 'var(--he)', H2020: 'var(--h2020)', FP7: 'var(--fp7)', FP6: 'var(--fp6)', LIFE: 'var(--life)', ERASMUS: 'var(--erasmus)', CREA: 'var(--crea)', KOHESIO: 'var(--kohesio)' };
 
 // ---------- estado ----------
 const estado = {
@@ -297,7 +297,7 @@ function pintarGrafico() {
 // importa tanto como la cifra. Los de Erasmus+ y Europa Creativa salen siempre que
 // están en los datos, estén marcados o no, porque es lo que decide si marcarlos.
 function limitesEuropa(fuentes) {
-  const er = fuentes.find((x) => x.codigo === 'ERASMUS'), cr = fuentes.find((x) => x.codigo === 'CREA'), lf = fuentes.find((x) => x.codigo === 'LIFE');
+  const er = fuentes.find((x) => x.codigo === 'ERASMUS'), cr = fuentes.find((x) => x.codigo === 'CREA'), kh = fuentes.find((x) => x.codigo === 'KOHESIO'), lf = fuentes.find((x) => x.codigo === 'LIFE');
   const activos = estado.programas.filter((c) => PROGRAMAS.find((x) => x.codigo === c)?.complementario);
   const li = [
     '<b>El criterio es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.',
@@ -305,10 +305,11 @@ function limitesEuropa(fuentes) {
     '<b>No recoge la financiación en cascada.</b> Muchos proyectos reparten parte de su presupuesto, con convocatorias abiertas a terceros, entre asociaciones, ayuntamientos, escuelas o grupos ciudadanos. Esas entidades no son participantes en CORDIS ni en LIFE, así que no cuentan aquí: la huella real de la ciencia ciudadana es mayor que la de estas cifras.',
     '<b>Países de LIFE.</b> Se deducen cruzando fuentes y las participaciones que no se pueden resolver quedan sin país (columna <code>pais_via</code> del CSV).',
   ];
-  if (er || cr) {
-    const nombres = [er && 'Erasmus+', cr && 'Europa Creativa'].filter(Boolean).join(' y ');
+  if (er || cr || kh) {
+    const nombres = [er && 'Erasmus+', cr && 'Europa Creativa', kh && 'Kohesio'].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' y $1');
     li.push(`<b>${nombres} no están en las cifras de partida</b>: no son programas de investigación (movilidad, cooperación educativa y cultural) y su dato es más pobre. Se incluyen con un clic en el filtro de programa${activos.length ? ' (<b>ahora están incluidos</b>)' : ''}.`);
     if (er) li.push(`<b>Erasmus+ sale de una API interna</b> de la plataforma de resultados de la Comisión, no documentada como pública: puede cambiar sin aviso. El buscador devuelve ${num(er.candidatos)} candidatos y solo ${num(er.aceptados)} llevan la frase en el texto que entrega la API; ${num(er.soloResultados)} la mencionan únicamente en «Resultados», que no cuenta (como en LIFE), y el resto no la lleva en ningún texto accesible. Las movilidades individuales no tienen socios con país.`);
+    if (kh) li.push(`<b>Kohesio</b> (fondos de cohesión: FEDER, FSE+, Interreg…) sale también de una API interna sin documentar. Trae ${num(kh.aceptados)} proyectos, ${num(kh.interreg)} de ellos Interreg. <b>No da el país de cada beneficiario</b>, solo los del proyecto: las entidades de los proyectos de un solo país lo heredan y las de los Interreg multinacionales quedan sin país. Tampoco indica el socio principal ni reparte el dinero entre beneficiarios (solo hay importe por entidad cuando el proyecto tiene una). Los importes son asignados, no pagados; el texto en inglés de los proyectos no ingleses es traducción automática de Kohesio. Pueden solaparse con los Interreg de KEEP (aún no incorporado) y con ayudas de la pestaña española cofinanciadas con FEDER, así que no se suma a las demás cifras.`);
     li.push('<b>No hay licencia de reutilización explícita para esos datos</b>: se citan con su origen y conviene confirmarlo antes de reutilizarlos.');
   }
   return `<details class="limites" open><summary>Límites de estos datos</summary><ul>${li.map((x) => `<li>${x}</li>`).join('')}</ul></details>`;
