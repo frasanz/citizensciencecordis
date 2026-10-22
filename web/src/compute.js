@@ -9,7 +9,14 @@ export const PROGRAMAS = [
   { codigo: 'FP6',     etiqueta: 'FP6',              archivo: 'cordis-fp6projects-csv.zip',     periodo: '2002-2006' },
   // LIFE no esta en CORDIS: lo lee scripts/life.js de la base de datos de CINEA.
   { codigo: 'LIFE',    etiqueta: 'LIFE',             archivo: null,                             periodo: '1992-2027', fuente: 'CINEA' },
+  // Programas complementarios: no son de investigacion, solo dan el importe por proyecto (no por socio) y su
+  // buscador es una API interna. Quedan fuera de las cifras de partida; la web los deja a un clic.
+  { codigo: 'ERASMUS', etiqueta: 'Erasmus+',         archivo: null,                             periodo: '2014-2027', fuente: 'Comisión Europea', complementario: true },
+  { codigo: 'CREA',    etiqueta: 'Europa Creativa',  archivo: null,                             periodo: '2014-2027', fuente: 'Comisión Europea', complementario: true },
 ];
+
+// Los que entran en las cifras de partida.
+export const PROGRAMAS_BASE = PROGRAMAS.filter((p) => !p.complementario).map((p) => p.codigo);
 
 export const ETIQUETA_PROGRAMA = Object.fromEntries(PROGRAMAS.map((p) => [p.codigo, p.etiqueta]));
 

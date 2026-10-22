@@ -44,6 +44,11 @@ const comprobaciones = [
   ['LIFE entre los programas', () => !!q('[data-prog="LIFE"]')],
   ['participaciones sin pais avisadas', () => /sin país/.test(q('.cifras').textContent)],
   ['enlace a la ficha de LIFE', () => [...window.document.querySelectorAll('#p-proyectos a')].some((a) => a.href.includes('webgate.ec.europa.eu/life'))],
+  ['Erasmus+ y Europa Creativa empiezan fuera de las cifras', () => {
+    const e = q('[data-prog="ERASMUS"]'), c = q('[data-prog="CREA"]');
+    return !!e && !!c && !e.classList.contains('on') && !c.classList.contains('on') && q('[data-prog="HORIZON"]').classList.contains('on');
+  }],
+  ['límites de los datos visibles', () => !!q('#limites details.limites[open]') && /Erasmus\+/.test(q('#limites').textContent) && /por proyecto, no por socio/.test(q('#limites').textContent)],
   ['selector de pais', () => q('#f-pais').options.length > 20],
   ['filtro por mes', () => {
     const d = q('#f-desde') || q('#f-desde-a');

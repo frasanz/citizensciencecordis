@@ -103,6 +103,15 @@ resuelve por una cadena de fuentes, y cada participación lleva anotada la vía 
 Cada ejecución deja en `datos/life-paises-pendientes.csv` los nombres que quedan sin país, para
 copiarlos a `datos/life-paises.csv` con su código de país y la fuente consultada.
 
+## Erasmus+ y Europa Creativa
+
+`scripts/erasmus.js` lee la API JSON de la plataforma de resultados de proyectos de la Comisión (la que
+usa su buscador, sin autenticación ni documentación pública), con la frase entre comillas, y vuelve a
+aplicar el criterio sobre el texto devuelto. Son **programas complementarios** (`complementario: true`
+en `compute.js`): están en los datos y en el filtro de programa, pero fuera de las cifras de partida y
+del factsheet. Solo dan un importe por proyecto, no por socio; los límites están escritos en la propia
+web («Límites de estos datos») y en la página de metodología.
+
 ## Convocatorias españolas
 
 Ninguno de los tres financiadores publica un volcado de datos. `scripts/nacional.js` orquesta lo

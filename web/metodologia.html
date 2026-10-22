@@ -51,6 +51,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
       <li><a href="#principios">Principios generales</a></li>
       <li><a href="#cordis">CORDIS: FP7, Horizonte 2020 y Horizonte Europa</a></li>
       <li><a href="#life">LIFE</a></li>
+      <li><a href="#erasmus">Erasmus+ y Europa Creativa</a></li>
       <li><a href="#aei">AEI</a></li>
       <li><a href="#fecyt">FECYT</a></li>
       <li><a href="#fb">Fundación Biodiversidad</a></li>
@@ -110,6 +111,22 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   </ol>
   <p>Cada ejecución deja en <code>datos/life-paises-pendientes.csv</code> los nombres que quedan sin país.</p>
   <div class="nota">Como LIFE no da fecha de volcado, la web muestra la de descarga. No hay reparto del dinero por socio, así que las cifras económicas por país solo cubren CORDIS.</div>
+
+  <h2 id="erasmus">Erasmus+ y Europa Creativa</h2>
+  <p>Programas de educación, juventud, deporte y cultura, no de investigación. Se incorporan como <strong>programas complementarios</strong>: están en los datos y se pueden marcar en el filtro de programa, pero quedan fuera de las cifras de partida y del factsheet.</p>
+  <h3>Obtención</h3>
+  <p>Las dos usan la misma plataforma de resultados de proyectos de la Comisión (<a href="https://erasmus-plus.ec.europa.eu/projects">Erasmus+</a>, <a href="https://culture.ec.europa.eu/creative-europe/projects">Europa Creativa</a>). Su buscador carga los datos de una API JSON sin autenticación, la que usa el propio front-end. Se pide la frase entre comillas (<code>"citizen science"</code>) a los índices <code>eplus2021</code> (Erasmus+, 2014-2020 y 2021-2027) y <code>ce2021</code> (Europa Creativa). Cada documento trae el proyecto y todos sus socios con país y rol.</p>
+  <h3>Criterio</h3>
+  <p>El mismo que en CORDIS, aplicado otra vez en local al título y a la descripción que entrega la API (descripción, antecedentes, objetivos e implementación). <em>Resultados</em> no cuenta, como en LIFE: se redacta al terminar el proyecto.</p>
+  <h3>Límites</h3>
+  <ul>
+    <li><strong>API interna.</strong> No está documentada como pública y puede cambiar sin aviso. Si falla, el snapshot lo dice y la parte europea sigue publicando lo último que funcionó.</li>
+    <li><strong>El buscador devuelve más de lo que cumple el criterio</strong> (busca en texto que no entrega). En esta edición, de 187 candidatos de Erasmus+ pasan 124; 20 mencionan la frase solo en «Resultados» y 43 en ningún texto accesible. De 3 candidatos de Europa Creativa pasa 1. Sin comillas el buscador devuelve 485 proyectos, casi todo ruido: por eso siempre se pide la frase exacta.</li>
+    <li><strong>Importe por proyecto, no por socio.</strong> No se puede repartir por país, así que estos programas no entran en la contribución neta de cada país, solo en la aportación total de la UE. No se sabe con certeza si el importe es el total del convenio o el del coordinador.</li>
+    <li><strong>Movilidades individuales.</strong> Las acciones de movilidad de personas no tienen socios con país: cuentan como proyecto pero no aportan participaciones.</li>
+    <li><strong>Entidades sin PIC.</strong> La plataforma usa su propio identificador, no el PIC de CORDIS; las entidades se unen a las de CORDIS por nombre.</li>
+    <li><strong>Licencia.</strong> Las condiciones de la plataforma no dan una licencia de reutilización explícita para los datos. Se citan con su origen y conviene confirmarlo antes de reutilizarlos.</li>
+  </ul>
 
   <h2 id="aei">4. AEI (Agencia Estatal de Investigación)</h2>
   <h3>Obtención</h3>

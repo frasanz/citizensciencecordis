@@ -9,11 +9,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { recomputarNacional, TIPOS } from '../web/src/nacional.js';
+import { recomputar, PROGRAMAS_BASE } from '../web/src/compute.js';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WEB = path.join(RAIZ, 'web');
 const leer = (f) => JSON.parse(fs.readFileSync(path.join(WEB, 'data', f), 'utf8'));
-const eu = leer('indicadores.json');
+// Europa: solo los programas de las cifras de partida (Erasmus+ y Europa Creativa quedan fuera).
+const euTodo = leer('indicadores.json');
+const eu = recomputar(euTodo, { programas: PROGRAMAS_BASE.filter((c) => euTodo.proyectos.some((p) => p.programa === c)) });
 const nacTodo = leer('nacional.json');
 // Cifra principal: solo proyectos. Los contratos de personal y las estancias de la
 // AEI heredan el texto de su proyecto y harian contar dos veces la misma idea.
@@ -137,7 +140,7 @@ const mensajes = [
 
 // ---------- piezas de pagina ----------
 const cabecera = (n, kicker) => `<header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>${esc(kicker)}</span></header>`;
-const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / 4</b></footer>`;
+const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / 5</b></footer>`;
 const kpi = (valor, et, sub = '') => `<div class="kpi"><div class="n">${valor}</div><div class="e">${et}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
 const fig = (titulo, cuerpo, nota = '') => `<figure><figcaption>${titulo}</figcaption>${cuerpo}${nota ? `<p class="nota">${nota}</p>` : ''}</figure>`;
 
@@ -163,35 +166,85 @@ const p1 = `
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
-      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 4.</p>
+      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 5.</p>
     </div>
   </div>
   ${pie(1, 'Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis')}
 </section>`;
 
-// ---------- pagina 2: Europa ----------
+// ---------- pagina 2: panorama europeo ----------
 const topPaises = (campo, n = 8) => top(paises, n, (p) => p[campo]).map((p) => ({ et: pais(p.pais), v: p[campo], resaltar: p.pais === 'ES' }));
 const nombreEnt = (e) => (e.siglas && e.siglas.length <= 14 ? e.siglas : titular(e.nombre));
 const entEs = top(eu.entidadesFoco, 8, (e) => e.proyectos).map((e) => ({ et: corto(nombreEnt(e), 24), v: e.proyectos }));
+const colProg = { HORIZON: C.negro, H2020: '#666666', LIFE: '#a8a8a8', FP7: C.claro };
+const progOrden = ['FP7', 'H2020', 'HORIZON', 'LIFE'].filter((c) => eu.programas.some((p) => p.clave === c));
+const etProg = Object.fromEntries(eu.programas.map((p) => [p.clave, p.etiqueta]));
+const serieProg = serieEu.map((s) => ({ anio: s.anio, ...s.porPrograma }));
+// Areas tematicas con nombre en castellano. SwafS aparece con dos etiquetas de CORDIS (su nombre y el de su objetivo especifico).
+const AREA = [[/^Marie/i, 'Acciones Marie Skłodowska-Curie'], [/^Food, Bioeconomy/i, 'Alimentación, bioeconomía y medio ambiente'],
+  [/^Culture, creativity/i, 'Cultura, creatividad y sociedad inclusiva'], [/^European Research Council/i, 'Consejo Europeo de Investigación'],
+  [/^Nature$/i, 'Naturaleza y biodiversidad (LIFE)'], [/^Climate action/i, 'Acción climática y medio ambiente'],
+  [/^(Science with and for society|Integrate society)/i, 'Ciencia con y para la sociedad'], [/^Environmental Governance/i, 'Gobernanza e información ambiental'],
+  [/^Health/i, 'Salud'], [/^Digital/i, 'Digital, industria y espacio']];
+const areas = new Map();
+for (const f of eu.familias) {
+  const m = AREA.find(([re]) => re.test(f.etiqueta));
+  const k = m ? m[1] : corto(f.etiqueta, 36);
+  areas.set(k, (areas.get(k) || 0) + f.proyectos);
+}
+const areasTop = [...areas].map(([et, v]) => ({ et, v })).sort((a, b) => b.v - a.v).slice(0, 8);
+const kpiPeq = (n, e) => `<div class="kp"><b>${n}</b><span>${e}</span></div>`;
+
 const p2 = `
 <section class="pagina">
-  ${cabecera(2, 'España en los programas europeos')}
+  ${cabecera(2, 'Panorama europeo')}
   <div class="cuerpo">
-    <h2>España está en ${num(es.proyectos)} de los ${num(E.totalProyectos)} proyectos europeos de ciencia ciudadana</h2>
-    <p class="entra">FP7, Horizonte 2020, Horizonte Europa y LIFE. Un proyecto cuenta una vez, con todo su consorcio, y se atribuye a España si tiene al menos una entidad española.</p>
-    ${fig('Proyectos por año de inicio', columnas(serieEu.map((s) => ({ anio: s.anio, total: s.total, foco: s.foco })), [{ clave: 'total', color: C.claro }, { clave: 'foco', color: C.ambar }], { superpuesta: true, alto: 152 })
-      + leyenda([{ et: 'Todos los proyectos', color: C.claro }, { et: 'Con participación española', color: C.ambar }]),
+    <h2>${num(E.totalProyectos)} proyectos europeos mencionan ciencia ciudadana, con participantes de ${paises.length} países</h2>
+    <p class="entra">FP7, Horizonte 2020, Horizonte Europa y LIFE. Un proyecto cuenta una vez, con todo su consorcio.</p>
+    <div class="kps">
+      ${kpiPeq(num(E.totalProyectos), 'proyectos')}${kpiPeq(num(paises.length), 'países')}${kpiPeq(num(E.organizacionesUnicas), 'entidades distintas')}
+      ${kpiPeq(num(E.participaciones), 'participaciones')}${kpiPeq(meur(E.aportacionNetaTotal), 'contribución neta UE')}
+    </div>
+    ${fig('Proyectos por año de inicio y programa', columnas(serieProg, progOrden.map((c) => ({ clave: c, color: colProg[c] })), { alto: 152 })
+      + leyenda(progOrden.map((c) => ({ et: etProg[c], color: colProg[c] }))),
       `${num(serieEu.filter((s) => s.anio >= anioActual).reduce((s, x) => s + x.total, 0))} proyectos con inicio en ${anioActual} o después ya están firmados; el año en curso no está cerrado.`)}
     <div class="rejilla">
-      ${fig('Proyectos por país', barrasH(topPaises('proyectos')), `${paises.length} países participan.`)}
+      ${fig('Proyectos por país', barrasH(topPaises('proyectos', 10)), 'Con al menos una entidad del país en el consorcio.')}
+      ${fig('Áreas temáticas con más proyectos', barrasH(areasTop, { etAncho: 178, ancho: 360 }), 'Subprograma bajo el que se financia, con el nombre oficial de CORDIS traducido.')}
+      ${fig('Proyectos por programa', barrasH(progOrden.map((c) => ({ et: etProg[c], v: eu.programas.find((p) => p.clave === c).proyectos })), { etAncho: 110 }))}
+      ${fig('Aportación de la UE por programa (M€)', barrasH(progOrden.map((c) => ({ et: etProg[c], v: eu.programas.find((p) => p.clave === c).aportacionUE / 1e6 })), { etAncho: 110, fmt: (v) => dec1(v) }),
+        'Aportación máxima de la UE a los proyectos; LIFE, la contribución de CINEA.')}
+    </div>
+  </div>
+  ${pie(2, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
+</section>`;
+
+// ---------- pagina 3: España en Europa ----------
+const tiposEnt = eu.tipos.filter((t) => t.codigo).slice(0, 5).map((t) => ({ et: t.etiqueta.replace('Entidades con animo de lucro', 'Empresas').replace('Educacion superior o secundaria', 'Educación superior').replace('Organismos de investigacion', 'Organismos de investigación').replace('Organismos publicos', 'Organismos públicos'), v: t.entidades }));
+const p3 = `
+<section class="pagina">
+  ${cabecera(3, 'España en los programas europeos')}
+  <div class="cuerpo">
+    <h2>España está en ${num(es.proyectos)} de los ${num(E.totalProyectos)} proyectos: ${pct(es.pctSobreTotal)} del total</h2>
+    <p class="entra">Un proyecto se atribuye a España si tiene al menos una entidad española en su consorcio.</p>
+    <div class="posicion">
+      <div><b>${rProy}.º</b><span>en proyectos<br>(${num(es.proyectos)})</span></div>
+      <div><b>${rCoord}.º</b><span>en proyectos coordinados<br>(${num(es.coordinados)})</span></div>
+      <div><b>${rDin}.º</b><span>en contribución neta UE<br>(${meur(es.aportacionNeta)})</span></div>
+      <div><b>${num(es.organizaciones)}</b><span>entidades españolas<br>distintas</span></div>
+    </div>
+    ${fig('Proyectos por año de inicio', columnas(serieEu.map((s) => ({ anio: s.anio, total: s.total, foco: s.foco })), [{ clave: 'total', color: C.claro }, { clave: 'foco', color: C.ambar }], { superpuesta: true, alto: 140 })
+      + leyenda([{ et: 'Todos los proyectos', color: C.claro }, { et: 'Con participación española', color: C.ambar }]))}
+    <div class="rejilla">
       ${fig('Proyectos coordinados', barrasH(topPaises('coordinados')))}
       ${fig('Contribución neta de la UE (M€)', barrasH(top(paises, 8, (p) => p.aportacionNeta).map((p) => ({ et: pais(p.pais), v: p.aportacionNeta / 1e6, resaltar: p.pais === 'ES' })), { fmt: (v) => dec1(v) }),
         'LIFE no publica el reparto por socio: solo cuenta CORDIS.')}
       ${fig('Entidades españolas con más proyectos', barrasH(entEs, { etAncho: 130 }))}
+      ${fig('Tipo de entidad española', barrasH(tiposEnt, { etAncho: 130 }), `Entidades distintas (${num(es.organizaciones)}).`)}
     </div>
-    <div class="programas">${eu.programas.map((p) => `<div><b>${esc(p.etiqueta)}</b><span>${num(p.foco)} de ${num(p.proyectos)} · ${pct(p.pctFoco)}</span></div>`).join('')}</div>
+    <div class="programas">${eu.programas.map((p) => `<div><b>${esc(p.etiqueta)}</b><span>España en ${num(p.foco)} de ${num(p.proyectos)} · ${pct(p.pctFoco)}</span></div>`).join('')}</div>
   </div>
-  ${pie(2, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
+  ${pie(3, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
 </section>`;
 
 // ---------- pagina 3: convocatorias españolas ----------
@@ -199,9 +252,9 @@ const colFin = { AEI: C.negro, FECYT: C.medio, FB: C.claro };
 const finOrden = ['AEI', 'FECYT', 'FB'].filter((f) => nac.financiadores.some((x) => x.clave === f));
 const VIA = { titulo: 'En el título', resumen: 'En el resumen', 'palabras-clave': 'En las palabras clave', categoria: 'Línea FECYT' };
 const viasTop = nac.vias.map((v) => ({ et: VIA[v.clave] || v.clave, v: v.ayudas }));
-const p3 = `
+const p4 = `
 <section class="pagina">
-  ${cabecera(3, 'Convocatorias españolas')}
+  ${cabecera(4, 'Convocatorias españolas')}
   <div class="cuerpo">
     <h2>${num(S.totalAyudas)} proyectos y ${meur(S.importeTotal)} concedidos desde ${S.desde}</h2>
     <p class="entra">AEI, FECYT y Fundación Biodiversidad. Aquí la unidad es la ayuda a una entidad, sin consorcios. Se cuentan solo proyectos: ${num(personal?.ayudas ?? 0)} contratos de personal y ${num(estancia?.ayudas ?? 0)} estancias de la AEI (${meur((personal?.importe ?? 0) + (estancia?.importe ?? 0))}) quedan fuera porque heredan el texto de su proyecto.</p>
@@ -217,14 +270,14 @@ const p3 = `
       ${fig('Cómo entra cada proyecto en el criterio', barrasH(viasTop, { etAncho: 130 }), 'Un proyecto entra por la primera vía que cumple. «Palabras clave»: las declara el proyecto (en la AEI, sin poder comprobarlas aquí).')}
     </div>
   </div>
-  ${pie(3, `Datos: AEI (${esc(fecha(fuenteEs.AEI.actualizado))}), FECYT y Fundación Biodiversidad · leídos de sus webs públicas`)}
+  ${pie(4, `Datos: AEI (${esc(fecha(fuenteEs.AEI.actualizado))}), FECYT y Fundación Biodiversidad · leídos de sus webs públicas`)}
 </section>`;
 
 // ---------- pagina 4: metodologia ----------
 const fl = (f) => nacTodo.meta.filtro.frases.map((x) => `<i>${esc(x)}</i>`).join(', ');
-const p4 = `
+const p5 = `
 <section class="pagina">
-  ${cabecera(4, 'Metodología y límites')}
+  ${cabecera(5, 'Metodología y límites')}
   <div class="cuerpo">
     <h2>Cómo se han obtenido estas cifras</h2>
     <p class="entra">Todo se recalcula con un único comando a partir de los datos públicos de cada financiador; el código y los CSV de partida están en abierto.</p>
@@ -273,7 +326,7 @@ const p4 = `
       </div>
     </div>
   </div>
-  ${pie(4, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
+  ${pie(5, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
 </section>`;
 
 // ---------- documento ----------
@@ -281,8 +334,9 @@ const css = `
 @page{size:A4;margin:0}
 :root{--negro:${C.negro};--carbon:${C.carbon};--gris:${C.gris};--medio:${C.medio};--claro:${C.claro};--fondo:${C.fondo};--ambar:${C.ambar};--ambar-osc:${C.ambarOsc}}
 *{box-sizing:border-box}
+.serif,h1,h2,.kpi .n,.kp b,.posicion b,.mensajes .num{font-family:"Source Serif 4","Source Serif Pro",Georgia,"Times New Roman",serif}
 html{background:#cfcfcf}
-body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Nunito","Nunito Sans","Avenir Next",ui-sans-serif,system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Source Sans 3","Source Sans Pro","Segoe UI",Helvetica,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .pagina{position:relative;width:210mm;height:297mm;margin:8mm auto;background:#fff;overflow:hidden;break-after:page;page-break-after:always;display:flex;flex-direction:column}
 @media print{html{background:none}.pagina{margin:0}}
 .cab{height:15mm;background:var(--negro);display:flex;align-items:center;justify-content:space-between;padding:0 14mm;flex:none}
@@ -291,7 +345,7 @@ body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Nunito","Nunito Sans","Avenir
 .cuerpo{padding:9mm 14mm 0;flex:1;min-height:0}
 .pie{height:11mm;flex:none;margin:0 14mm;border-top:.6pt solid var(--claro);display:flex;align-items:center;justify-content:space-between;font-size:7pt;color:var(--gris)}
 .pie b{color:var(--negro)}
-h2{font-size:15.5pt;line-height:1.2;margin:0 0 2mm;color:var(--negro);font-weight:800;letter-spacing:-.01em}
+h2{font-size:15.5pt;line-height:1.22;margin:0 0 2mm;color:var(--negro);font-weight:700;letter-spacing:-.005em}
 h3{font-size:10pt;margin:0 0 1mm;color:var(--negro);font-weight:800}
 .entra{margin:0 0 4mm;color:var(--gris);font-size:9pt}
 figure{margin:0 0 4mm;break-inside:avoid}
@@ -315,12 +369,12 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .portada .banda{background:var(--negro);color:#fff;padding:14mm 14mm 12mm;flex:none}
 .portada .logo{height:19mm;display:block;margin-bottom:17mm}
 .portada .kicker{font-size:8.6pt;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--ambar);margin-bottom:3mm}
-.portada h1{font-size:35pt;line-height:1.04;margin:0 0 5mm;font-weight:800;letter-spacing:-.02em}
+.portada h1{font-size:36pt;line-height:1.06;margin:0 0 5mm;font-weight:700;letter-spacing:-.01em}
 .portada h1 em{font-style:normal;color:var(--ambar)}
 .portada .sub{max-width:140mm;margin:0 0 11mm;font-size:10.5pt;color:#cfcfcf;line-height:1.5}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:5mm 8mm}
 .kpi{border-top:1.6pt solid var(--ambar);padding-top:2.4mm}
-.kpi .n{font-size:27pt;font-weight:800;line-height:1;color:#fff;letter-spacing:-.02em}
+.kpi .n{font-size:27pt;font-weight:700;line-height:1;color:#fff}
 .kpi .e{font-size:9pt;color:#fff;margin-top:1.6mm;line-height:1.3;font-weight:700}
 .kpi .s{font-size:8pt;color:var(--medio);margin-top:.8mm}
 .portada .cuerpo{padding-top:9mm}
@@ -330,6 +384,16 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .mensajes p{margin:0;font-size:9pt;color:var(--carbon)}
 .recuadro{background:var(--fondo);border-left:3pt solid var(--ambar);padding:3.5mm 5mm}
 .recuadro p{margin:0;font-size:8.6pt}
+
+/* panorama y posicion */
+.kps{display:grid;grid-template-columns:repeat(5,1fr);gap:3mm;margin:0 0 4mm}
+.kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
+.kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
+.kp span{font-size:7.6pt;color:var(--gris)}
+.posicion{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:0 0 4mm}
+.posicion div{background:var(--negro);color:#fff;padding:2.6mm 3mm;border-bottom:2.2pt solid var(--ambar)}
+.posicion b{display:block;font-size:19pt;line-height:1.05;color:var(--ambar);font-weight:700}
+.posicion span{font-size:7.6pt;line-height:1.3;color:#d9d9d9}
 
 /* metodologia */
 table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm}
@@ -341,7 +405,7 @@ table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm
 .dos ul{margin:0;padding-left:4.2mm;font-size:8.6pt}
 .dos li{margin-bottom:1.6mm}
 .dos p{margin:0 0 2mm;font-size:8.6pt}
-.web{font-size:12pt!important;font-weight:800;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
+.web{font-size:12pt!important;font-weight:700;font-family:"Source Serif 4",Georgia,serif;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
 .peq{font-size:7.4pt!important;color:var(--gris)}
 .abajo{margin-top:7mm;padding-top:5mm;border-top:.6pt solid var(--claro)}
 table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2mm}
@@ -357,7 +421,7 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La ciencia ciudadana en España · Factsheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&family=Source+Serif+4:wght@600;700;800&display=swap" rel="stylesheet">
 <style>${css}</style>
 </head>
 <body>
@@ -365,6 +429,7 @@ ${p1}
 ${p2}
 ${p3}
 ${p4}
+${p5}
 </body>
 </html>
 `;

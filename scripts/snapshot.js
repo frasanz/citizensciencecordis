@@ -2,14 +2,15 @@
 // FECYT y Fundacion Biodiversidad (convocatorias españolas), calcula los
 // indicadores y deja en web/data/ los JSON que consume la web mas los CSV.
 //
-//   node scripts/snapshot.js                    -> todo: HORIZON, H2020, FP7, LIFE, AEI, FECYT, FB
+//   node scripts/snapshot.js                    -> todo: HORIZON, H2020, FP7, LIFE, ERASMUS, CREA, AEI, FECYT, FB
 //   node scripts/snapshot.js --programas=HORIZON
 //   node scripts/snapshot.js --programas=AEI,FECYT,FB   -> solo la parte española (no toca indicadores.json)
 //   node scripts/snapshot.js --sin-cache
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { crearAnalisis, crearFiltro, PROGRAMAS } from '../web/src/compute.js';
+import { crearAnalisis, crearFiltro, recomputar, PROGRAMAS, PROGRAMAS_BASE } from '../web/src/compute.js';
+import { PLATAFORMAS, descargarProyectosErasmus, registroProyecto as registroErasmus, registroBaseLegal as baseLegalErasmus, registrosParticipacion as participacionesErasmus } from './erasmus.js';
 import { procesarPrograma, descargarPrograma } from './cordis.js';
 import {
   descargarProyectosLife, buscarCandidatosLife, descargarFicha, leerFicha, descargarFts, leerFts,
@@ -27,7 +28,7 @@ const SALIDA = path.join(RAIZ, 'web', 'data');
 const arg = (n, d) => (process.argv.find((a) => a.startsWith(`--${n}=`)) || `=${d}`).split('=')[1];
 const flag = (n) => process.argv.includes(`--${n}`);
 
-const todos = arg('programas', 'HORIZON,H2020,FP7,LIFE,AEI,FECYT,FB').split(',').filter(Boolean);
+const todos = arg('programas', 'HORIZON,H2020,FP7,LIFE,ERASMUS,CREA,AEI,FECYT,FB').split(',').filter(Boolean);
 const nacionales = todos.filter((c) => FINANCIADORES.some((f) => f.codigo === c));
 const quiero = todos.filter((c) => !nacionales.includes(c));
 const frase = arg('frase', 'citizen science');
@@ -82,7 +83,7 @@ const recogerNombre = (r) => {
 for (const codigo of quiero) {
   const p = PROGRAMAS.find((x) => x.codigo === codigo);
   if (!p) { console.warn(`  aviso: programa desconocido "${codigo}", se omite`); continue; }
-  if (!p.archivo) continue;                       // LIFE va despues, necesita los nombres de CORDIS
+  if (!p.archivo) continue;                       // LIFE, Erasmus+ y Europa Creativa van despues
   const t0 = Date.now();
   const { bytes, ultimaMod } = await bytesDe(p);
   await procesarPrograma(bytes, p.codigo, analisis, quiero.includes('LIFE') ? recogerNombre : null);
@@ -91,6 +92,43 @@ for (const codigo of quiero) {
 }
 
 if (quiero.includes('LIFE')) await procesarLife();
+for (const codigo of Object.keys(PLATAFORMAS)) if (quiero.includes(codigo)) await procesarErasmus(codigo);
+
+// ---------- Erasmus+ y Europa Creativa ----------
+// Buscador de la plataforma de resultados de proyectos de la Comision, con la
+// frase entre comillas; el criterio se vuelve a aplicar aqui sobre el texto devuelto.
+async function procesarErasmus(codigo) {
+  const p = PROGRAMAS.find((x) => x.codigo === codigo);
+  const t0 = Date.now();
+  const dir = path.join(CACHE, 'erasmus');
+  fs.mkdirSync(dir, { recursive: true });
+  const f = path.join(dir, `${codigo}.json`);
+  let cache = usarCache && fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null;
+  if (!cache) {
+    process.stdout.write(`  ${p.etiqueta}: descargando `);
+    cache = { descargado: new Date().toISOString(), docs: await descargarProyectosErasmus(codigo, frase) };
+    fs.writeFileSync(f, JSON.stringify(cache));
+    console.log(`${cache.docs.length} candidatos`);
+  }
+  let aceptados = 0, conSocio = 0, soloResultados = 0;
+  for (const d of cache.docs) {
+    const rec = registroErasmus(codigo, d);
+    analisis.proyecto(rec, codigo);
+    analisis.baseLegal(baseLegalErasmus(codigo, d));
+    if (!filtro(rec)) {
+      // La frase solo en «Resultados», que se redacta al terminar: no cuenta, como en LIFE.
+      if (filtro({ objective: d.projectDescriptionResults || '', title: '' })) soloResultados++;
+      continue;
+    }
+    aceptados++;
+    const socios = participacionesErasmus(codigo, d);
+    if (socios.length) conSocio++;
+    for (const s of socios) analisis.participacion(s);
+  }
+  fuentes.push({ codigo, etiqueta: p.etiqueta, periodo: p.periodo, archivo: `Plataforma de resultados de proyectos (${PLATAFORMAS[codigo].indice})`, actualizado: cache.descargado,
+    candidatos: cache.docs.length, aceptados, soloResultados });
+  console.log(`  ${p.etiqueta}: ${cache.docs.length} candidatos del buscador, ${aceptados} cumplen el criterio (${cache.docs.length - aceptados} descartados por no llevar la frase en el texto devuelto), ${conSocio} con socios, en ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+}
 
 // ---------- LIFE ----------
 // Volcado completo por la API de CINEA, fichas HTML de los candidatos para leer
@@ -191,10 +229,14 @@ if (quiero.length) {
   const r = analisis.resultado();
   r.meta.fuentes = fuentes;
   fs.writeFileSync(path.join(SALIDA, 'indicadores.json'), JSON.stringify(r));
+  // Los CSV agregados salen de los programas de las cifras de partida; los de registros (proyectos y
+  // participaciones) llevan todos, con la columna `programa`.
+  const base = recomputar(r, { programas: PROGRAMAS_BASE.filter((c) => quiero.includes(c)) });
   for (const [nombre, fn] of Object.entries(TABLAS)) {
-    fs.writeFileSync(path.join(SALIDA, `${nombre}.csv`), fn(r));
+    fs.writeFileSync(path.join(SALIDA, `${nombre}.csv`), fn(['proyectos', 'participaciones'].includes(nombre) ? r : base));
   }
   console.log(`\n--- programas europeos ---`);
+  console.log(`(cifras de todos los programas; las de partida excluyen ERASMUS y CREA)`);
   console.log(`proyectos            ${String(r.resumen.totalProyectos).padStart(6)}`);
   console.log(`  ${r.programas.map((p) => `${p.clave}: ${p.proyectos}`).join('  ')}`);
   console.log(`organizaciones unicas${String(r.resumen.organizacionesUnicas).padStart(6)}`);

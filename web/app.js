@@ -14,7 +14,7 @@ let regiones = null;
 try { regiones = new Intl.DisplayNames(['es'], { type: 'region' }); } catch { /* navegador antiguo */ }
 const nombrePais = (c) => PAIS_ESPECIAL[c] || (() => { try { return regiones?.of(c) || c; } catch { return c; } })();
 
-const COLOR = { HORIZON: 'var(--he)', H2020: 'var(--h2020)', FP7: 'var(--fp7)', FP6: 'var(--fp6)', LIFE: 'var(--life)' };
+const COLOR = { HORIZON: 'var(--he)', H2020: 'var(--h2020)', FP7: 'var(--fp7)', FP6: 'var(--fp6)', LIFE: 'var(--life)', ERASMUS: 'var(--erasmus)', CREA: 'var(--crea)' };
 
 // ---------- estado ----------
 const estado = {
@@ -56,7 +56,8 @@ function fijarBase(datos) {
   // Todos los programas marcados de partida: el conjunto completo es la foto
   // honesta, y quitar alguno es una decision que toma quien mira, no la web.
   const disponibles = [...new Set(datos.proyectos.map((p) => p.programa))];
-  estado.programas = [...disponibles];
+  // Erasmus+ y Europa Creativa son complementarios: empiezan desmarcados (un clic los incluye).
+  estado.programas = disponibles.filter((c) => !PROGRAMAS.find((x) => x.codigo === c)?.complementario);
   const meses = datos.proyectos.map((p) => (p.inicio || '').slice(0, 7)).filter(Boolean).sort();
   estado.limites = [meses[0], meses[meses.length - 1]];
   estado.periodo = [...estado.limites];
@@ -228,6 +229,7 @@ function pintar() {
   const f = estado.base.meta.fuentes || [];
 
   const conLife = f.some((x) => x.codigo === 'LIFE');
+  el('#limites').innerHTML = limitesEuropa(f);
   el('#fuente').innerHTML = `Fuente: datos abiertos de CORDIS${conLife ? ' y de la base de datos pública de LIFE (CINEA)' : ''}`
     + (f.length ? ` · ${f.map((x) => `${esc(x.etiqueta)} <span class="pct">(${fecha(x.actualizado)})</span>`).join(' · ')}` : '')
     + `<br>Criterio: <code>${esc(estado.base.meta.filtro?.frase ?? 'citizen science')}</code> en `
@@ -290,6 +292,27 @@ function pintarGrafico() {
   });
 }
 
+// ---------- límites de los datos ----------
+// Visibles en la propia página, no solo en la metodología: lo que una cifra no dice
+// importa tanto como la cifra. Los de Erasmus+ y Europa Creativa salen siempre que
+// están en los datos, estén marcados o no, porque es lo que decide si marcarlos.
+function limitesEuropa(fuentes) {
+  const er = fuentes.find((x) => x.codigo === 'ERASMUS'), cr = fuentes.find((x) => x.codigo === 'CREA');
+  const activos = estado.programas.filter((c) => PROGRAMAS.find((x) => x.codigo === c)?.complementario);
+  const li = [
+    '<b>El criterio es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.',
+    '<b>El dinero por país solo cubre CORDIS.</b> LIFE, Erasmus+ y Europa Creativa publican un importe por proyecto, no por socio, así que no entran en la contribución neta de cada país: solo en la aportación total de la UE. Las cifras por país están, por tanto, infravaloradas.',
+    '<b>Países de LIFE.</b> Se deducen cruzando fuentes y las participaciones que no se pueden resolver quedan sin país (columna <code>pais_via</code> del CSV).',
+  ];
+  if (er || cr) {
+    const nombres = [er && 'Erasmus+', cr && 'Europa Creativa'].filter(Boolean).join(' y ');
+    li.push(`<b>${nombres} no están en las cifras de partida</b>: no son programas de investigación (movilidad, cooperación educativa y cultural) y su dato es más pobre. Se incluyen con un clic en el filtro de programa${activos.length ? ' (<b>ahora están incluidos</b>)' : ''}.`);
+    if (er) li.push(`<b>Erasmus+ sale de una API interna</b> de la plataforma de resultados de la Comisión, no documentada como pública: puede cambiar sin aviso. El buscador devuelve ${num(er.candidatos)} candidatos y solo ${num(er.aceptados)} llevan la frase en el texto que entrega la API; ${num(er.soloResultados)} la mencionan únicamente en «Resultados», que no cuenta (como en LIFE), y el resto no la lleva en ningún texto accesible. Las movilidades individuales no tienen socios con país.`);
+    li.push('<b>No hay licencia de reutilización explícita para esos datos</b>: se citan con su origen y conviene confirmarlo antes de reutilizarlos.');
+  }
+  return `<details class="limites" open><summary>Límites de estos datos</summary><ul>${li.map((x) => `<li>${x}</li>`).join('')}</ul></details>`;
+}
+
 // ---------- ayuda contextual ----------
 // Los textos viven aqui juntos para que se lean como un glosario coherente.
 registrarAyuda({
@@ -315,7 +338,7 @@ registrarAyuda({
   focoAportacion: ['Financiación recibida',
     'Suma de la <b>contribución neta</b> que la UE asigna concretamente a las entidades de ese país (<code>netEcContribution</code>), no el presupuesto de los proyectos enteros.',
     'Es el dinero que de verdad llega al país. Compararlo con el porcentaje de proyectos revela si se participa en papeles grandes o pequeños.',
-    'LIFE no publica el reparto por socio, así que sus proyectos no suman aquí: solo cuentan en la aportación total de la UE.'],
+    'LIFE, Erasmus+ y Europa Creativa no publican el reparto por socio, así que sus proyectos no suman aquí: solo cuentan en la aportación total de la UE.'],
   grafico: ['Evolución por año de inicio',
     'Cada proyecto se cuenta en el año en que <b>arrancó</b>, con el color de su programa marco. Pasa el ratón por una barra para ver el detalle.',
     'La serie sale de una sola descarga: como cada proyecto lleva su fecha, no hace falta guardar histórico. Los últimos años pueden crecer más adelante, según CORDIS incorpore proyectos ya firmados.'],
@@ -335,9 +358,10 @@ registrarAyuda({
     'La lista completa que cumple el criterio. Pulsa cualquier cabecera para ordenar, y el acrónimo para abrir la ficha oficial en CORDIS o en la base de datos de LIFE.',
     '<b>Coordina</b> muestra quién lidera con su código de país, resaltado si es el país seleccionado. <b>Entidades</b> son las de ese país que participan.'],
   filtroPrograma: ['Programa',
-    'Los programas marco con los que la UE financia la investigación, sucesivos en el tiempo: <b>FP7</b> (2007-2013), <b>Horizonte 2020</b> (2014-2020) y <b>Horizonte Europa</b> (2021-2027). Y <b>LIFE</b>, el programa de medio ambiente y clima, que no es de investigación ni está en CORDIS.',
-    'Vienen todos marcados. Desmárcalos para aislar una etapa: la comparación entre programas dice bastante, porque el peso de cada país cambia de uno a otro.',
+    'Los programas marco con los que la UE financia la investigación, sucesivos en el tiempo: <b>FP7</b> (2007-2013), <b>Horizonte 2020</b> (2014-2020) y <b>Horizonte Europa</b> (2021-2027). Y <b>LIFE</b>, el programa de medio ambiente y clima, que no es de investigación ni está en CORDIS. <b>Erasmus+</b> y <b>Europa Creativa</b> (educación y cultura) son complementarios.',
+    'Vienen marcados todos menos Erasmus+ y Europa Creativa. Desmárcalos para aislar una etapa: la comparación entre programas dice bastante, porque el peso de cada país cambia de uno a otro.',
     'FP7 aporta muy pocos proyectos, porque entonces apenas se usaba el término «citizen science». Además su volcado está cerrado: al ser un programa terminado, CORDIS no lo actualiza desde enero de 2025.',
+    'Erasmus+ y Europa Creativa salen de la plataforma de resultados de proyectos de la Comisión. Dan un importe por proyecto, no por socio, y quedan fuera de las cifras de partida; su detalle está en «Límites de estos datos».',
     'LIFE sale de la base de datos pública de CINEA con el <b>mismo criterio</b>, aplicado a la descripción de cada ficha. Sus socios no traen PIC, tipo de entidad ni reparto del dinero, y su país se resuelve cruzando fuentes: cada participación lleva anotada la vía en el CSV.'],
   filtroPais: ['País de referencia',
     'Todas las cifras y tablas marcadas se recalculan alrededor del país que elijas. Sirve para comparar: prueba Italia o Alemania.',

@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La ciencia ciudadana en España · Factsheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&family=Source+Serif+4:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 @page{size:A4;margin:0}
 :root{--negro:#111111;--carbon:#2b2b2b;--gris:#555555;--medio:#8a8a8a;--claro:#d9d9d9;--fondo:#f4f4f2;--ambar:#f2a900;--ambar-osc:#a86f00}
 *{box-sizing:border-box}
+.serif,h1,h2,.kpi .n,.kp b,.posicion b,.mensajes .num{font-family:"Source Serif 4","Source Serif Pro",Georgia,"Times New Roman",serif}
 html{background:#cfcfcf}
-body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Nunito","Nunito Sans","Avenir Next",ui-sans-serif,system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Source Sans 3","Source Sans Pro","Segoe UI",Helvetica,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .pagina{position:relative;width:210mm;height:297mm;margin:8mm auto;background:#fff;overflow:hidden;break-after:page;page-break-after:always;display:flex;flex-direction:column}
 @media print{html{background:none}.pagina{margin:0}}
 .cab{height:15mm;background:var(--negro);display:flex;align-items:center;justify-content:space-between;padding:0 14mm;flex:none}
@@ -20,7 +21,7 @@ body{margin:0;color:var(--carbon);font:9.4pt/1.45 "Nunito","Nunito Sans","Avenir
 .cuerpo{padding:9mm 14mm 0;flex:1;min-height:0}
 .pie{height:11mm;flex:none;margin:0 14mm;border-top:.6pt solid var(--claro);display:flex;align-items:center;justify-content:space-between;font-size:7pt;color:var(--gris)}
 .pie b{color:var(--negro)}
-h2{font-size:15.5pt;line-height:1.2;margin:0 0 2mm;color:var(--negro);font-weight:800;letter-spacing:-.01em}
+h2{font-size:15.5pt;line-height:1.22;margin:0 0 2mm;color:var(--negro);font-weight:700;letter-spacing:-.005em}
 h3{font-size:10pt;margin:0 0 1mm;color:var(--negro);font-weight:800}
 .entra{margin:0 0 4mm;color:var(--gris);font-size:9pt}
 figure{margin:0 0 4mm;break-inside:avoid}
@@ -44,12 +45,12 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .portada .banda{background:var(--negro);color:#fff;padding:14mm 14mm 12mm;flex:none}
 .portada .logo{height:19mm;display:block;margin-bottom:17mm}
 .portada .kicker{font-size:8.6pt;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--ambar);margin-bottom:3mm}
-.portada h1{font-size:35pt;line-height:1.04;margin:0 0 5mm;font-weight:800;letter-spacing:-.02em}
+.portada h1{font-size:36pt;line-height:1.06;margin:0 0 5mm;font-weight:700;letter-spacing:-.01em}
 .portada h1 em{font-style:normal;color:var(--ambar)}
 .portada .sub{max-width:140mm;margin:0 0 11mm;font-size:10.5pt;color:#cfcfcf;line-height:1.5}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:5mm 8mm}
 .kpi{border-top:1.6pt solid var(--ambar);padding-top:2.4mm}
-.kpi .n{font-size:27pt;font-weight:800;line-height:1;color:#fff;letter-spacing:-.02em}
+.kpi .n{font-size:27pt;font-weight:700;line-height:1;color:#fff}
 .kpi .e{font-size:9pt;color:#fff;margin-top:1.6mm;line-height:1.3;font-weight:700}
 .kpi .s{font-size:8pt;color:var(--medio);margin-top:.8mm}
 .portada .cuerpo{padding-top:9mm}
@@ -59,6 +60,16 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .mensajes p{margin:0;font-size:9pt;color:var(--carbon)}
 .recuadro{background:var(--fondo);border-left:3pt solid var(--ambar);padding:3.5mm 5mm}
 .recuadro p{margin:0;font-size:8.6pt}
+
+/* panorama y posicion */
+.kps{display:grid;grid-template-columns:repeat(5,1fr);gap:3mm;margin:0 0 4mm}
+.kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
+.kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
+.kp span{font-size:7.6pt;color:var(--gris)}
+.posicion{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:0 0 4mm}
+.posicion div{background:var(--negro);color:#fff;padding:2.6mm 3mm;border-bottom:2.2pt solid var(--ambar)}
+.posicion b{display:block;font-size:19pt;line-height:1.05;color:var(--ambar);font-weight:700}
+.posicion span{font-size:7.6pt;line-height:1.3;color:#d9d9d9}
 
 /* metodologia */
 table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm}
@@ -70,7 +81,7 @@ table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm
 .dos ul{margin:0;padding-left:4.2mm;font-size:8.6pt}
 .dos li{margin-bottom:1.6mm}
 .dos p{margin:0 0 2mm;font-size:8.6pt}
-.web{font-size:12pt!important;font-weight:800;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
+.web{font-size:12pt!important;font-weight:700;font-family:"Source Serif 4",Georgia,serif;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
 .peq{font-size:7.4pt!important;color:var(--gris)}
 .abajo{margin-top:7mm;padding-top:5mm;border-top:.6pt solid var(--claro)}
 table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2mm}
@@ -101,26 +112,30 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
-      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 4.</p>
+      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 5.</p>
     </div>
   </div>
-  <footer class="pie"><span>Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis</span><b>1 / 4</b></footer>
+  <footer class="pie"><span>Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis</span><b>1 / 5</b></footer>
 </section>
 
 <section class="pagina">
-  <header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>España en los programas europeos</span></header>
+  <header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>Panorama europeo</span></header>
   <div class="cuerpo">
-    <h2>España está en 164 de los 316 proyectos europeos de ciencia ciudadana</h2>
-    <p class="entra">FP7, Horizonte 2020, Horizonte Europa y LIFE. Un proyecto cuenta una vez, con todo su consorcio, y se atribuye a España si tiene al menos una entidad española.</p>
-    <figure><figcaption>Proyectos por año de inicio</figcaption><svg viewBox="0 0 700 152" role="img"><line x1="24" x2="694" y1="132" y2="132" stroke="#8a8a8a" stroke-width=".6"/>
+    <h2>316 proyectos europeos mencionan ciencia ciudadana, con participantes de 75 países</h2>
+    <p class="entra">FP7, Horizonte 2020, Horizonte Europa y LIFE. Un proyecto cuenta una vez, con todo su consorcio.</p>
+    <div class="kps">
+      <div class="kp"><b>316</b><span>proyectos</span></div><div class="kp"><b>75</b><span>países</span></div><div class="kp"><b>2146</b><span>entidades distintas</span></div>
+      <div class="kp"><b>3615</b><span>participaciones</span></div><div class="kp"><b>913,5 M€</b><span>contribución neta UE</span></div>
+    </div>
+    <figure><figcaption>Proyectos por año de inicio y programa</figcaption><svg viewBox="0 0 700 152" role="img"><line x1="24" x2="694" y1="132" y2="132" stroke="#8a8a8a" stroke-width=".6"/>
       <text x="20" y="135" text-anchor="end" class="eje">0</text><line x1="24" x2="694" y1="108.4" y2="108.4" stroke="#d9d9d9" stroke-width=".6"/>
       <text x="20" y="111.4" text-anchor="end" class="eje">10</text><line x1="24" x2="694" y1="84.8" y2="84.8" stroke="#d9d9d9" stroke-width=".6"/>
       <text x="20" y="87.8" text-anchor="end" class="eje">20</text><line x1="24" x2="694" y1="61.2" y2="61.2" stroke="#d9d9d9" stroke-width=".6"/>
       <text x="20" y="64.2" text-anchor="end" class="eje">30</text><line x1="24" x2="694" y1="37.599999999999994" y2="37.599999999999994" stroke="#d9d9d9" stroke-width=".6"/>
       <text x="20" y="40.599999999999994" text-anchor="end" class="eje">40</text><line x1="24" x2="694" y1="14" y2="14" stroke="#d9d9d9" stroke-width=".6"/>
-      <text x="20" y="17" text-anchor="end" class="eje">50</text><rect x="29.5" y="129.6" width="28.4" height="2.4" fill="#d9d9d9"/><rect x="35.8" y="129.6" width="15.9" height="2.4" fill="#f2a900"/><text x="43.7" y="126.6" text-anchor="middle" class="eje v">1</text><text x="43.7" y="146" text-anchor="middle" class="eje">2011</text><rect x="68.9" y="127.3" width="28.4" height="4.7" fill="#d9d9d9"/><rect x="75.2" y="129.6" width="15.9" height="2.4" fill="#f2a900"/><text x="83.1" y="124.3" text-anchor="middle" class="eje v">2</text><text x="83.1" y="146" text-anchor="middle" class="eje">2012</text><rect x="108.3" y="129.6" width="28.4" height="2.4" fill="#d9d9d9"/><text x="122.5" y="126.6" text-anchor="middle" class="eje v">1</text><text x="122.5" y="146" text-anchor="middle" class="eje">2013</text><rect x="147.8" y="124.9" width="28.4" height="7.1" fill="#d9d9d9"/><text x="161.9" y="121.9" text-anchor="middle" class="eje v">3</text><text x="161.9" y="146" text-anchor="middle" class="eje">2014</text><rect x="187.2" y="120.2" width="28.4" height="11.8" fill="#d9d9d9"/><rect x="193.4" y="120.2" width="15.9" height="11.8" fill="#f2a900"/><text x="201.4" y="117.2" text-anchor="middle" class="eje v">5</text><text x="201.4" y="146" text-anchor="middle" class="eje">2015</text><rect x="226.6" y="106.0" width="28.4" height="26.0" fill="#d9d9d9"/><rect x="232.8" y="117.8" width="15.9" height="14.2" fill="#f2a900"/><text x="240.8" y="103.0" text-anchor="middle" class="eje v">11</text><text x="240.8" y="146" text-anchor="middle" class="eje">2016</text><rect x="266.0" y="120.2" width="28.4" height="11.8" fill="#d9d9d9"/><rect x="272.2" y="122.6" width="15.9" height="9.4" fill="#f2a900"/><text x="280.2" y="117.2" text-anchor="middle" class="eje v">5</text><text x="280.2" y="146" text-anchor="middle" class="eje">2017</text><rect x="305.4" y="87.2" width="28.4" height="44.8" fill="#d9d9d9"/><rect x="311.6" y="115.5" width="15.9" height="16.5" fill="#f2a900"/><text x="319.6" y="84.2" text-anchor="middle" class="eje v">19</text><text x="319.6" y="146" text-anchor="middle" class="eje">2018</text><rect x="344.8" y="94.2" width="28.4" height="37.8" fill="#d9d9d9"/><rect x="351.1" y="110.8" width="15.9" height="21.2" fill="#f2a900"/><text x="359.0" y="91.2" text-anchor="middle" class="eje v">16</text><text x="359.0" y="146" text-anchor="middle" class="eje">2019</text><rect x="384.2" y="77.7" width="28.4" height="54.3" fill="#d9d9d9"/><rect x="390.5" y="106.0" width="15.9" height="26.0" fill="#f2a900"/><text x="398.4" y="74.7" text-anchor="middle" class="eje v">23</text><text x="398.4" y="146" text-anchor="middle" class="eje">2020</text><rect x="423.6" y="28.2" width="28.4" height="103.8" fill="#d9d9d9"/><rect x="429.9" y="70.6" width="15.9" height="61.4" fill="#f2a900"/><text x="437.8" y="25.2" text-anchor="middle" class="eje v">44</text><text x="437.8" y="146" text-anchor="middle" class="eje">2021</text><rect x="463.0" y="54.1" width="28.4" height="77.9" fill="#d9d9d9"/><rect x="469.3" y="94.2" width="15.9" height="37.8" fill="#f2a900"/><text x="477.2" y="51.1" text-anchor="middle" class="eje v">33</text><text x="477.2" y="146" text-anchor="middle" class="eje">2022</text><rect x="502.5" y="65.9" width="28.4" height="66.1" fill="#d9d9d9"/><rect x="508.7" y="89.5" width="15.9" height="42.5" fill="#f2a900"/><text x="516.6" y="62.9" text-anchor="middle" class="eje v">28</text><text x="516.6" y="146" text-anchor="middle" class="eje">2023</text><rect x="541.9" y="35.2" width="28.4" height="96.8" fill="#d9d9d9"/><rect x="548.1" y="87.2" width="15.9" height="44.8" fill="#f2a900"/><text x="556.1" y="32.2" text-anchor="middle" class="eje v">41</text><text x="556.1" y="146" text-anchor="middle" class="eje">2024</text><rect x="581.3" y="56.5" width="28.4" height="75.5" fill="#d9d9d9"/><rect x="587.5" y="96.6" width="15.9" height="35.4" fill="#f2a900"/><text x="595.5" y="53.5" text-anchor="middle" class="eje v">32</text><text x="595.5" y="146" text-anchor="middle" class="eje">2025</text><rect x="620.7" y="16.4" width="28.4" height="115.6" fill="#d9d9d9"/><rect x="626.9" y="73.0" width="15.9" height="59.0" fill="#f2a900"/><text x="634.9" y="13.4" text-anchor="middle" class="eje v">49</text><text x="634.9" y="146" text-anchor="middle" class="eje">2026</text><rect x="660.1" y="124.9" width="28.4" height="7.1" fill="#d9d9d9"/><rect x="666.3" y="129.6" width="15.9" height="2.4" fill="#f2a900"/><text x="674.3" y="121.9" text-anchor="middle" class="eje v">3</text><text x="674.3" y="146" text-anchor="middle" class="eje">2027</text></svg><div class="leyenda"><span><i style="background:#d9d9d9"></i>Todos los proyectos</span><span><i style="background:#f2a900"></i>Con participación española</span></div><p class="nota">52 proyectos con inicio en 2026 o después ya están firmados; el año en curso no está cerrado.</p></figure>
+      <text x="20" y="17" text-anchor="end" class="eje">50</text><rect x="29.5" y="129.6" width="28.4" height="2.4" fill="#d9d9d9"/><text x="43.7" y="126.6" text-anchor="middle" class="eje v">1</text><text x="43.7" y="146" text-anchor="middle" class="eje">2011</text><rect x="68.9" y="127.3" width="28.4" height="4.7" fill="#d9d9d9"/><text x="83.1" y="124.3" text-anchor="middle" class="eje v">2</text><text x="83.1" y="146" text-anchor="middle" class="eje">2012</text><rect x="108.3" y="129.6" width="28.4" height="2.4" fill="#a8a8a8"/><text x="122.5" y="126.6" text-anchor="middle" class="eje v">1</text><text x="122.5" y="146" text-anchor="middle" class="eje">2013</text><rect x="147.8" y="129.6" width="28.4" height="2.4" fill="#d9d9d9"/><rect x="147.8" y="127.3" width="28.4" height="2.4" fill="#666666"/><rect x="147.8" y="124.9" width="28.4" height="2.4" fill="#a8a8a8"/><text x="161.9" y="121.9" text-anchor="middle" class="eje v">3</text><text x="161.9" y="146" text-anchor="middle" class="eje">2014</text><rect x="187.2" y="120.2" width="28.4" height="11.8" fill="#666666"/><text x="201.4" y="117.2" text-anchor="middle" class="eje v">5</text><text x="201.4" y="146" text-anchor="middle" class="eje">2015</text><rect x="226.6" y="110.8" width="28.4" height="21.2" fill="#666666"/><rect x="226.6" y="106.0" width="28.4" height="4.7" fill="#a8a8a8"/><text x="240.8" y="103.0" text-anchor="middle" class="eje v">11</text><text x="240.8" y="146" text-anchor="middle" class="eje">2016</text><rect x="266.0" y="120.2" width="28.4" height="11.8" fill="#666666"/><text x="280.2" y="117.2" text-anchor="middle" class="eje v">5</text><text x="280.2" y="146" text-anchor="middle" class="eje">2017</text><rect x="305.4" y="89.5" width="28.4" height="42.5" fill="#666666"/><rect x="305.4" y="87.2" width="28.4" height="2.4" fill="#a8a8a8"/><text x="319.6" y="84.2" text-anchor="middle" class="eje v">19</text><text x="319.6" y="146" text-anchor="middle" class="eje">2018</text><rect x="344.8" y="99.0" width="28.4" height="33.0" fill="#666666"/><rect x="344.8" y="94.2" width="28.4" height="4.7" fill="#a8a8a8"/><text x="359.0" y="91.2" text-anchor="middle" class="eje v">16</text><text x="359.0" y="146" text-anchor="middle" class="eje">2019</text><rect x="384.2" y="82.4" width="28.4" height="49.6" fill="#666666"/><rect x="384.2" y="77.7" width="28.4" height="4.7" fill="#a8a8a8"/><text x="398.4" y="74.7" text-anchor="middle" class="eje v">23</text><text x="398.4" y="146" text-anchor="middle" class="eje">2020</text><rect x="423.6" y="40.0" width="28.4" height="92.0" fill="#666666"/><rect x="423.6" y="28.2" width="28.4" height="11.8" fill="#a8a8a8"/><text x="437.8" y="25.2" text-anchor="middle" class="eje v">44</text><text x="437.8" y="146" text-anchor="middle" class="eje">2021</text><rect x="463.0" y="124.9" width="28.4" height="7.1" fill="#666666"/><rect x="463.0" y="61.2" width="28.4" height="63.7" fill="#111111"/><rect x="463.0" y="54.1" width="28.4" height="7.1" fill="#a8a8a8"/><text x="477.2" y="51.1" text-anchor="middle" class="eje v">33</text><text x="477.2" y="146" text-anchor="middle" class="eje">2022</text><rect x="502.5" y="75.4" width="28.4" height="56.6" fill="#111111"/><rect x="502.5" y="65.9" width="28.4" height="9.4" fill="#a8a8a8"/><text x="516.6" y="62.9" text-anchor="middle" class="eje v">28</text><text x="516.6" y="146" text-anchor="middle" class="eje">2023</text><rect x="541.9" y="35.2" width="28.4" height="96.8" fill="#111111"/><text x="556.1" y="32.2" text-anchor="middle" class="eje v">41</text><text x="556.1" y="146" text-anchor="middle" class="eje">2024</text><rect x="581.3" y="68.3" width="28.4" height="63.7" fill="#111111"/><rect x="581.3" y="56.5" width="28.4" height="11.8" fill="#a8a8a8"/><text x="595.5" y="53.5" text-anchor="middle" class="eje v">32</text><text x="595.5" y="146" text-anchor="middle" class="eje">2025</text><rect x="620.7" y="37.6" width="28.4" height="94.4" fill="#111111"/><rect x="620.7" y="16.4" width="28.4" height="21.2" fill="#a8a8a8"/><text x="634.9" y="13.4" text-anchor="middle" class="eje v">49</text><text x="634.9" y="146" text-anchor="middle" class="eje">2026</text><rect x="660.1" y="124.9" width="28.4" height="7.1" fill="#111111"/><text x="674.3" y="121.9" text-anchor="middle" class="eje v">3</text><text x="674.3" y="146" text-anchor="middle" class="eje">2027</text></svg><div class="leyenda"><span><i style="background:#d9d9d9"></i>FP7</span><span><i style="background:#666666"></i>Horizonte 2020</span><span><i style="background:#111111"></i>Horizonte Europa</span><span><i style="background:#a8a8a8"></i>LIFE</span></div><p class="nota">52 proyectos con inicio en 2026 o después ya están firmados; el año en curso no está cerrado.</p></figure>
     <div class="rejilla">
-      <figure><figcaption>Proyectos por país</figcaption><svg viewBox="0 0 330 178" role="img"><text x="111" y="14" text-anchor="end" class="et res">España</text>
+      <figure><figcaption>Proyectos por país</figcaption><svg viewBox="0 0 330 222" role="img"><text x="111" y="14" text-anchor="end" class="et res">España</text>
       <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#f2a900"/>
       <text x="289.0" y="14" class="val">164</text><text x="111" y="36" text-anchor="end" class="et">Italia</text>
       <rect x="118" y="26" width="150.8" height="15" rx="1.5" fill="#2b2b2b"/>
@@ -136,7 +151,70 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <rect x="118" y="136" width="90.1" height="15" rx="1.5" fill="#2b2b2b"/>
       <text x="213.1" y="146" class="val">89</text><text x="111" y="168" text-anchor="end" class="et">Grecia</text>
       <rect x="118" y="158" width="76.9" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="199.9" y="168" class="val">76</text></svg><p class="nota">75 países participan.</p></figure>
+      <text x="199.9" y="168" class="val">76</text><text x="111" y="190" text-anchor="end" class="et">Austria</text>
+      <rect x="118" y="180" width="71.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="194.9" y="190" class="val">71</text><text x="111" y="212" text-anchor="end" class="et">Portugal</text>
+      <rect x="118" y="202" width="71.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="194.9" y="212" class="val">71</text></svg><p class="nota">Con al menos una entidad del país en el consorcio.</p></figure>
+      <figure><figcaption>Áreas temáticas con más proyectos</figcaption><svg viewBox="0 0 360 178" role="img"><text x="171" y="14" text-anchor="end" class="et">Acciones Marie Skłodowska-Curie</text>
+      <rect x="178" y="4" width="136.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="319.0" y="14" class="val">80</text><text x="171" y="36" text-anchor="end" class="et">Alimentación, bioeconomía y medio ambiente</text>
+      <rect x="178" y="26" width="62.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="245.9" y="36" class="val">37</text><text x="171" y="58" text-anchor="end" class="et">Cultura, creatividad y sociedad inclusiva</text>
+      <rect x="178" y="48" width="62.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="245.9" y="58" class="val">37</text><text x="171" y="80" text-anchor="end" class="et">Ciencia con y para la sociedad</text>
+      <rect x="178" y="70" width="44.2" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="227.2" y="80" class="val">26</text><text x="171" y="102" text-anchor="end" class="et">Consejo Europeo de Investigación</text>
+      <rect x="178" y="92" width="34.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="217.0" y="102" class="val">20</text><text x="171" y="124" text-anchor="end" class="et">Naturaleza y biodiversidad (LIFE)</text>
+      <rect x="178" y="114" width="34.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="217.0" y="124" class="val">20</text><text x="171" y="146" text-anchor="end" class="et">Acción climática y medio ambiente</text>
+      <rect x="178" y="136" width="25.5" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="208.5" y="146" class="val">15</text><text x="171" y="168" text-anchor="end" class="et">Gobernanza e información ambiental</text>
+      <rect x="178" y="158" width="15.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="198.3" y="168" class="val">9</text></svg><p class="nota">Subprograma bajo el que se financia, con el nombre oficial de CORDIS traducido.</p></figure>
+      <figure><figcaption>Proyectos por programa</figcaption><svg viewBox="0 0 330 90" role="img"><text x="103" y="14" text-anchor="end" class="et">FP7</text>
+      <rect x="110" y="4" width="4.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="119.3" y="14" class="val">4</text><text x="103" y="36" text-anchor="end" class="et">Horizonte 2020</text>
+      <rect x="110" y="26" width="123.5" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="238.5" y="36" class="val">115</text><text x="103" y="58" text-anchor="end" class="et">Horizonte Europa</text>
+      <rect x="110" y="48" width="174.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="58" class="val">162</text><text x="103" y="80" text-anchor="end" class="et">LIFE</text>
+      <rect x="110" y="70" width="37.6" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="152.6" y="80" class="val">35</text></svg></figure>
+      <figure><figcaption>Aportación de la UE por programa (M€)</figcaption><svg viewBox="0 0 330 90" role="img"><text x="103" y="14" text-anchor="end" class="et">FP7</text>
+      <rect x="110" y="4" width="1.9" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="116.9" y="14" class="val">6,8</text><text x="103" y="36" text-anchor="end" class="et">Horizonte 2020</text>
+      <rect x="110" y="26" width="78.3" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="193.3" y="36" class="val">282,1</text><text x="103" y="58" text-anchor="end" class="et">Horizonte Europa</text>
+      <rect x="110" y="48" width="174.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="58" class="val">627,2</text><text x="103" y="80" text-anchor="end" class="et">LIFE</text>
+      <rect x="110" y="70" width="27.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="142.0" y="80" class="val">97,4</text></svg><p class="nota">Aportación máxima de la UE a los proyectos; LIFE, la contribución de CINEA.</p></figure>
+    </div>
+  </div>
+  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>2 / 5</b></footer>
+</section>
+
+<section class="pagina">
+  <header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>España en los programas europeos</span></header>
+  <div class="cuerpo">
+    <h2>España está en 164 de los 316 proyectos: 52 % del total</h2>
+    <p class="entra">Un proyecto se atribuye a España si tiene al menos una entidad española en su consorcio.</p>
+    <div class="posicion">
+      <div><b>1.º</b><span>en proyectos<br>(164)</span></div>
+      <div><b>1.º</b><span>en proyectos coordinados<br>(54)</span></div>
+      <div><b>1.º</b><span>en contribución neta UE<br>(111,8 M€)</span></div>
+      <div><b>244</b><span>entidades españolas<br>distintas</span></div>
+    </div>
+    <figure><figcaption>Proyectos por año de inicio</figcaption><svg viewBox="0 0 700 140" role="img"><line x1="24" x2="694" y1="120" y2="120" stroke="#8a8a8a" stroke-width=".6"/>
+      <text x="20" y="123" text-anchor="end" class="eje">0</text><line x1="24" x2="694" y1="98.8" y2="98.8" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="101.8" text-anchor="end" class="eje">10</text><line x1="24" x2="694" y1="77.6" y2="77.6" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="80.6" text-anchor="end" class="eje">20</text><line x1="24" x2="694" y1="56.400000000000006" y2="56.400000000000006" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="59.400000000000006" text-anchor="end" class="eje">30</text><line x1="24" x2="694" y1="35.19999999999999" y2="35.19999999999999" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="38.19999999999999" text-anchor="end" class="eje">40</text><line x1="24" x2="694" y1="14" y2="14" stroke="#d9d9d9" stroke-width=".6"/>
+      <text x="20" y="17" text-anchor="end" class="eje">50</text><rect x="29.5" y="117.9" width="28.4" height="2.1" fill="#d9d9d9"/><rect x="35.8" y="117.9" width="15.9" height="2.1" fill="#f2a900"/><text x="43.7" y="114.9" text-anchor="middle" class="eje v">1</text><text x="43.7" y="134" text-anchor="middle" class="eje">2011</text><rect x="68.9" y="115.8" width="28.4" height="4.2" fill="#d9d9d9"/><rect x="75.2" y="117.9" width="15.9" height="2.1" fill="#f2a900"/><text x="83.1" y="112.8" text-anchor="middle" class="eje v">2</text><text x="83.1" y="134" text-anchor="middle" class="eje">2012</text><rect x="108.3" y="117.9" width="28.4" height="2.1" fill="#d9d9d9"/><text x="122.5" y="114.9" text-anchor="middle" class="eje v">1</text><text x="122.5" y="134" text-anchor="middle" class="eje">2013</text><rect x="147.8" y="113.6" width="28.4" height="6.4" fill="#d9d9d9"/><text x="161.9" y="110.6" text-anchor="middle" class="eje v">3</text><text x="161.9" y="134" text-anchor="middle" class="eje">2014</text><rect x="187.2" y="109.4" width="28.4" height="10.6" fill="#d9d9d9"/><rect x="193.4" y="109.4" width="15.9" height="10.6" fill="#f2a900"/><text x="201.4" y="106.4" text-anchor="middle" class="eje v">5</text><text x="201.4" y="134" text-anchor="middle" class="eje">2015</text><rect x="226.6" y="96.7" width="28.4" height="23.3" fill="#d9d9d9"/><rect x="232.8" y="107.3" width="15.9" height="12.7" fill="#f2a900"/><text x="240.8" y="93.7" text-anchor="middle" class="eje v">11</text><text x="240.8" y="134" text-anchor="middle" class="eje">2016</text><rect x="266.0" y="109.4" width="28.4" height="10.6" fill="#d9d9d9"/><rect x="272.2" y="111.5" width="15.9" height="8.5" fill="#f2a900"/><text x="280.2" y="106.4" text-anchor="middle" class="eje v">5</text><text x="280.2" y="134" text-anchor="middle" class="eje">2017</text><rect x="305.4" y="79.7" width="28.4" height="40.3" fill="#d9d9d9"/><rect x="311.6" y="105.2" width="15.9" height="14.8" fill="#f2a900"/><text x="319.6" y="76.7" text-anchor="middle" class="eje v">19</text><text x="319.6" y="134" text-anchor="middle" class="eje">2018</text><rect x="344.8" y="86.1" width="28.4" height="33.9" fill="#d9d9d9"/><rect x="351.1" y="100.9" width="15.9" height="19.1" fill="#f2a900"/><text x="359.0" y="83.1" text-anchor="middle" class="eje v">16</text><text x="359.0" y="134" text-anchor="middle" class="eje">2019</text><rect x="384.2" y="71.2" width="28.4" height="48.8" fill="#d9d9d9"/><rect x="390.5" y="96.7" width="15.9" height="23.3" fill="#f2a900"/><text x="398.4" y="68.2" text-anchor="middle" class="eje v">23</text><text x="398.4" y="134" text-anchor="middle" class="eje">2020</text><rect x="423.6" y="26.7" width="28.4" height="93.3" fill="#d9d9d9"/><rect x="429.9" y="64.9" width="15.9" height="55.1" fill="#f2a900"/><text x="437.8" y="23.7" text-anchor="middle" class="eje v">44</text><text x="437.8" y="134" text-anchor="middle" class="eje">2021</text><rect x="463.0" y="50.0" width="28.4" height="70.0" fill="#d9d9d9"/><rect x="469.3" y="86.1" width="15.9" height="33.9" fill="#f2a900"/><text x="477.2" y="47.0" text-anchor="middle" class="eje v">33</text><text x="477.2" y="134" text-anchor="middle" class="eje">2022</text><rect x="502.5" y="60.6" width="28.4" height="59.4" fill="#d9d9d9"/><rect x="508.7" y="81.8" width="15.9" height="38.2" fill="#f2a900"/><text x="516.6" y="57.6" text-anchor="middle" class="eje v">28</text><text x="516.6" y="134" text-anchor="middle" class="eje">2023</text><rect x="541.9" y="33.1" width="28.4" height="86.9" fill="#d9d9d9"/><rect x="548.1" y="79.7" width="15.9" height="40.3" fill="#f2a900"/><text x="556.1" y="30.1" text-anchor="middle" class="eje v">41</text><text x="556.1" y="134" text-anchor="middle" class="eje">2024</text><rect x="581.3" y="52.2" width="28.4" height="67.8" fill="#d9d9d9"/><rect x="587.5" y="88.2" width="15.9" height="31.8" fill="#f2a900"/><text x="595.5" y="49.2" text-anchor="middle" class="eje v">32</text><text x="595.5" y="134" text-anchor="middle" class="eje">2025</text><rect x="620.7" y="16.1" width="28.4" height="103.9" fill="#d9d9d9"/><rect x="626.9" y="67.0" width="15.9" height="53.0" fill="#f2a900"/><text x="634.9" y="13.1" text-anchor="middle" class="eje v">49</text><text x="634.9" y="134" text-anchor="middle" class="eje">2026</text><rect x="660.1" y="113.6" width="28.4" height="6.4" fill="#d9d9d9"/><rect x="666.3" y="117.9" width="15.9" height="2.1" fill="#f2a900"/><text x="674.3" y="110.6" text-anchor="middle" class="eje v">3</text><text x="674.3" y="134" text-anchor="middle" class="eje">2027</text></svg><div class="leyenda"><span><i style="background:#d9d9d9"></i>Todos los proyectos</span><span><i style="background:#f2a900"></i>Con participación española</span></div></figure>
+    <div class="rejilla">
       <figure><figcaption>Proyectos coordinados</figcaption><svg viewBox="0 0 330 178" role="img"><text x="111" y="14" text-anchor="end" class="et res">España</text>
       <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#f2a900"/>
       <text x="289.0" y="14" class="val">54</text><text x="111" y="36" text-anchor="end" class="et">Italia</text>
@@ -188,10 +266,21 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <text x="158.7" y="146" class="val">6</text><text x="123" y="168" text-anchor="end" class="et">UPF</text>
       <rect x="130" y="158" width="23.7" height="15" rx="1.5" fill="#2b2b2b"/>
       <text x="158.7" y="168" class="val">6</text></svg></figure>
+      <figure><figcaption>Tipo de entidad española</figcaption><svg viewBox="0 0 330 112" role="img"><text x="123" y="14" text-anchor="end" class="et">Empresas</text>
+      <rect x="130" y="4" width="154.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="289.0" y="14" class="val">71</text><text x="123" y="36" text-anchor="end" class="et">Organismos de investigación</text>
+      <rect x="130" y="26" width="115.0" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="250.0" y="36" class="val">53</text><text x="123" y="58" text-anchor="end" class="et">Educación superior</text>
+      <rect x="130" y="48" width="82.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="217.4" y="58" class="val">38</text><text x="123" y="80" text-anchor="end" class="et">Otras entidades</text>
+      <rect x="130" y="70" width="69.4" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="204.4" y="80" class="val">32</text><text x="123" y="102" text-anchor="end" class="et">Organismos públicos</text>
+      <rect x="130" y="92" width="65.1" height="15" rx="1.5" fill="#2b2b2b"/>
+      <text x="200.1" y="102" class="val">30</text></svg><p class="nota">Entidades distintas (244).</p></figure>
     </div>
-    <div class="programas"><div><b>Horizonte Europa</b><span>83 de 162 · 51 %</span></div><div><b>Horizonte 2020</b><span>64 de 115 · 56 %</span></div><div><b>LIFE</b><span>15 de 35 · 43 %</span></div><div><b>FP7</b><span>2 de 4 · 50 %</span></div></div>
+    <div class="programas"><div><b>Horizonte Europa</b><span>España en 83 de 162 · 51 %</span></div><div><b>Horizonte 2020</b><span>España en 64 de 115 · 56 %</span></div><div><b>LIFE</b><span>España en 15 de 35 · 43 %</span></div><div><b>FP7</b><span>España en 2 de 4 · 50 %</span></div></div>
   </div>
-  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>2 / 4</b></footer>
+  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>3 / 5</b></footer>
 </section>
 
 <section class="pagina">
@@ -262,7 +351,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <text x="140.8" y="80" class="val">10</text></svg><p class="nota">Un proyecto entra por la primera vía que cumple. «Palabras clave»: las declara el proyecto (en la AEI, sin poder comprobarlas aquí).</p></figure>
     </div>
   </div>
-  <footer class="pie"><span>Datos: AEI (22 de octubre de 2026), FECYT y Fundación Biodiversidad · leídos de sus webs públicas</span><b>3 / 4</b></footer>
+  <footer class="pie"><span>Datos: AEI (22 de octubre de 2026), FECYT y Fundación Biodiversidad · leídos de sus webs públicas</span><b>4 / 5</b></footer>
 </section>
 
 <section class="pagina">
@@ -315,7 +404,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       </div>
     </div>
   </div>
-  <footer class="pie"><span>Generado el 22 de octubre de 2026 · Elaboración: Ibercivis</span><b>4 / 4</b></footer>
+  <footer class="pie"><span>Generado el 22 de octubre de 2026 · Elaboración: Ibercivis</span><b>5 / 5</b></footer>
 </section>
 </body>
 </html>
