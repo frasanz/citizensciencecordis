@@ -250,7 +250,7 @@ function pintar() {
     + '<a href="https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas" target="_blank" rel="noopener">AEI</a>, '
     + '<a href="https://www.convocatoria.fecyt.es/Publico/Convocatoria/ConvocatoriasAnteriores.aspx" target="_blank" rel="noopener">FECYT</a> y '
     + '<a href="https://fundacion-biodiversidad.es/buscador-de-proyectos/" target="_blank" rel="noopener">Fundación Biodiversidad</a>'
-    + ' · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
+    + ' (reutilizados según la Ley 37/2007) · Análisis independiente de Fundación Ibercivis, no es una publicación oficial de los financiadores · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
 }
 
 function pintarGrafico() {

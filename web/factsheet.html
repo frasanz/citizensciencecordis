@@ -67,6 +67,11 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
 .kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
 .kp span{font-size:7.6pt;color:var(--gris)}
+.tendencia{margin:-1mm 0 4mm;padding:2.2mm 3.5mm;background:var(--fondo);border-left:2.2pt solid var(--ambar);font-size:8.6pt}
+table.tab{width:100%;border-collapse:collapse;font-size:7.8pt;margin:0 0 1.5mm}
+.tab th{text-align:left;font-size:7pt;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--negro);padding:1.3mm 2mm}
+.tab td{padding:.95mm 2mm;border-bottom:.5pt solid var(--claro);vertical-align:top}
+.tab th.n,.tab td.n{text-align:right;white-space:nowrap}
 .posicion{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:0 0 4mm}
 .posicion div{background:var(--negro);color:#fff;padding:2.6mm 3mm;border-bottom:2.2pt solid var(--ambar)}
 .posicion b{display:block;font-size:19pt;line-height:1.05;color:var(--ambar);font-weight:700}
@@ -84,9 +89,12 @@ table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm
 .dos p{margin:0 0 2mm;font-size:8.6pt}
 .web{font-size:12pt!important;font-weight:700;font-family:"Source Serif 4",Georgia,serif;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
 .peq{font-size:7.4pt!important;color:var(--gris)}
-.abajo{margin-top:7mm;padding-top:5mm;border-top:.6pt solid var(--claro)}
-table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2mm}
-.fechas td{padding:1.4mm 0;border-bottom:.6pt solid var(--claro)}
+.cascada{margin:0 0 3mm;padding:2.6mm 4mm}
+.cascada p{font-size:8.2pt!important}
+.legal{margin:2.5mm 0 0;font-size:7.2pt;color:var(--gris);line-height:1.4}
+.abajo{margin-top:3mm;padding-top:3mm;border-top:.6pt solid var(--claro)}
+table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm}
+.fechas td{padding:.9mm 0;border-bottom:.6pt solid var(--claro)}
 .fechas td:last-child{text-align:right;font-weight:800;color:var(--negro);white-space:nowrap}
 .cita{background:var(--fondo);border-left:3pt solid var(--ambar);padding:3mm 4mm;font-size:8.4pt!important}
 </style>
@@ -113,10 +121,10 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
-      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 5.</p>
+      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 6.</p>
     </div>
   </div>
-  <footer class="pie"><span>Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis</span><b>1 / 5</b></footer>
+  <footer class="pie"><span>Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis</span><b>1 / 6</b></footer>
 </section>
 
 <section class="pagina">
@@ -217,7 +225,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <text x="179.8" y="190" class="val">2,5</text></svg><p class="nota">CORDIS y LIFE (el 90 % de la contribución de LIFE está atribuido a un socio); Erasmus+ y Europa Creativa quedan fuera.</p></figure>
     </div>
   </div>
-  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>2 / 5</b></footer>
+  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>2 / 6</b></footer>
 </section>
 
 <section class="pagina">
@@ -238,6 +246,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <text x="20" y="59.400000000000006" text-anchor="end" class="eje">30</text><line x1="24" x2="694" y1="35.19999999999999" y2="35.19999999999999" stroke="#d9d9d9" stroke-width=".6"/>
       <text x="20" y="38.19999999999999" text-anchor="end" class="eje">40</text><line x1="24" x2="694" y1="14" y2="14" stroke="#d9d9d9" stroke-width=".6"/>
       <text x="20" y="17" text-anchor="end" class="eje">50</text><rect x="29.5" y="117.9" width="28.4" height="2.1" fill="#d9d9d9"/><rect x="35.8" y="117.9" width="15.9" height="2.1" fill="#f2a900"/><text x="43.7" y="114.9" text-anchor="middle" class="eje v">1</text><text x="43.7" y="134" text-anchor="middle" class="eje">2011</text><rect x="68.9" y="115.8" width="28.4" height="4.2" fill="#d9d9d9"/><rect x="75.2" y="117.9" width="15.9" height="2.1" fill="#f2a900"/><text x="83.1" y="112.8" text-anchor="middle" class="eje v">2</text><text x="83.1" y="134" text-anchor="middle" class="eje">2012</text><rect x="108.3" y="117.9" width="28.4" height="2.1" fill="#d9d9d9"/><text x="122.5" y="114.9" text-anchor="middle" class="eje v">1</text><text x="122.5" y="134" text-anchor="middle" class="eje">2013</text><rect x="147.8" y="113.6" width="28.4" height="6.4" fill="#d9d9d9"/><text x="161.9" y="110.6" text-anchor="middle" class="eje v">3</text><text x="161.9" y="134" text-anchor="middle" class="eje">2014</text><rect x="187.2" y="109.4" width="28.4" height="10.6" fill="#d9d9d9"/><rect x="193.4" y="109.4" width="15.9" height="10.6" fill="#f2a900"/><text x="201.4" y="106.4" text-anchor="middle" class="eje v">5</text><text x="201.4" y="134" text-anchor="middle" class="eje">2015</text><rect x="226.6" y="96.7" width="28.4" height="23.3" fill="#d9d9d9"/><rect x="232.8" y="107.3" width="15.9" height="12.7" fill="#f2a900"/><text x="240.8" y="93.7" text-anchor="middle" class="eje v">11</text><text x="240.8" y="134" text-anchor="middle" class="eje">2016</text><rect x="266.0" y="109.4" width="28.4" height="10.6" fill="#d9d9d9"/><rect x="272.2" y="111.5" width="15.9" height="8.5" fill="#f2a900"/><text x="280.2" y="106.4" text-anchor="middle" class="eje v">5</text><text x="280.2" y="134" text-anchor="middle" class="eje">2017</text><rect x="305.4" y="79.7" width="28.4" height="40.3" fill="#d9d9d9"/><rect x="311.6" y="105.2" width="15.9" height="14.8" fill="#f2a900"/><text x="319.6" y="76.7" text-anchor="middle" class="eje v">19</text><text x="319.6" y="134" text-anchor="middle" class="eje">2018</text><rect x="344.8" y="86.1" width="28.4" height="33.9" fill="#d9d9d9"/><rect x="351.1" y="100.9" width="15.9" height="19.1" fill="#f2a900"/><text x="359.0" y="83.1" text-anchor="middle" class="eje v">16</text><text x="359.0" y="134" text-anchor="middle" class="eje">2019</text><rect x="384.2" y="71.2" width="28.4" height="48.8" fill="#d9d9d9"/><rect x="390.5" y="96.7" width="15.9" height="23.3" fill="#f2a900"/><text x="398.4" y="68.2" text-anchor="middle" class="eje v">23</text><text x="398.4" y="134" text-anchor="middle" class="eje">2020</text><rect x="423.6" y="26.7" width="28.4" height="93.3" fill="#d9d9d9"/><rect x="429.9" y="64.9" width="15.9" height="55.1" fill="#f2a900"/><text x="437.8" y="23.7" text-anchor="middle" class="eje v">44</text><text x="437.8" y="134" text-anchor="middle" class="eje">2021</text><rect x="463.0" y="50.0" width="28.4" height="70.0" fill="#d9d9d9"/><rect x="469.3" y="86.1" width="15.9" height="33.9" fill="#f2a900"/><text x="477.2" y="47.0" text-anchor="middle" class="eje v">33</text><text x="477.2" y="134" text-anchor="middle" class="eje">2022</text><rect x="502.5" y="60.6" width="28.4" height="59.4" fill="#d9d9d9"/><rect x="508.7" y="81.8" width="15.9" height="38.2" fill="#f2a900"/><text x="516.6" y="57.6" text-anchor="middle" class="eje v">28</text><text x="516.6" y="134" text-anchor="middle" class="eje">2023</text><rect x="541.9" y="33.1" width="28.4" height="86.9" fill="#d9d9d9"/><rect x="548.1" y="79.7" width="15.9" height="40.3" fill="#f2a900"/><text x="556.1" y="30.1" text-anchor="middle" class="eje v">41</text><text x="556.1" y="134" text-anchor="middle" class="eje">2024</text><rect x="581.3" y="52.2" width="28.4" height="67.8" fill="#d9d9d9"/><rect x="587.5" y="88.2" width="15.9" height="31.8" fill="#f2a900"/><text x="595.5" y="49.2" text-anchor="middle" class="eje v">32</text><text x="595.5" y="134" text-anchor="middle" class="eje">2025</text><rect x="620.7" y="16.1" width="28.4" height="103.9" fill="#d9d9d9"/><rect x="626.9" y="67.0" width="15.9" height="53.0" fill="#f2a900"/><text x="634.9" y="13.1" text-anchor="middle" class="eje v">49</text><text x="634.9" y="134" text-anchor="middle" class="eje">2026</text><rect x="660.1" y="113.6" width="28.4" height="6.4" fill="#d9d9d9"/><rect x="666.3" y="117.9" width="15.9" height="2.1" fill="#f2a900"/><text x="674.3" y="110.6" text-anchor="middle" class="eje v">3</text><text x="674.3" y="134" text-anchor="middle" class="eje">2027</text></svg><div class="leyenda"><span><i style="background:#d9d9d9"></i>Todos los proyectos</span><span><i style="background:#f2a900"></i>Con participación española</span></div></figure>
+    <p class="tendencia">Proyectos con participación española iniciados en 2023–2025: <b>52</b> de 101; en 2020–2022: <b>53</b> de 100. La presencia es alta pero no ha crecido entre los dos periodos.</p>
     <div class="rejilla">
       <figure><figcaption>Proyectos coordinados</figcaption><svg viewBox="0 0 330 178" role="img"><text x="111" y="14" text-anchor="end" class="et res">España</text>
       <rect x="118" y="4" width="166.0" height="15" rx="1.5" fill="#f2a900"/>
@@ -273,38 +282,29 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <text x="184.9" y="146" class="val">46,5</text><text x="111" y="168" text-anchor="end" class="et">Grecia</text>
       <rect x="118" y="158" width="61.6" height="15" rx="1.5" fill="#2b2b2b"/>
       <text x="184.6" y="168" class="val">46,2</text></svg><p class="nota">CORDIS y LIFE (LIFE: 90 % atribuido a un socio, del panel público de CINEA). Mínimo: lo no atribuido no se reparte.</p></figure>
-      <figure><figcaption>Entidades españolas con más proyectos</figcaption><svg viewBox="0 0 330 178" role="img"><text x="123" y="14" text-anchor="end" class="et">CSIC</text>
-      <rect x="130" y="4" width="154.0" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="289.0" y="14" class="val">39</text><text x="123" y="36" text-anchor="end" class="et">Fundacion Ibercivis</text>
-      <rect x="130" y="26" width="47.4" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="182.4" y="36" class="val">12</text><text x="123" y="58" text-anchor="end" class="et">Science For Change, Sl</text>
-      <rect x="130" y="48" width="39.5" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="174.5" y="58" class="val">10</text><text x="123" y="80" text-anchor="end" class="et">CREAF - CERCA</text>
-      <rect x="130" y="70" width="31.6" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="166.6" y="80" class="val">8</text><text x="123" y="102" text-anchor="end" class="et">UAB</text>
-      <rect x="130" y="92" width="31.6" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="166.6" y="102" class="val">8</text><text x="123" y="124" text-anchor="end" class="et">UB</text>
-      <rect x="130" y="114" width="27.6" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="162.6" y="124" class="val">7</text><text x="123" y="146" text-anchor="end" class="et">UPC</text>
-      <rect x="130" y="136" width="23.7" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="158.7" y="146" class="val">6</text><text x="123" y="168" text-anchor="end" class="et">UPF</text>
-      <rect x="130" y="158" width="23.7" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="158.7" y="168" class="val">6</text></svg></figure>
-      <figure><figcaption>Tipo de entidad española</figcaption><svg viewBox="0 0 330 112" role="img"><text x="123" y="14" text-anchor="end" class="et">Empresas</text>
-      <rect x="130" y="4" width="154.0" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="289.0" y="14" class="val">71</text><text x="123" y="36" text-anchor="end" class="et">Organismos de investigación</text>
-      <rect x="130" y="26" width="115.0" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="250.0" y="36" class="val">53</text><text x="123" y="58" text-anchor="end" class="et">Educación superior</text>
-      <rect x="130" y="48" width="82.4" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="217.4" y="58" class="val">38</text><text x="123" y="80" text-anchor="end" class="et">Otras entidades</text>
-      <rect x="130" y="70" width="69.4" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="204.4" y="80" class="val">32</text><text x="123" y="102" text-anchor="end" class="et">Organismos públicos</text>
-      <rect x="130" y="92" width="65.1" height="15" rx="1.5" fill="#2b2b2b"/>
-      <text x="200.1" y="102" class="val">30</text></svg><p class="nota">Entidades distintas (244).</p></figure>
     </div>
     <div class="programas"><div><b>Horizonte Europa</b><span>España en 83 de 162 · 51 %</span></div><div><b>Horizonte 2020</b><span>España en 64 de 115 · 56 %</span></div><div><b>LIFE</b><span>España en 15 de 35 · 43 %</span></div><div><b>FP7</b><span>España en 2 de 4 · 50 %</span></div></div>
   </div>
-  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>3 / 5</b></footer>
+  <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>3 / 6</b></footer>
+</section>
+
+<section class="pagina">
+  <header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>España en los programas europeos</span></header>
+  <div class="cuerpo">
+    <h2>Quién participa, en qué áreas y qué coordina España ahora</h2>
+    <p class="entra">Las entidades españolas presentes en los proyectos europeos, las áreas donde España tiene más peso y los proyectos que coordina y siguen en marcha.</p>
+    <h3 class="subtit">Áreas temáticas con más proyectos con España</h3>
+    <table class="tab "><thead><tr><th>Área (subprograma de CORDIS)</th><th class="n">Con España</th><th class="n">Total</th><th class="n">% con España</th></tr></thead><tbody><tr><td>Alimentación, bioeconomía y medio ambiente</td><td class="n">25</td><td class="n">37</td><td class="n">68 %</td></tr><tr><td>Cultura, creatividad y sociedad inclusiva</td><td class="n">24</td><td class="n">37</td><td class="n">65 %</td></tr><tr><td>Ciencia con y para la sociedad</td><td class="n">21</td><td class="n">26</td><td class="n">81 %</td></tr><tr><td>Acciones Marie Skłodowska-Curie</td><td class="n">18</td><td class="n">80</td><td class="n">23 %</td></tr><tr><td>Acción climática y medio ambiente</td><td class="n">10</td><td class="n">15</td><td class="n">67 %</td></tr><tr><td>Infraestructuras de investigación</td><td class="n">8</td><td class="n">9</td><td class="n">89 %</td></tr><tr><td>Salud</td><td class="n">8</td><td class="n">8</td><td class="n">100 %</td></tr><tr><td>Naturaleza y biodiversidad (LIFE)</td><td class="n">7</td><td class="n">20</td><td class="n">35 %</td></tr></tbody></table>
+    <p class="nota">Subprograma de la base legal del proyecto, con el nombre oficial de CORDIS traducido; las acciones de un mismo área en distintos programas marco se suman.</p>
+    <h3 class="subtit">Entidades españolas más activas</h3>
+    <table class="tab "><thead><tr><th>Entidad</th><th>Tipo</th><th class="n">Proyectos</th><th class="n">Coordina</th><th>Programas</th><th class="n">Contribución UE</th></tr></thead><tbody><tr><td>CSIC</td><td>Centro de investigación</td><td class="n">39</td><td class="n">6</td><td>HE · H2020 · LIFE</td><td class="n">14,2 M€</td></tr><tr><td>Fundacion Ibercivis</td><td>Centro de investigación</td><td class="n">12</td><td class="n">2</td><td>HE · H2020 · LIFE</td><td class="n">3,0 M€</td></tr><tr><td>Science For Change, Sl</td><td>Empresa</td><td class="n">10</td><td class="n">1</td><td>HE · H2020</td><td class="n">2,8 M€</td></tr><tr><td>CREAF - CERCA</td><td>Centro de investigación</td><td class="n">8</td><td class="n">1</td><td>HE · H2020 · LIFE</td><td class="n">2,6 M€</td></tr><tr><td>UAB</td><td>Universidad</td><td class="n">8</td><td class="n">—</td><td>HE · H2020</td><td class="n">2,1 M€</td></tr><tr><td>UB</td><td>Universidad</td><td class="n">7</td><td class="n">2</td><td>HE · H2020 · LIFE</td><td class="n">1,6 M€</td></tr><tr><td>UPC</td><td>Universidad</td><td class="n">6</td><td class="n">2</td><td>HE · H2020</td><td class="n">2,8 M€</td></tr><tr><td>UPF</td><td>Universidad</td><td class="n">6</td><td class="n">1</td><td>HE · H2020</td><td class="n">3,1 M€</td></tr><tr><td>UVEG</td><td>Universidad</td><td class="n">5</td><td class="n">3</td><td>HE</td><td class="n">1,7 M€</td></tr></tbody></table>
+    <p class="nota">Las entidades se identifican por su PIC, estable entre programas: el CSIC cuenta como una sola. La contribución es la asignada en el acuerdo de subvención, no lo pagado; en LIFE, la que atribuye el panel de CINEA. Entidades españolas distintas: 244.</p>
+    <h3 class="subtit">Proyectos en curso coordinados desde España</h3>
+    <p class="entra" style="margin-bottom:2mm">20 proyectos en marcha a 22 de octubre de 2026, con 71,8 M€ de aportación de la UE al conjunto de cada proyecto. Los mayores, por número de miembros:</p>
+    <table class="tab "><thead><tr><th>Proyecto</th><th>Coordinador</th><th>Programa</th><th class="n">Miembros</th><th class="n">Países</th><th class="n">Fin</th><th class="n">Aportación UE</th></tr></thead><tbody><tr><td><b>SEAMPHONI</b></td><td>UPC</td><td>HE</td><td class="n">24</td><td class="n">13</td><td class="n">05/2029</td><td class="n">11,1 M€</td></tr><tr><td><b>EFFECTIVE</b></td><td>Asociacion Centro Tecnologico…</td><td>HE</td><td class="n">22</td><td class="n">12</td><td class="n">05/2027</td><td class="n">8,2 M€</td></tr><tr><td><b>SEA4FUTURE</b></td><td>Universidad de Alicante</td><td>HE</td><td class="n">22</td><td class="n">9</td><td class="n">12/2029</td><td class="n">8,0 M€</td></tr><tr><td><b>BlueGreen Governance</b></td><td>UVEG</td><td>HE</td><td class="n">17</td><td class="n">9</td><td class="n">12/2027</td><td class="n">5,0 M€</td></tr><tr><td><b>CERBERUS</b></td><td>UPV</td><td>HE</td><td class="n">14</td><td class="n">4</td><td class="n">12/2027</td><td class="n">4,9 M€</td></tr><tr><td><b>RIECS-Concept</b></td><td>Fundacion Ibercivis</td><td>HE</td><td class="n">13</td><td class="n">8</td><td class="n">12/2027</td><td class="n">3,0 M€</td></tr><tr><td><b>MAGNO</b></td><td>Idener Research &amp; Development…</td><td>HE</td><td class="n">12</td><td class="n">7</td><td class="n">06/2027</td><td class="n">4,0 M€</td></tr></tbody></table>
+    <p class="nota">En curso: empezó y no ha terminado a la fecha de los datos. Miembros: coordinador, beneficiarios, entidades afiliadas y socios asociados. Aportación UE: la del proyecto entero, no solo la parte española.</p>
+  </div>
+  <footer class="pie"><span>Datos: CORDIS y base de datos pública de LIFE · CC BY 4.0</span><b>4 / 6</b></footer>
 </section>
 
 <section class="pagina">
@@ -375,7 +375,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
       <text x="140.8" y="80" class="val">10</text></svg><p class="nota">Un proyecto entra por la primera vía que cumple. «Palabras clave»: las declara el proyecto (en la AEI, sin poder comprobarlas aquí).</p></figure>
     </div>
   </div>
-  <footer class="pie"><span>Datos: AEI (22 de octubre de 2026), FECYT y Fundación Biodiversidad · leídos de sus webs públicas</span><b>4 / 5</b></footer>
+  <footer class="pie"><span>Datos: AEI (22 de octubre de 2026), FECYT y Fundación Biodiversidad · leídos de sus webs públicas</span><b>5 / 6</b></footer>
 </section>
 
 <section class="pagina">
@@ -411,6 +411,10 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
         <p class="peq">Datos de CORDIS: Comisión Europea, CC BY 4.0. Datos de LIFE: CINEA. Datos de AEI, FECYT y Fundación Biodiversidad: webs públicas de cada entidad.</p>
       </div>
     </div>
+    <div class="recuadro cascada">
+      <h3>Lo que estas cifras no recogen</h3>
+      <p><b>Financiación en cascada.</b> Muchos proyectos europeos reparten parte de su presupuesto, mediante convocatorias abiertas a terceros, entre asociaciones, ayuntamientos, escuelas o grupos ciudadanos. Esas entidades no figuran como participantes en CORDIS ni en LIFE, así que no cuentan aquí: la huella real de la ciencia ciudadana sobre el terreno es mayor que la de estas tablas. Tampoco se incluyen la financiación regional, local o privada ni otros programas europeos (Interreg, Erasmus+ y Europa Creativa quedan fuera de las cifras de partida).</p>
+    </div>
     <div class="dos abajo">
       <div>
         <h3>Fecha de los datos</h3>
@@ -427,8 +431,9 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2
         <p class="cita">Ibercivis (2026). <i>La ciencia ciudadana en España. Factsheet</i>. Datos de CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad a 22 de octubre de 2026. frasanz.github.io/citizensciencecordis</p>
       </div>
     </div>
+    <p class="legal">Datos de CORDIS y LIFE: © Unión Europea, CC BY 4.0. Datos de AEI, FECYT y Fundación Biodiversidad: reutilizados según la Ley 37/2007, sobre reutilización de la información del sector público. Este documento es un análisis independiente elaborado por Fundación Ibercivis y no es una publicación oficial de ninguno de los financiadores.</p>
   </div>
-  <footer class="pie"><span>Generado el 22 de octubre de 2026 · Elaboración: Ibercivis</span><b>5 / 5</b></footer>
+  <footer class="pie"><span>Generado el 22 de octubre de 2026 · Elaboración: Ibercivis</span><b>6 / 6</b></footer>
 </section>
 </body>
 </html>

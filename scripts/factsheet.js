@@ -161,7 +161,7 @@ const mensajes = [
 
 // ---------- piezas de pagina ----------
 const cabecera = (n, kicker) => `<header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>${esc(kicker)}</span></header>`;
-const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / 5</b></footer>`;
+const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / 6</b></footer>`;
 const kpi = (valor, et, sub = '') => `<div class="kpi"><div class="n">${valor}</div><div class="e">${et}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
 const fig = (titulo, cuerpo, nota = '') => `<figure><figcaption>${titulo}</figcaption>${cuerpo}${nota ? `<p class="nota">${nota}</p>` : ''}</figure>`;
 
@@ -187,7 +187,7 @@ const p1 = `
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
-      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 5.</p>
+      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 6.</p>
     </div>
   </div>
   ${pie(1, 'Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis')}
@@ -206,7 +206,9 @@ const AREA = [[/^Marie/i, 'Acciones Marie Skłodowska-Curie'], [/^Food, Bioecono
   [/^Culture, creativity/i, 'Cultura, creatividad y sociedad inclusiva'], [/^European Research Council/i, 'Consejo Europeo de Investigación'],
   [/^Nature$/i, 'Naturaleza y biodiversidad (LIFE)'], [/^Climate action/i, 'Acción climática y medio ambiente'],
   [/^(Science with and for society|Integrate society)/i, 'Ciencia con y para la sociedad'], [/^Environmental Governance/i, 'Gobernanza e información ambiental'],
-  [/^Health/i, 'Salud'], [/^Digital/i, 'Digital, industria y espacio']];
+  [/^Health/i, 'Salud'], [/^Reforming and enhancing/i, 'Reforma y mejora del sistema europeo de I+i'],
+  [/^Food security/i, 'Seguridad alimentaria, agricultura, mar y bioeconomía'], [/^Widening participation/i, 'Ampliar la participación y difundir la excelencia'],
+  [/^Research infrastructures/i, 'Infraestructuras de investigación'], [/^Digital, Industry/i, 'Digital, industria y espacio'], [/^Civil Security/i, 'Seguridad civil'], [/^Digital/i, 'Digital, industria y espacio']];
 const areas = new Map();
 for (const f of eu.familias) {
   const m = AREA.find(([re]) => re.test(f.etiqueta));
@@ -244,6 +246,45 @@ const p2 = `
   ${pie(2, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
 </section>`;
 
+// ---------- tablas de la segunda pagina de España en Europa ----------
+const TIPO_ENT = { PRC: 'Empresa', REC: 'Centro de investigación', HES: 'Universidad', PUB: 'Entidad pública', OTH: 'Otra', '': 'Sin clasificar' };
+const CORTO_PROG = { HORIZON: 'HE', H2020: 'H2020', LIFE: 'LIFE', FP7: 'FP7' };
+const celda = (v, cls = '') => `<td${cls ? ` class="${cls}"` : ''}>${v}</td>`;
+const tabla = (cabs, filas, { cls = '' } = {}) => `<table class="tab ${cls}"><thead><tr>${cabs.map(([t, c]) => `<th${c ? ` class="${c}"` : ''}>${esc(t)}</th>`).join('')}</tr></thead><tbody>${filas.join('')}</tbody></table>`;
+
+// Areas tematicas con la parte de España (SwafS aparece con dos etiquetas de CORDIS: se suman).
+const areasEs = new Map();
+for (const f of eu.familias) {
+  const m = AREA.find(([re]) => re.test(f.etiqueta));
+  const k = m ? m[1] : corto(f.etiqueta, 40);
+  const a = areasEs.get(k) || { proyectos: 0, foco: 0 };
+  a.proyectos += f.proyectos; a.foco += f.foco;
+  areasEs.set(k, a);
+}
+const filasAreas = [...areasEs].map(([et, a]) => ({ et, ...a })).sort((a, b) => b.foco - a.foco || b.proyectos - a.proyectos).slice(0, 8)
+  .map((a) => `<tr>${celda(esc(a.et))}${celda(num(a.foco), 'n')}${celda(num(a.proyectos), 'n')}${celda(pct(100 * a.foco / a.proyectos), 'n')}</tr>`);
+
+const nombreEntidad = (e) => (e.siglas && e.siglas.length <= 14 ? e.siglas : titular(e.nombre));
+const filasEntidades = top(eu.entidadesFoco, 9, (e) => e.proyectos).map((e) => `<tr>${celda(esc(corto(nombreEntidad(e), 34)))}${celda(esc(TIPO_ENT[e.tipo] ?? e.tipo))}${celda(num(e.proyectos), 'n')}${celda(e.coordinados ? num(e.coordinados) : '—', 'n')}${celda(esc(e.programas.map((c) => CORTO_PROG[c] || c).join(' · ')))}${celda(e.aportacionNeta ? meur(e.aportacionNeta) : '—', 'n')}</tr>`);
+
+// Proyectos en curso coordinados desde España: arrancados y sin terminar a la fecha de los datos.
+const hoyIso = new Date(eu.meta.generado).toISOString().slice(0, 10);
+const miembros = new Map();
+for (const x of eu.participaciones) { const m = miembros.get(x.proyecto) || { n: 0, paises: new Set() }; m.n++; if (x.pais) m.paises.add(x.pais); miembros.set(x.proyecto, m); }
+const enCurso = eu.proyectos.filter((x) => x.coordinaFoco && x.inicio && x.inicio <= hoyIso && x.fin && x.fin >= hoyIso)
+  .map((x) => ({ ...x, miembros: miembros.get(x.id)?.n ?? 0, paisesN: miembros.get(x.id)?.paises.size ?? 0 }))
+  .sort((a, b) => b.miembros - a.miembros || b.aportacionUE - a.aportacionUE);
+const aportEnCurso = enCurso.reduce((s, x) => s + x.aportacionUE, 0);
+const mesAnio = (iso) => (iso ? `${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '');
+const filasEnCurso = enCurso.slice(0, 7).map((x) => `<tr>${celda(`<b>${esc(corto(x.acronimo || x.titulo, 24))}</b>`)}${celda(esc(corto(nombreEntidad({ siglas: x.coordinador, nombre: x.coordinadorNombre || x.coordinador }), 30)))}${celda(esc(CORTO_PROG[x.programa] || x.programa))}${celda(num(x.miembros), 'n')}${celda(num(x.paisesN), 'n')}${celda(mesAnio(x.fin), 'n')}${celda(meur(x.aportacionUE), 'n')}</tr>`);
+
+// Tendencia: proyectos con España que arrancan en los tres ultimos años cerrados frente a los tres anteriores.
+const anioCierre = new Date(eu.meta.generado).getUTCFullYear() - 1;
+const tramo = (a, b) => ({ con: eu.proyectos.filter((x) => x.entidadesFoco.length && x.anio >= a && x.anio <= b).length, tot: eu.proyectos.filter((x) => x.anio >= a && x.anio <= b).length });
+const tAct = tramo(anioCierre - 2, anioCierre), tAnt = tramo(anioCierre - 5, anioCierre - 3);
+const dif = tAct.con - tAnt.con;
+const fraseTendencia = `Proyectos con participación española iniciados en ${anioCierre - 2}–${anioCierre}: <b>${num(tAct.con)}</b> de ${num(tAct.tot)}; en ${anioCierre - 5}–${anioCierre - 3}: <b>${num(tAnt.con)}</b> de ${num(tAnt.tot)}. ${Math.abs(dif) <= 3 ? 'La presencia es alta pero no ha crecido entre los dos periodos.' : dif > 0 ? 'La presencia ha crecido entre los dos periodos.' : 'La presencia ha bajado entre los dos periodos.'}`;
+
 // ---------- pagina 3: España en Europa ----------
 const tiposEnt = eu.tipos.filter((t) => t.codigo).slice(0, 5).map((t) => ({ et: t.etiqueta.replace('Entidades con animo de lucro', 'Empresas').replace('Educacion superior o secundaria', 'Educación superior').replace('Organismos de investigacion', 'Organismos de investigación').replace('Organismos publicos', 'Organismos públicos'), v: t.entidades }));
 const p3 = `
@@ -260,16 +301,36 @@ const p3 = `
     </div>
     ${fig('Proyectos por año de inicio', columnas(serieEu.map((s) => ({ anio: s.anio, total: s.total, foco: s.foco })), [{ clave: 'total', color: C.claro }, { clave: 'foco', color: C.ambar }], { superpuesta: true, alto: 140 })
       + leyenda([{ et: 'Todos los proyectos', color: C.claro }, { et: 'Con participación española', color: C.ambar }]))}
+    <p class="tendencia">${fraseTendencia}</p>
     <div class="rejilla">
       ${fig('Proyectos coordinados', barrasH(topPaises('coordinados')))}
       ${fig('Contribución neta de la UE (M€)', barrasH(top(paises, 8, (p) => p.aportacionNeta).map((p) => ({ et: pais(p.pais), v: p.aportacionNeta / 1e6, resaltar: p.pais === 'ES' })), { fmt: (v) => dec1(v) }),
         `CORDIS y LIFE${pctLife != null ? ` (LIFE: ${pctLife} % atribuido a un socio, del panel público de CINEA)` : ''}. Mínimo: lo no atribuido no se reparte.`)}
-      ${fig('Entidades españolas con más proyectos', barrasH(entEs, { etAncho: 130 }))}
-      ${fig('Tipo de entidad española', barrasH(tiposEnt, { etAncho: 130 }), `Entidades distintas (${num(es.organizaciones)}).`)}
     </div>
     <div class="programas">${eu.programas.map((p) => `<div><b>${esc(p.etiqueta)}</b><span>España en ${num(p.foco)} de ${num(p.proyectos)} · ${pct(p.pctFoco)}</span></div>`).join('')}</div>
   </div>
   ${pie(3, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
+</section>`;
+
+// ---------- pagina 4: quien participa ----------
+const p3b = `
+<section class="pagina">
+  ${cabecera(4, 'España en los programas europeos')}
+  <div class="cuerpo">
+    <h2>Quién participa, en qué áreas y qué coordina España ahora</h2>
+    <p class="entra">Las entidades españolas presentes en los proyectos europeos, las áreas donde España tiene más peso y los proyectos que coordina y siguen en marcha.</p>
+    <h3 class="subtit">Áreas temáticas con más proyectos con España</h3>
+    ${tabla([['Área (subprograma de CORDIS)', ''], ['Con España', 'n'], ['Total', 'n'], ['% con España', 'n']], filasAreas)}
+    <p class="nota">Subprograma de la base legal del proyecto, con el nombre oficial de CORDIS traducido; las acciones de un mismo área en distintos programas marco se suman.</p>
+    <h3 class="subtit">Entidades españolas más activas</h3>
+    ${tabla([['Entidad', ''], ['Tipo', ''], ['Proyectos', 'n'], ['Coordina', 'n'], ['Programas', ''], ['Contribución UE', 'n']], filasEntidades)}
+    <p class="nota">Las entidades se identifican por su PIC, estable entre programas: el CSIC cuenta como una sola. La contribución es la asignada en el acuerdo de subvención, no lo pagado; en LIFE, la que atribuye el panel de CINEA. Entidades españolas distintas: ${num(es.organizaciones)}.</p>
+    <h3 class="subtit">Proyectos en curso coordinados desde España</h3>
+    <p class="entra" style="margin-bottom:2mm">${num(enCurso.length)} proyectos en marcha a ${esc(fecha(eu.meta.generado))}, con ${meur(aportEnCurso)} de aportación de la UE al conjunto de cada proyecto. Los mayores, por número de miembros:</p>
+    ${tabla([['Proyecto', ''], ['Coordinador', ''], ['Programa', ''], ['Miembros', 'n'], ['Países', 'n'], ['Fin', 'n'], ['Aportación UE', 'n']], filasEnCurso)}
+    <p class="nota">En curso: empezó y no ha terminado a la fecha de los datos. Miembros: coordinador, beneficiarios, entidades afiliadas y socios asociados. Aportación UE: la del proyecto entero, no solo la parte española.</p>
+  </div>
+  ${pie(4, `Datos: CORDIS y base de datos pública de LIFE · CC BY 4.0`)}
 </section>`;
 
 // ---------- pagina 3: convocatorias españolas ----------
@@ -279,7 +340,7 @@ const VIA = { titulo: 'En el título', resumen: 'En el resumen', 'palabras-clave
 const viasTop = nac.vias.map((v) => ({ et: VIA[v.clave] || v.clave, v: v.ayudas }));
 const p4 = `
 <section class="pagina">
-  ${cabecera(4, 'Convocatorias españolas')}
+  ${cabecera(5, 'Convocatorias españolas')}
   <div class="cuerpo">
     <h2>${num(S.totalAyudas)} proyectos y ${meur(S.importeTotal)} concedidos desde ${S.desde}</h2>
     <p class="entra">AEI, FECYT y Fundación Biodiversidad. Aquí la unidad es la ayuda a una entidad, sin consorcios. Se cuentan solo proyectos: ${num(personal?.ayudas ?? 0)} contratos de personal y ${num(estancia?.ayudas ?? 0)} estancias de la AEI (${meur((personal?.importe ?? 0) + (estancia?.importe ?? 0))}) quedan fuera porque heredan el texto de su proyecto.</p>
@@ -295,14 +356,14 @@ const p4 = `
       ${fig('Cómo entra cada proyecto en el criterio', barrasH(viasTop, { etAncho: 130 }), 'Un proyecto entra por la primera vía que cumple. «Palabras clave»: las declara el proyecto (en la AEI, sin poder comprobarlas aquí).')}
     </div>
   </div>
-  ${pie(4, `Datos: AEI (${esc(fecha(fuenteEs.AEI.actualizado))}), FECYT y Fundación Biodiversidad · leídos de sus webs públicas`)}
+  ${pie(5, `Datos: AEI (${esc(fecha(fuenteEs.AEI.actualizado))}), FECYT y Fundación Biodiversidad · leídos de sus webs públicas`)}
 </section>`;
 
 // ---------- pagina 4: metodologia ----------
 const fl = (f) => nacTodo.meta.filtro.frases.map((x) => `<i>${esc(x)}</i>`).join(', ');
 const p5 = `
 <section class="pagina">
-  ${cabecera(5, 'Metodología y límites')}
+  ${cabecera(6, 'Metodología y límites')}
   <div class="cuerpo">
     <h2>Cómo se han obtenido estas cifras</h2>
     <p class="entra">Todo se recalcula con un único comando a partir de los datos públicos de cada financiador; el código y los CSV de partida están en abierto.</p>
@@ -334,6 +395,10 @@ const p5 = `
         <p class="peq">Datos de CORDIS: Comisión Europea, CC BY 4.0. Datos de LIFE: CINEA. Datos de AEI, FECYT y Fundación Biodiversidad: webs públicas de cada entidad.</p>
       </div>
     </div>
+    <div class="recuadro cascada">
+      <h3>Lo que estas cifras no recogen</h3>
+      <p><b>Financiación en cascada.</b> Muchos proyectos europeos reparten parte de su presupuesto, mediante convocatorias abiertas a terceros, entre asociaciones, ayuntamientos, escuelas o grupos ciudadanos. Esas entidades no figuran como participantes en CORDIS ni en LIFE, así que no cuentan aquí: la huella real de la ciencia ciudadana sobre el terreno es mayor que la de estas tablas. Tampoco se incluyen la financiación regional, local o privada ni otros programas europeos (Interreg, Erasmus+ y Europa Creativa quedan fuera de las cifras de partida).</p>
+    </div>
     <div class="dos abajo">
       <div>
         <h3>Fecha de los datos</h3>
@@ -350,8 +415,9 @@ const p5 = `
         <p class="cita">Ibercivis (${anioActual}). <i>La ciencia ciudadana en España. Factsheet</i>. Datos de CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad a ${esc(fecha(eu.meta.generado))}. frasanz.github.io/citizensciencecordis</p>
       </div>
     </div>
+    <p class="legal">Datos de CORDIS y LIFE: © Unión Europea, CC BY 4.0. Datos de AEI, FECYT y Fundación Biodiversidad: reutilizados según la Ley 37/2007, sobre reutilización de la información del sector público. Este documento es un análisis independiente elaborado por Fundación Ibercivis y no es una publicación oficial de ninguno de los financiadores.</p>
   </div>
-  ${pie(5, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
+  ${pie(6, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
 </section>`;
 
 // ---------- documento ----------
@@ -416,6 +482,11 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
 .kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
 .kp span{font-size:7.6pt;color:var(--gris)}
+.tendencia{margin:-1mm 0 4mm;padding:2.2mm 3.5mm;background:var(--fondo);border-left:2.2pt solid var(--ambar);font-size:8.6pt}
+table.tab{width:100%;border-collapse:collapse;font-size:7.8pt;margin:0 0 1.5mm}
+.tab th{text-align:left;font-size:7pt;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--negro);padding:1.3mm 2mm}
+.tab td{padding:.95mm 2mm;border-bottom:.5pt solid var(--claro);vertical-align:top}
+.tab th.n,.tab td.n{text-align:right;white-space:nowrap}
 .posicion{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:0 0 4mm}
 .posicion div{background:var(--negro);color:#fff;padding:2.6mm 3mm;border-bottom:2.2pt solid var(--ambar)}
 .posicion b{display:block;font-size:19pt;line-height:1.05;color:var(--ambar);font-weight:700}
@@ -433,9 +504,12 @@ table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm
 .dos p{margin:0 0 2mm;font-size:8.6pt}
 .web{font-size:12pt!important;font-weight:700;font-family:"Source Serif 4",Georgia,serif;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
 .peq{font-size:7.4pt!important;color:var(--gris)}
-.abajo{margin-top:7mm;padding-top:5mm;border-top:.6pt solid var(--claro)}
-table.fechas{width:100%;border-collapse:collapse;font-size:8.4pt;margin-bottom:2mm}
-.fechas td{padding:1.4mm 0;border-bottom:.6pt solid var(--claro)}
+.cascada{margin:0 0 3mm;padding:2.6mm 4mm}
+.cascada p{font-size:8.2pt!important}
+.legal{margin:2.5mm 0 0;font-size:7.2pt;color:var(--gris);line-height:1.4}
+.abajo{margin-top:3mm;padding-top:3mm;border-top:.6pt solid var(--claro)}
+table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm}
+.fechas td{padding:.9mm 0;border-bottom:.6pt solid var(--claro)}
 .fechas td:last-child{text-align:right;font-weight:800;color:var(--negro);white-space:nowrap}
 .cita{background:var(--fondo);border-left:3pt solid var(--ambar);padding:3mm 4mm;font-size:8.4pt!important}
 `;
@@ -454,6 +528,7 @@ const html = `<!doctype html>
 ${p1}
 ${p2}
 ${p3}
+${p3b}
 ${p4}
 ${p5}
 </body>

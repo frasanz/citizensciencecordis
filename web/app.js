@@ -282,7 +282,7 @@ function pintar() {
 
   el('#pie').innerHTML = `Generado el ${fecha(r.meta.generado)} · `
     + 'Datos: <a href="https://cordis.europa.eu/datalab/browse.html" target="_blank" rel="noopener">CORDIS</a>, '
-    + 'Comisión Europea (CC BY 4.0) · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
+    + 'Comisión Europea (© Unión Europea, CC BY 4.0), y base de datos de LIFE (CINEA) · Análisis independiente de Fundación Ibercivis, no es una publicación oficial de los financiadores · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
 }
 
 function pintarGrafico() {
@@ -302,6 +302,7 @@ function limitesEuropa(fuentes) {
   const li = [
     '<b>El criterio es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.',
     `<b>El dinero por país cubre CORDIS y casi todo LIFE.</b> En LIFE sale del panel público de CINEA${lf?.importesPanel ? `: el ${Math.round(100 * lf.importesPanel.asignado / lf.importesPanel.total)} % de la contribución de la UE (${millones(lf.importesPanel.asignado)} de ${millones(lf.importesPanel.total)}) está atribuido a un socio concreto; el resto, de socios sin identificador o con nombre que no casa, queda sin asignar y no se reparte` : ''}. Erasmus+ y Europa Creativa dan un importe por proyecto, no por socio: no entran en la contribución neta de cada país, solo en la aportación total de la UE. Las cifras por país son, por tanto, un mínimo.`,
+    '<b>No recoge la financiación en cascada.</b> Muchos proyectos reparten parte de su presupuesto, con convocatorias abiertas a terceros, entre asociaciones, ayuntamientos, escuelas o grupos ciudadanos. Esas entidades no son participantes en CORDIS ni en LIFE, así que no cuentan aquí: la huella real de la ciencia ciudadana es mayor que la de estas cifras.',
     '<b>Países de LIFE.</b> Se deducen cruzando fuentes y las participaciones que no se pueden resolver quedan sin país (columna <code>pais_via</code> del CSV).',
   ];
   if (er || cr) {
