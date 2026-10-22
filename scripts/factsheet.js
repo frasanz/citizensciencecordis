@@ -147,6 +147,11 @@ const estancia = nacTodo.tipos.find((t) => t.clave === 'estancia');
 const finEtiqueta = { AEI: 'AEI', FECYT: 'FECYT', FB: 'Fundación Biodiversidad' };
 const concentracion = (ccaaTop[0].ayudas + ccaaTop[1].ayudas) / S.totalAyudas * 100;
 
+// Resumen total en euros: contribucion neta de la UE a entidades españolas (CORDIS y LIFE) mas lo concedido por los
+// financiadores estatales (solo proyectos). Son dos medidas distintas y no se han restado solapes: es un minimo.
+const totalEur = es.aportacionNeta + S.importeTotal;
+const pctEu = Math.round(100 * es.aportacionNeta / totalEur);
+
 const mensajes = [
   { n: 1,
     t: `España está en el ${pct(es.pctSobreTotal)} de los proyectos europeos`,
@@ -173,6 +178,14 @@ const p1 = `
     <div class="kicker">Factsheet · ${esc(fecha(eu.meta.generado))}</div>
     <h1>La ciencia ciudadana<br>en <em>España</em></h1>
     <p class="sub">Qué proyectos financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos abiertos de cada financiador.</p>
+    <div class="total">
+      <div class="tn"><b>${meur(totalEur)}</b><span>de financiación pública identificada para entidades españolas</span></div>
+      <div class="td">
+        <div class="barra"><i style="width:${pctEu}%"></i></div>
+        <p><b>${meur(es.aportacionNeta)}</b> de la UE (CORDIS y LIFE) · ${pctEu} %</p>
+        <p><b>${meur(S.importeTotal)}</b> concedidos por convocatorias estatales (AEI, FECYT, Fundación Biodiversidad) · ${100 - pctEu} %</p>
+      </div>
+    </div>
     <div class="kpis">
       ${kpi(num(es.proyectos), 'proyectos europeos con participación española', `${pct(es.pctSobreTotal)} de los ${num(E.totalProyectos)} del criterio`)}
       ${kpi(num(es.coordinados), 'proyectos europeos coordinados desde España', `${meur(es.aportacionNeta)} de contribución neta UE`)}
@@ -187,7 +200,7 @@ const p1 = `
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
-      <p>Un proyecto cuenta como de <b>ciencia ciudadana</b> si la expresión aparece en su título o en su descripción: es una medida textual y reproducible, no un juicio de calidad. Los programas europeos y las convocatorias españolas tienen unidades distintas (un proyecto con todo su consorcio, frente a una ayuda a una entidad), así que <b>sus cifras no se suman</b>. Detalle en la página 6.</p>
+      <p>Un proyecto es de <b>ciencia ciudadana</b> si la expresión aparece en su título o descripción: una medida textual y reproducible, no un juicio de calidad. <b>El número de proyectos no se suma</b> (un proyecto con consorcio no es una ayuda a una entidad). El importe total junta la contribución neta de la UE a entidades españolas y lo concedido por financiadores estatales, sin restar posibles solapes, y es un <b>mínimo</b>: no incluye Erasmus+, Europa Creativa ni Kohesio, ni lo no atribuible de LIFE. Detalle en la página 6.</p>
     </div>
   </div>
   ${pie(1, 'Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis')}
@@ -382,7 +395,7 @@ const p5 = `
         <h3>Qué hay que tener en cuenta</h3>
         <ul>
           <li><b>La medida es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.</li>
-          <li><b>Dos ámbitos, dos unidades.</b> Un proyecto europeo con su consorcio no equivale a una ayuda nacional; no se suman.</li>
+          <li><b>Dos ámbitos, dos unidades.</b> Un proyecto europeo con su consorcio no equivale a una ayuda nacional: el número de proyectos no se suma. El importe total de la portada junta ambas medidas y es un mínimo.</li>
           <li><b>Contratos de la AEI fuera.</b> Los contratos de personal y las estancias repiten el texto de su proyecto y se cuentan aparte.</li>
           <li><b>Datos incompletos.</b> En LIFE ${pctLife != null ? `el ${pctLife} % del dinero` : 'parte del dinero'} está atribuido a un socio concreto y el resto no se reparte; la Fundación Biodiversidad no publica el importe en muchas fichas.</li>
           <li><b>Cada dato lleva su vía.</b> Qué criterio hizo entrar cada proyecto y cómo se dedujo su país o comunidad queda anotado.</li>
@@ -457,24 +470,31 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .programas span{color:var(--gris)}
 
 /* portada */
-.portada .banda{background:var(--negro);color:#fff;padding:14mm 14mm 12mm;flex:none}
-.portada .logo{height:19mm;display:block;margin-bottom:12mm}
+.portada .banda{background:var(--negro);color:#fff;padding:11mm 14mm 9mm;flex:none}
+.portada .logo{height:15mm;display:block;margin-bottom:6mm}
 .portada .kicker{font-size:8.6pt;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--ambar);margin-bottom:3mm}
-.portada h1{font-size:36pt;line-height:1.06;margin:0 0 5mm;font-weight:700;letter-spacing:-.01em}
+.portada h1{font-size:30pt;line-height:1.06;margin:0 0 3mm;font-weight:700;letter-spacing:-.01em}
 .portada h1 em{font-style:normal;color:var(--ambar)}
-.portada .sub{max-width:140mm;margin:0 0 11mm;font-size:10.5pt;color:#cfcfcf;line-height:1.5}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:5mm 8mm}
+.portada .sub{max-width:140mm;margin:0 0 5mm;font-size:10.5pt;color:#cfcfcf;line-height:1.5}
+.total{display:grid;grid-template-columns:auto 1fr;gap:7mm;align-items:center;margin:0 0 5mm;padding:3mm 5mm;border:1.4pt solid var(--ambar);border-radius:1.5mm}
+.total .tn b{display:block;font-family:"Source Serif 4",Georgia,serif;font-size:31pt;line-height:1;color:var(--ambar);font-weight:700}
+.total .tn span{display:block;margin-top:1.4mm;max-width:46mm;font-size:8.6pt;line-height:1.3;color:#fff;font-weight:700}
+.total .barra{height:3.2mm;background:#4a4a4a;border-radius:1mm;overflow:hidden;margin-bottom:2mm}
+.total .barra i{display:block;height:100%;background:var(--ambar)}
+.total .td p{margin:.6mm 0;font-size:8.2pt;color:#d9d9d9}
+.total .td p b{color:#fff}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm}
 .kpi{border-top:1.6pt solid var(--ambar);padding-top:2.4mm}
-.kpi .n{font-size:27pt;font-weight:700;line-height:1;color:#fff}
+.kpi .n{font-size:24pt;font-weight:700;line-height:1;color:#fff}
 .kpi .e{font-size:9pt;color:#fff;margin-top:1.6mm;line-height:1.3;font-weight:700}
 .kpi .s{font-size:8pt;color:var(--medio);margin-top:.8mm}
-.portada .cuerpo{padding-top:9mm}
-.mensajes{list-style:none;margin:3mm 0 6mm;padding:0;display:grid;gap:4mm}
+.portada .cuerpo{padding-top:6mm}
+.mensajes{list-style:none;margin:2mm 0 4mm;padding:0;display:grid;gap:3mm}
 .mensajes li{display:flex;gap:4mm;align-items:flex-start}
 .mensajes .num{flex:none;width:9mm;height:9mm;border-radius:50%;background:var(--negro);color:var(--ambar);font-weight:800;font-size:12pt;display:flex;align-items:center;justify-content:center}
-.mensajes p{margin:0;font-size:9pt;color:var(--carbon)}
-.recuadro{background:var(--fondo);border-left:3pt solid var(--ambar);padding:3.5mm 5mm}
-.recuadro p{margin:0;font-size:8.6pt}
+.mensajes p{margin:0;font-size:8.6pt;color:var(--carbon)}
+.recuadro{background:var(--fondo);border-left:3pt solid var(--ambar);padding:2.6mm 4.5mm}
+.recuadro p{margin:0;font-size:8pt}
 
 /* panorama y posicion */
 .subtit{font-size:9.5pt;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin:1mm 0 3mm;font-family:inherit}
