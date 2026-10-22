@@ -100,7 +100,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
   <h3>Criterio</h3>
   <p>El mismo que en CORDIS, aplicado al título y a la descripción de la ficha. La mención en <em>Results</em> no cuenta: se redacta al terminar el proyecto, no al firmarlo. Los registros de LIFE se transforman a la misma forma que los de CORDIS, de manera que todos los indicadores se calculan con el mismo código.</p>
   <h3>El país de los socios</h3>
-  <p>LIFE no publica el PIC de los socios, su tipo, el reparto del dinero ni, desde 2021, su país. El país se resuelve con una cadena, de la fuente más fiable a la menos, y se anota la vía en cada participación:</p>
+  <p>La API de LIFE no publica el PIC de los socios, su tipo, el reparto del dinero ni, desde 2021, su país. El dinero por socio se saca de otra fuente (más abajo) y el país se resuelve con una cadena, de la fuente más fiable a la menos, y se anota la vía en cada participación:</p>
   <ol>
     <li><code>ficha</code>: lo trae la ficha (socios hasta 2020 y coordinadores).</li>
     <li><code>cordis</code>: el mismo nombre legal existe en <code>organization.csv</code> de CORDIS. Un nombre visto con dos países distintos se descarta.</li>
@@ -110,7 +110,15 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenu
     <li><code>sin-pais</code>: no determinable. Cuenta en el total, no en ningún país.</li>
   </ol>
   <p>Cada ejecución deja en <code>datos/life-paises-pendientes.csv</code> los nombres que quedan sin país.</p>
-  <div class="nota">Como LIFE no da fecha de volcado, la web muestra la de descarga. No hay reparto del dinero por socio, así que las cifras económicas por país solo cubren CORDIS.</div>
+  <h3>El dinero por socio: panel público de CINEA</h3>
+  <p>CINEA publica el panel <em>LIFE Project Portfolio</em> (Qlik Sense), cuyo glosario dice que la contribución de la UE se da <strong>por beneficiario para las convocatorias de 2014 en adelante</strong>; en las anteriores se asigna entera al coordinador. De él se extrae una tabla de proyecto, participante (nombre legal del registro de participantes) e importe, que se guarda en <code>datos/life-importes.csv</code>. Se obtuvo filtrando la tabla del panel por los 35 proyectos que cumplen el criterio y leyendo sus filas; los totales cuadran con los del panel (285 filas y 97,4 M€, con 2 € de diferencia por el redondeo de sus celdas).</p>
+  <ul>
+    <li><strong>Cruce.</strong> El importe se asigna al socio de la ficha por nombre normalizado, después por palabras compartidas y, si en un proyecto queda un solo socio y una sola fila del mismo país, emparejados. En los 20 proyectos recientes los 215 nombres casan uno a uno. En los antiguos el panel usa el nombre legal en su idioma y la ficha lo traduce, y no siempre casan.</li>
+    <li><strong>Lo que no se puede atribuir no se reparte.</strong> Algunos socios aparecen agrupados sin nombre (sin PIC) y, en los proyectos anteriores a 2014, todo el importe va a esa fila. Ese dinero cuenta en la aportación del proyecto, pero no en el de ningún país. En esta edición el <strong>90 %</strong> de la contribución de LIFE (87,5 de 97,4 M€) queda atribuido a un socio.</li>
+    <li><strong>Es un mínimo para cada país.</strong> Las cifras por país suman lo atribuido; el resto puede pertenecer a cualquiera de los socios del proyecto.</li>
+    <li><strong>Actualización manual.</strong> La tabla no se regenera sola: cuando LIFE incorpore proyectos nuevos o cambie el criterio, hay que volver a extraerla del panel. Las instrucciones están en el README.</li>
+  </ul>
+  <div class="nota">Como LIFE no da fecha de volcado, la web muestra la de descarga. El importe por socio es el del panel de CINEA, con la fecha en que se extrajo (22 de octubre de 2026).</div>
 
   <h2 id="erasmus">Erasmus+ y Europa Creativa</h2>
   <p>Programas de educación, juventud, deporte y cultura, no de investigación. Se incorporan como <strong>programas complementarios</strong>: están en los datos y se pueden marcar en el filtro de programa, pero quedan fuera de las cifras de partida y del factsheet.</p>

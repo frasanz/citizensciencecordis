@@ -7,8 +7,9 @@
 // para que el criterio y todos los indicadores se calculen igual.
 //
 // Lo que LIFE no da y CORDIS si: el PIC de cada socio, su tipo de entidad, la
-// contribucion por socio y, en los proyectos posteriores a 2020, el pais de los
-// socios. El pais se resuelve por una cadena de fuentes, y cada participacion
+// contribucion por socio (que se completa con datos/life-importes.csv, sacado del
+// panel publico de CINEA, ver mas abajo) y, en los proyectos posteriores a 2020,
+// el pais de los socios. El pais se resuelve por una cadena de fuentes, y cada participacion
 // lleva anotada la via (campo `via`) para que nadie sume peras con manzanas.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -292,6 +293,60 @@ const slug = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]+/g, '-').re
 export const ID_LIFE = (projectId) => `LIFE-${projectId}`;
 export const grantDe = (referencia) => /\/(\d{9})$/.exec(referencia || '')?.[1] ?? null;
 
+// ---------- importes por socio: panel publico de LIFE (CINEA) ----------
+// datos/life-importes.csv sale del panel «LIFE Project Portfolio» de CINEA (Qlik
+// Sense), que publica la contribucion de la UE por participante para las
+// convocatorias desde 2014. Columnas: proyecto (numero de subvencion, o la
+// referencia en los proyectos antiguos), participante (nombre legal del registro
+// de participantes; vacio si el panel lo agrupa sin PIC), importe_ue_eur y
+// participaciones (varias solo en esas filas agrupadas). Los nombres del panel
+// coinciden con los de las fichas en los proyectos recientes; en los antiguos no
+// siempre, y lo que no se puede atribuir a un socio queda SIN asignar: no se reparte.
+export function leerImportes(ruta) {
+  const m = new Map();
+  if (!fs.existsSync(ruta)) return m;
+  for (const l of fs.readFileSync(ruta, 'utf8').replace(/^\uFEFF/, '').trim().split('\n').slice(1)) {
+    const [proyecto, participante, importe, part] = l.split(';');
+    if (!proyecto) continue;
+    if (!m.has(proyecto)) m.set(proyecto, []);
+    m.get(proyecto).push({ nombre: participante || '', importe: Number(importe) || 0, participaciones: Number(part) || 1 });
+  }
+  return m;
+}
+// Numero de subvencion si la referencia lo trae (LIFE21-NAT-IT-X/101074458); si no, la referencia.
+export const claveImportes = (referencia) => {
+  const t = String(referencia || '').split('/').pop();
+  return /^\d{8,}$/.test(t) ? t : String(referencia || '');
+};
+
+// Asigna a cada socio el importe de su fila del panel: por nombre normalizado,
+// luego por palabras compartidas y, si queda un unico socio y una unica fila del
+// mismo pais (el pais de la fila, por el nombre legal en CORDIS), emparejados.
+// Devuelve el importe del panel que no se ha podido atribuir a ningun socio.
+export function repartirImportes(socios, filas, cordis) {
+  const libres = filas.filter((f) => f.nombre).map((f) => ({ ...f, usada: false }));
+  const asignar = (s, f) => { s.netEcContribution = f.importe; s.importeVia = 'panel'; f.usada = true; };
+  for (const s of socios) {
+    const k = claveNombre(s.name);
+    const f = libres.find((f) => !f.usada && claveNombre(f.nombre) === k);
+    if (f) asignar(s, f);
+  }
+  for (const s of socios) {
+    if (s.importeVia) continue;
+    const f = libres.find((f) => !f.usada && casarEnFts(s.name, [{ nombre: f.nombre, pais: 'X' }]));
+    if (f) asignar(s, f);
+  }
+  const paisDe = (f) => cordis.get(claveNombre(f.nombre))?.pais;
+  for (const pais of new Set(socios.filter((s) => !s.importeVia && s.country).map((s) => s.country))) {
+    const ss = socios.filter((s) => !s.importeVia && s.country === pais);
+    const ff = libres.filter((f) => !f.usada && paisDe(f) === pais);
+    if (ss.length === 1 && ff.length === 1) asignar(ss[0], ff[0]);
+  }
+  const total = filas.reduce((a, f) => a + f.importe, 0);
+  const asignado = socios.reduce((a, s) => a + (s.importeVia ? s.netEcContribution : 0), 0);
+  return { total, asignado };
+}
+
 // Entrega al analisis un proyecto LIFE con la forma de project.csv.
 export function registroProyecto(x, descripcion) {
   return {
@@ -320,7 +375,7 @@ export function registroBaseLegal(x) {
 // exacto, que ademas da el PIC) -> FTS -> forma juridica -> tabla manual.
 // `cordis` es Map(claveNombre -> {pais, pic}); `fts` la lista de beneficiarios
 // de esa subvencion o null; `manual` Map(claveNombre -> pais).
-export function registrosParticipacion(x, ficha, { cordis, fts, manual }) {
+export function registrosParticipacion(x, ficha, { cordis, fts, manual, importes = null }) {
   const salida = [];
   const socios = ficha.socios.length ? ficha.socios : [];
   // Si la tabla no trae coordinador, se toma del bloque de contacto.
@@ -350,5 +405,7 @@ export function registrosParticipacion(x, ficha, { cordis, fts, manual }) {
       paisVia: pais ? via : 'sin-pais',
     });
   }
+  const filas = importes?.get(claveImportes(x.reference));
+  if (filas) salida.importes = repartirImportes(salida, filas, cordis);
   return salida;
 }

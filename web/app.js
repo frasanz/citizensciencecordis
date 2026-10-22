@@ -297,11 +297,11 @@ function pintarGrafico() {
 // importa tanto como la cifra. Los de Erasmus+ y Europa Creativa salen siempre que
 // están en los datos, estén marcados o no, porque es lo que decide si marcarlos.
 function limitesEuropa(fuentes) {
-  const er = fuentes.find((x) => x.codigo === 'ERASMUS'), cr = fuentes.find((x) => x.codigo === 'CREA');
+  const er = fuentes.find((x) => x.codigo === 'ERASMUS'), cr = fuentes.find((x) => x.codigo === 'CREA'), lf = fuentes.find((x) => x.codigo === 'LIFE');
   const activos = estado.programas.filter((c) => PROGRAMAS.find((x) => x.codigo === c)?.complementario);
   const li = [
     '<b>El criterio es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.',
-    '<b>El dinero por país solo cubre CORDIS.</b> LIFE, Erasmus+ y Europa Creativa publican un importe por proyecto, no por socio, así que no entran en la contribución neta de cada país: solo en la aportación total de la UE. Las cifras por país están, por tanto, infravaloradas.',
+    `<b>El dinero por país cubre CORDIS y casi todo LIFE.</b> En LIFE sale del panel público de CINEA${lf?.importesPanel ? `: el ${Math.round(100 * lf.importesPanel.asignado / lf.importesPanel.total)} % de la contribución de la UE (${millones(lf.importesPanel.asignado)} de ${millones(lf.importesPanel.total)}) está atribuido a un socio concreto; el resto, de socios sin identificador o con nombre que no casa, queda sin asignar y no se reparte` : ''}. Erasmus+ y Europa Creativa dan un importe por proyecto, no por socio: no entran en la contribución neta de cada país, solo en la aportación total de la UE. Las cifras por país son, por tanto, un mínimo.`,
     '<b>Países de LIFE.</b> Se deducen cruzando fuentes y las participaciones que no se pueden resolver quedan sin país (columna <code>pais_via</code> del CSV).',
   ];
   if (er || cr) {
@@ -338,7 +338,7 @@ registrarAyuda({
   focoAportacion: ['Financiación recibida',
     'Suma de la <b>contribución neta</b> que la UE asigna concretamente a las entidades de ese país (<code>netEcContribution</code>), no el presupuesto de los proyectos enteros.',
     'Es el dinero que de verdad llega al país. Compararlo con el porcentaje de proyectos revela si se participa en papeles grandes o pequeños.',
-    'LIFE, Erasmus+ y Europa Creativa no publican el reparto por socio, así que sus proyectos no suman aquí: solo cuentan en la aportación total de la UE.'],
+    'En LIFE el reparto por socio sale del panel público de CINEA y cubre casi toda su contribución (ver «Límites de estos datos»). Erasmus+ y Europa Creativa no publican reparto por socio, así que sus proyectos no suman aquí: solo cuentan en la aportación total de la UE.'],
   grafico: ['Evolución por año de inicio',
     'Cada proyecto se cuenta en el año en que <b>arrancó</b>, con el color de su programa marco. Pasa el ratón por una barra para ver el detalle.',
     'La serie sale de una sola descarga: como cada proyecto lleva su fecha, no hace falta guardar histórico. Los últimos años pueden crecer más adelante, según CORDIS incorpore proyectos ya firmados.'],

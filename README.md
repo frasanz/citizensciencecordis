@@ -89,8 +89,8 @@ ficha HTML de cada uno, que es donde vive la descripción. El criterio se aplica
 la descripción (*Background* y *Objectives*), igual que en CORDIS. La mención en *Results* no
 cuenta: se redacta al terminar el proyecto, no al firmarlo.
 
-Lo que LIFE no publica y CORDIS sí: el PIC de cada socio, su tipo de entidad, el reparto del
-dinero por socio y, en los proyectos posteriores a 2020, el país de los socios. El país se
+Lo que la API de LIFE no publica y CORDIS sí: el PIC de cada socio, su tipo de entidad, el reparto del
+dinero por socio (que sale de otra fuente, ver abajo) y, en los proyectos posteriores a 2020, el país de los socios. El país se
 resuelve por una cadena de fuentes, y cada participación lleva anotada la vía en la columna
 `pais_via` del CSV:
 
@@ -114,6 +114,17 @@ aplicar el criterio sobre el texto devuelto. Son **programas complementarios** (
 en `compute.js`): están en los datos y en el filtro de programa, pero fuera de las cifras de partida y
 del factsheet. Solo dan un importe por proyecto, no por socio; los límites están escritos en la propia
 web («Límites de estos datos») y en la página de metodología.
+
+### El dinero por socio de LIFE
+
+Sale del panel público *LIFE Project Portfolio* de CINEA (Qlik Sense), que da la contribución de la UE por
+participante para las convocatorias desde 2014 (en las anteriores, todo al coordinador). Se guarda en
+`datos/life-importes.csv` (proyecto; participante; importe_ue_eur; participaciones) y `snapshot.js` lo
+cruza con las fichas por nombre. Lo que no se puede atribuir a un socio (filas sin PIC) no se reparte.
+**No se regenera solo**; para actualizarlo, abrir la vista de tabla del panel
+(`…/public/single/?appid=8298c020-48a6-4b84-91f4-f6f2665c0f99&obj=djMUAV&opt=ctxmenu,currsel&select=$::%25Dimension,Participant%20short%20name,PIC%20participant%20legal%20name,Project%20acronym,Project%20number,Project%20title&select=$::%25Measure,EU%20contribution,Number%20of%20participations,Number%20of%20projects`),
+filtrar por `&select=Project%20acronym,<valores>` con los acrónimos de los proyectos (los recientes con el formato
+`LIFE21-NAT-BE-LIFE HARWIN`; los antiguos con `<referencia>-<acrónimo>`) y exportar o copiar la tabla.
 
 ## Convocatorias españolas
 

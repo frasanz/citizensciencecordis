@@ -15,7 +15,7 @@ import { procesarPrograma, descargarPrograma } from './cordis.js';
 import {
   descargarProyectosLife, buscarCandidatosLife, descargarFicha, leerFicha, descargarFts, leerFts,
   registroProyecto, registroBaseLegal, registrosParticipacion, leerTablaManual, escribirPendientes,
-  claveNombre, grantDe,
+  claveNombre, grantDe, leerImportes,
 } from './life.js';
 import { TABLAS, TABLAS_NACIONAL } from '../web/src/exportar.js';
 import { FINANCIADORES, crearFiltroNacional, construirNacional } from '../web/src/nacional.js';
@@ -194,6 +194,8 @@ async function procesarLife() {
   }
 
   const manual = leerTablaManual(path.join(RAIZ, 'datos', 'life-paises.csv'));
+  const importes = leerImportes(path.join(RAIZ, 'datos', 'life-importes.csv'));
+  let importesPanel = { proyectos: 0, total: 0, asignado: 0 };
   const cordis = new Map([...nombresCordis].filter(([, e]) => e.pais));
   const pendientes = new Set();
   const vias = new Map();
@@ -206,7 +208,13 @@ async function procesarLife() {
     analisis.baseLegal(registroBaseLegal(x));
     if (!ficha || !filtro(rec)) continue;
     aceptados++;
-    for (const s of registrosParticipacion(x, ficha, { cordis, fts: ftsPorProyecto.get(x.projectId) ?? null, manual })) {
+    const socios = registrosParticipacion(x, ficha, { cordis, fts: ftsPorProyecto.get(x.projectId) ?? null, manual, importes });
+    if (socios.importes) {
+      importesPanel.proyectos++;
+      importesPanel.total += socios.importes.total;
+      importesPanel.asignado += socios.importes.asignado;
+    }
+    for (const s of socios) {
       analisis.participacion(s);
       vias.set(s.paisVia, (vias.get(s.paisVia) || 0) + 1);
       if (s.paisVia === 'sin-pais') pendientes.add(s.name);
@@ -214,7 +222,9 @@ async function procesarLife() {
   }
   escribirPendientes(path.join(RAIZ, 'datos', 'life-paises-pendientes.csv'), pendientes);
 
-  fuentes.push({ codigo: 'LIFE', etiqueta: p.etiqueta, periodo: p.periodo, archivo: 'LIFE public database (CINEA)', actualizado: descargado });
+  fuentes.push({ codigo: 'LIFE', etiqueta: p.etiqueta, periodo: p.periodo, archivo: 'LIFE public database (CINEA)', actualizado: descargado,
+    candidatos: proyectos.length, aceptados, importesPanel });
+  if (importesPanel.proyectos) console.log(`  LIFE: importes por socio del panel de CINEA en ${importesPanel.proyectos} de ${aceptados} proyectos: ${(importesPanel.asignado / 1e6).toFixed(1)} M EUR atribuidos a un socio de ${(importesPanel.total / 1e6).toFixed(1)} M EUR (${(100 * importesPanel.asignado / importesPanel.total).toFixed(0)} %)`);
   console.log(`  LIFE: ${aceptados} proyectos cumplen el criterio; pais de los socios por via: ${
     [...vias].map(([v, n]) => `${v} ${n}`).join(', ')}`);
   if (pendientes.size) console.log(`  LIFE: ${pendientes.size} entidades sin pais -> datos/life-paises-pendientes.csv`);

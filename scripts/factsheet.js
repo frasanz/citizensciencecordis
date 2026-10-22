@@ -128,6 +128,8 @@ function topConEs(campo, n, fmtEt = pais) {
   return items;
 }
 const fuenteEu = Object.fromEntries(eu.meta.fuentes.map((f) => [f.codigo, f]));
+const cobLife = fuenteEu.LIFE?.importesPanel;
+const pctLife = cobLife?.total ? Math.round(100 * cobLife.asignado / cobLife.total) : null;
 const fuenteEs = Object.fromEntries(nacTodo.meta.fuentes.map((f) => [f.codigo, f]));
 const top = (arr, n, f) => [...arr].sort((a, b) => f(b) - f(a)).slice(0, n);
 const ordinal = (n) => (n === 1 ? 'el primer puesto' : `el puesto ${n}`);
@@ -236,7 +238,7 @@ const p2 = `
       ${fig('Proyectos por millón de habitantes', barrasH(topConEs('permm', 8), { fmt: dec1 }),
         `Países con al menos ${MIN_PROYECTOS_HAB} proyectos (${habitantes.length}). Población a 1 de enero de ${anioPob}, Eurostat.${sinPoblacion.length ? ` Sin ${sinPoblacion.join(', ')}: Eurostat no publica su población.` : ''}`)}
       ${fig('Contribución neta de la UE por habitante (€)', barrasH(topConEs('eurHab', 8), { fmt: (v) => dec1(v) }),
-        'Solo CORDIS: LIFE y los programas complementarios no reparten el dinero por socio.')}
+        `CORDIS y LIFE${pctLife != null ? ` (el ${pctLife} % de la contribución de LIFE está atribuido a un socio)` : ''}; Erasmus+ y Europa Creativa quedan fuera.`)}
     </div>
   </div>
   ${pie(2, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
@@ -261,7 +263,7 @@ const p3 = `
     <div class="rejilla">
       ${fig('Proyectos coordinados', barrasH(topPaises('coordinados')))}
       ${fig('Contribución neta de la UE (M€)', barrasH(top(paises, 8, (p) => p.aportacionNeta).map((p) => ({ et: pais(p.pais), v: p.aportacionNeta / 1e6, resaltar: p.pais === 'ES' })), { fmt: (v) => dec1(v) }),
-        'LIFE no publica el reparto por socio: solo cuenta CORDIS.')}
+        `CORDIS y LIFE${pctLife != null ? ` (LIFE: ${pctLife} % atribuido a un socio, del panel público de CINEA)` : ''}. Mínimo: lo no atribuido no se reparte.`)}
       ${fig('Entidades españolas con más proyectos', barrasH(entEs, { etAncho: 130 }))}
       ${fig('Tipo de entidad española', barrasH(tiposEnt, { etAncho: 130 }), `Entidades distintas (${num(es.organizaciones)}).`)}
     </div>
@@ -308,7 +310,7 @@ const p5 = `
       <thead><tr><th>Fuente</th><th>Qué se lee</th><th>Criterio</th></tr></thead>
       <tbody>
         <tr><td><b>CORDIS</b><br>FP7, H2020, Horizonte Europa</td><td>Volcados oficiales de datos abiertos: proyectos, organizaciones y base legal.</td><td rowspan="2"><i>citizen science</i> en título o descripción del proyecto.</td></tr>
-        <tr><td><b>LIFE</b><br>CINEA</td><td>API de su base pública y ficha de cada candidato. El país de los socios se resuelve por una cadena de fuentes anotada.</td></tr>
+        <tr><td><b>LIFE</b><br>CINEA</td><td>API de su base pública y ficha de cada candidato; el importe por socio, del panel público de CINEA. El país de los socios se resuelve por una cadena de fuentes anotada.</td></tr>
         <tr><td><b>AEI</b></td><td>CSV de su buscador de ayudas concedidas, por título, resumen y palabras clave.</td><td rowspan="3">${fl()} en título o resumen.<br>FECYT: además, su línea de ciencia ciudadana y los descriptores.</td></tr>
         <tr><td><b>FECYT</b></td><td>PDF de concedidas de cada año (tablas reconstruidas por coordenadas) y ficha resumen de cada proyecto.</td></tr>
         <tr><td><b>Fundación Biodiversidad</b></td><td>API de su web y ficha de cada proyecto candidato.</td></tr>
@@ -321,7 +323,7 @@ const p5 = `
           <li><b>La medida es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.</li>
           <li><b>Dos ámbitos, dos unidades.</b> Un proyecto europeo con su consorcio no equivale a una ayuda nacional; no se suman.</li>
           <li><b>Contratos de la AEI fuera.</b> Los contratos de personal y las estancias repiten el texto de su proyecto y se cuentan aparte.</li>
-          <li><b>Datos incompletos.</b> LIFE no da reparto por socio; la Fundación Biodiversidad no publica el importe en muchas fichas.</li>
+          <li><b>Datos incompletos.</b> En LIFE ${pctLife != null ? `el ${pctLife} % del dinero` : 'parte del dinero'} está atribuido a un socio concreto y el resto no se reparte; la Fundación Biodiversidad no publica el importe en muchas fichas.</li>
           <li><b>Cada dato lleva su vía.</b> Qué criterio hizo entrar cada proyecto y cómo se dedujo su país o comunidad queda anotado.</li>
         </ul>
       </div>
