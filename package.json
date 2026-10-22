@@ -1,7 +1,7 @@
 {
   "name": "cordis-ciencia-ciudadana",
   "version": "1.0.0",
-  "description": "Indicadores de ciencia ciudadana en los programas marco europeos (CORDIS, LIFE) y en las convocatorias españolas (AEI, FECYT, Fundación Biodiversidad)",
+  "description": "Indicadores de ciencia ciudadana en los programas marco europeos (CORDIS, LIFE; y Erasmus+, Europa Creativa y Kohesio como complementarios) y en las convocatorias españolas (AEI, FECYT, Fundación Biodiversidad)",
   "type": "module",
   "scripts": {
     "snapshot": "node scripts/snapshot.js",

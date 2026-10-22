@@ -90,16 +90,17 @@ table.fuentes{width:100%;border-collapse:collapse;font-size:8.2pt;margin:0 0 5mm
 .fuentes td{vertical-align:top;padding:2mm 2.4mm;border-bottom:.6pt solid var(--claro)}
 .fuentes td:first-child{white-space:nowrap}
 .fuentes td[rowspan]{background:var(--fondo)}
+.fuentes tr.compl td{background:var(--fondo);color:var(--gris)}
 .dos{display:grid;grid-template-columns:1.25fr 1fr;gap:9mm}
 .dos ul{margin:0;padding-left:4.2mm;font-size:8.6pt}
-.dos li{margin-bottom:1.6mm}
+.dos li{margin-bottom:1.1mm}
 .dos p{margin:0 0 2mm;font-size:8.6pt}
 .web{font-size:12pt!important;font-weight:700;font-family:"Source Serif 4",Georgia,serif;color:var(--negro);border-bottom:2pt solid var(--ambar);display:inline-block;padding-bottom:.6mm;margin-bottom:3mm!important}
 .peq{font-size:7.4pt!important;color:var(--gris)}
 .cascada{margin:0 0 3mm;padding:2.6mm 4mm}
 .cascada p{font-size:8.2pt!important}
 .legal{margin:2.5mm 0 0;font-size:7.2pt;color:var(--gris);line-height:1.4}
-.abajo{margin-top:3mm;padding-top:3mm;border-top:.6pt solid var(--claro)}
+.abajo{margin-top:2mm;padding-top:2.4mm;border-top:.6pt solid var(--claro)}
 table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm}
 .fechas td{padding:.9mm 0;border-bottom:.6pt solid var(--claro)}
 .fechas td:last-child{text-align:right;font-weight:800;color:var(--negro);white-space:nowrap}
@@ -406,6 +407,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm
         <tr><td><b>AEI</b></td><td>CSV de su buscador de ayudas concedidas, por título, resumen y palabras clave.</td><td rowspan="3"><i>ciencia ciudadana</i>, <i>citizen science</i>, <i>ciència ciutadana</i>, <i>ciencia cidadá</i>, <i>zientzia herritarra</i> en título o resumen.<br>FECYT: además, su línea de ciencia ciudadana y los descriptores.</td></tr>
         <tr><td><b>FECYT</b></td><td>PDF de concedidas de cada año (tablas reconstruidas por coordenadas) y ficha resumen de cada proyecto.</td></tr>
         <tr><td><b>Fundación Biodiversidad</b></td><td>API de su web y ficha de cada proyecto candidato.</td></tr>
+        <tr class="compl"><td><b>Erasmus+, Europa Creativa, Kohesio</b><br>complementarios</td><td>API internas de la plataforma de resultados de proyectos de la Comisión y de Kohesio (FEDER, FSE+, Interreg). Importe por proyecto, no por socio.</td><td><b>Fuera de las cifras de este documento</b>: se consultan en la web.</td></tr>
       </tbody>
     </table>
     <div class="dos">
@@ -428,7 +430,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm
     </div>
     <div class="recuadro cascada">
       <h3>Lo que estas cifras no recogen</h3>
-      <p><b>Financiación en cascada.</b> Muchos proyectos europeos reparten parte de su presupuesto, mediante convocatorias abiertas a terceros, entre asociaciones, ayuntamientos, escuelas o grupos ciudadanos. Esas entidades no figuran como participantes en CORDIS ni en LIFE, así que no cuentan aquí: la huella real de la ciencia ciudadana sobre el terreno es mayor que la de estas tablas. Tampoco se incluyen la financiación regional, local o privada ni otros programas europeos (Interreg, Erasmus+ y Europa Creativa quedan fuera de las cifras de partida).</p>
+      <p><b>Financiación en cascada.</b> Muchos proyectos europeos reparten parte de su presupuesto, mediante convocatorias abiertas a terceros, entre asociaciones, ayuntamientos, escuelas o grupos ciudadanos. Esas entidades no figuran como participantes en CORDIS ni en LIFE, así que no cuentan aquí: la huella real de la ciencia ciudadana sobre el terreno es mayor que la de estas tablas. Tampoco se incluyen la financiación regional, local o privada ni otros programas europeos: Interreg (aún sin incorporar) y, como complementarios fuera de estas cifras, Erasmus+, Europa Creativa y Kohesio.</p>
     </div>
     <div class="dos abajo">
       <div>

@@ -93,8 +93,13 @@ for (const codigo of quiero) {
 }
 
 if (quiero.includes('LIFE')) await procesarLife();
-for (const codigo of Object.keys(PLATAFORMAS)) if (quiero.includes(codigo)) await procesarErasmus(codigo);
-if (quiero.includes('KOHESIO')) await procesarKohesio();
+// Las APIs de Erasmus+, Europa Creativa y Kohesio son internas y pueden cambiar: si una falla, la
+// actualizacion sigue sin ese programa y se avisa, para no bloquear los datos de CORDIS y LIFE.
+const complementarios = [...Object.keys(PLATAFORMAS).map((c) => [c, () => procesarErasmus(c)]), ['KOHESIO', procesarKohesio]];
+for (const [codigo, tarea] of complementarios) {
+  if (!quiero.includes(codigo)) continue;
+  try { await tarea(); } catch (e) { console.warn(`\n  AVISO: ${codigo} no se ha podido leer (${e.message}); se sigue sin él.`); }
+}
 
 // ---------- Kohesio ----------
 // Lista por la frase exacta y detalle de cada proyecto (beneficiarios, fondo, programa). El criterio

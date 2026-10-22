@@ -38,7 +38,7 @@ jobs:
         if: github.event_name != 'push'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
 
-      - name: Recalcular indicadores desde CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad
+      - name: Recalcular indicadores desde CORDIS, LIFE, Erasmus+, Europa Creativa, Kohesio, AEI, FECYT y Fundación Biodiversidad
         if: github.event_name != 'push'
         run: node scripts/snapshot.js --sin-cache   # sin dependencias de npm: fflate va en vendor/
 
@@ -60,7 +60,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "Ninguna fuente ha cambiado nada desde la ultima vez."
           else
-            git commit -m "Datos de CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad a $(date -u +%Y-%m-%d)"
+            git commit -m "Datos de CORDIS, LIFE, Erasmus+, Europa Creativa, Kohesio, AEI, FECYT y Fundación Biodiversidad a $(date -u +%Y-%m-%d)"
             git push
           fi
 

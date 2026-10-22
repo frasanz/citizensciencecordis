@@ -11,6 +11,9 @@ dos pestañas, porque las dos mitades no comparten ni criterio ni unidad de medi
   [base de datos pública de CINEA](https://webgate.ec.europa.eu/life/publicWebsite/search).
   La unidad es el proyecto con todo su consorcio: se puede filtrar por programa, por país de
   referencia, por mes de inicio y por socio, y ver cuota, coordinaciones y dinero recibido por país.
+  Además, como **programas complementarios** (desmarcados por defecto, fuera de las cifras de partida):
+  Erasmus+ y Europa Creativa, de la [plataforma de resultados de proyectos](https://erasmus-plus.ec.europa.eu/projects),
+  y los fondos de cohesión (FEDER, FSE+, Interreg) de [Kohesio](https://kohesio.ec.europa.eu).
 - **Convocatorias españolas**: la [AEI](https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas),
   [FECYT](https://www.convocatoria.fecyt.es/Publico/Convocatoria/ConvocatoriasAnteriores.aspx) y la
   [Fundación Biodiversidad](https://fundacion-biodiversidad.es/buscador-de-proyectos/). La unidad es
@@ -249,7 +252,8 @@ que la serie completa se reconstruye desde una única descarga.
 ## Datos
 
 CORDIS y base de datos pública de LIFE (CINEA), Comisión Europea —
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Buscador de ayudas concedidas de la AEI,
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Erasmus+, Europa Creativa y Kohesio (API internas de sus webs, sin
+licencia de reutilización confirmada; se cita el origen). Buscador de ayudas concedidas de la AEI,
 listados de concedidas y fichas resumen de FECYT y buscador de proyectos de la Fundación Biodiversidad: información pública de
 cada organismo, reutilizada según la Ley 37/2007 y la Ley 19/2013 de transparencia. El código, MIT.
 

@@ -230,7 +230,8 @@ function pintar() {
 
   const conLife = f.some((x) => x.codigo === 'LIFE');
   el('#limites').innerHTML = limitesEuropa(f);
-  el('#fuente').innerHTML = `Fuente: datos abiertos de CORDIS${conLife ? ' y de la base de datos pública de LIFE (CINEA)' : ''}`
+  const compl = [f.some((x) => x.codigo === 'ERASMUS') && 'Erasmus+', f.some((x) => x.codigo === 'CREA') && 'Europa Creativa', f.some((x) => x.codigo === 'KOHESIO') && 'Kohesio'].filter(Boolean);
+  el('#fuente').innerHTML = `Fuente: datos abiertos de CORDIS${conLife ? ' y de la base de datos pública de LIFE (CINEA)' : ''}${compl.length ? `; complementarios (fuera de las cifras de partida): ${compl.join(', ').replace(/, ([^,]*)$/, ' y $1')}, de la Comisión Europea` : ''}`
     + (f.length ? ` · ${f.map((x) => `${esc(x.etiqueta)} <span class="pct">(${fecha(x.actualizado)})</span>`).join(' · ')}` : '')
     + `<br>Criterio: <code>${esc(estado.base.meta.filtro?.frase ?? 'citizen science')}</code> en `
     + (estado.base.meta.filtro?.campos ?? []).map((c) =>
@@ -282,7 +283,7 @@ function pintar() {
 
   el('#pie').innerHTML = `Generado el ${fecha(r.meta.generado)} · `
     + 'Datos: <a href="https://cordis.europa.eu/datalab/browse.html" target="_blank" rel="noopener">CORDIS</a>, '
-    + 'Comisión Europea (© Unión Europea, CC BY 4.0), y base de datos de LIFE (CINEA) · Análisis independiente de Fundación Ibercivis, no es una publicación oficial de los financiadores · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
+    + 'Comisión Europea (© Unión Europea, CC BY 4.0), base de datos de LIFE (CINEA) y, como complementarios, plataforma de resultados de proyectos (Erasmus+, Europa Creativa) y Kohesio · Análisis independiente de Fundación Ibercivis, no es una publicación oficial de los financiadores · Cifras recalculadas en el navegador a partir de los datos originales · <a href="./metodologia.html">Metodología</a>.';
 }
 
 function pintarGrafico() {
@@ -361,9 +362,9 @@ registrarAyuda({
     '<b>Coordina</b> muestra quién lidera con su código de país, resaltado si es el país seleccionado. <b>Entidades</b> son las de ese país que participan.'],
   filtroPrograma: ['Programa',
     'Los programas marco con los que la UE financia la investigación, sucesivos en el tiempo: <b>FP7</b> (2007-2013), <b>Horizonte 2020</b> (2014-2020) y <b>Horizonte Europa</b> (2021-2027). Y <b>LIFE</b>, el programa de medio ambiente y clima, que no es de investigación ni está en CORDIS. <b>Erasmus+</b> y <b>Europa Creativa</b> (educación y cultura) son complementarios.',
-    'Vienen marcados todos menos Erasmus+ y Europa Creativa. Desmárcalos para aislar una etapa: la comparación entre programas dice bastante, porque el peso de cada país cambia de uno a otro.',
+    'Vienen marcados todos menos Erasmus+, Europa Creativa y Kohesio. Desmárcalos para aislar una etapa: la comparación entre programas dice bastante, porque el peso de cada país cambia de uno a otro.',
     'FP7 aporta muy pocos proyectos, porque entonces apenas se usaba el término «citizen science». Además su volcado está cerrado: al ser un programa terminado, CORDIS no lo actualiza desde enero de 2025.',
-    'Erasmus+ y Europa Creativa salen de la plataforma de resultados de proyectos de la Comisión. Dan un importe por proyecto, no por socio, y quedan fuera de las cifras de partida; su detalle está en «Límites de estos datos».',
+    'Erasmus+ y Europa Creativa salen de la plataforma de resultados de proyectos de la Comisión, y los <b>fondos de cohesión (Kohesio)</b> —FEDER, FSE+, Interreg— del portal Kohesio. Dan un importe por proyecto, no por socio (y Kohesio no da el país de cada beneficiario), y quedan fuera de las cifras de partida; su detalle está en «Límites de estos datos».',
     'LIFE sale de la base de datos pública de CINEA con el <b>mismo criterio</b>, aplicado a la descripción de cada ficha. Sus socios no traen PIC, tipo de entidad ni reparto del dinero, y su país se resuelve cruzando fuentes: cada participación lleva anotada la vía en el CSV.'],
   filtroPais: ['País de referencia',
     'Todas las cifras y tablas marcadas se recalculan alrededor del país que elijas. Sirve para comparar: prueba Italia o Alemania.',
