@@ -54,6 +54,13 @@ que se refresca a mano con `node scripts/poblacion.js` (cambia una vez al año).
 al menos 15 proyectos, y Reino Unido queda fuera porque Eurostat ya no publica su población.
 El PDF necesita Playwright y Chromium (`npx playwright install chromium`); el HTML, solo Node.
 
+## Vínculo con América Latina
+
+`recomputar` calcula, para cualquier país de referencia, en cuántos proyectos hay entidades de 19 países
+latinoamericanos y en cuántos de ellos participa también ese país (`latam` en el resultado, `latam.csv` en
+`web/data/`). Se muestra en la web (panel «América Latina») y en la página 3 del factsheet. Son pocos
+proyectos, así que es un indicio y no una prueba.
+
 ## Criterio de selección
 
 En los programas europeos, un proyecto entra si la expresión **`citizen science`** aparece en su

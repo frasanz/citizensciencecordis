@@ -74,6 +74,9 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
 .kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
 .kp span{font-size:7.6pt;color:var(--gris)}
+.latam{display:grid;grid-template-columns:1.3fr 1fr;gap:6mm;align-items:start}
+.latam p{margin:0 0 2mm;font-size:8.2pt}
+.latam table.tab{margin:0}
 .tendencia{margin:-1mm 0 4mm;padding:2.2mm 3.5mm;background:var(--fondo);border-left:2.2pt solid var(--ambar);font-size:8.6pt}
 table.tab{width:100%;border-collapse:collapse;font-size:7.8pt;margin:0 0 1.5mm}
 .tab th{text-align:left;font-size:7pt;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--negro);padding:1.3mm 2mm}
@@ -300,6 +303,13 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm
       <text x="184.6" y="168" class="val">46,2</text></svg><p class="nota">CORDIS y LIFE (LIFE: 90 % atribuido a un socio, del panel público de CINEA). Mínimo: lo no atribuido no se reparte.</p></figure>
     </div>
     <div class="programas"><div><b>Horizonte Europa</b><span>España en 83 de 162 · 51 %</span></div><div><b>Horizonte 2020</b><span>España en 64 de 115 · 56 %</span></div><div><b>LIFE</b><span>España en 15 de 35 · 43 %</span></div><div><b>FP7</b><span>España en 2 de 4 · 50 %</span></div></div>
+    
+    <h3 class="subtit" style="margin-top:5mm">Vínculo con América Latina</h3>
+    <div class="latam">
+      <div><p>Entidades latinoamericanas participan en <b>17</b> de los 316 proyectos (5 %), con 20 participaciones (7 de socios asociados) y sin ninguna coordinadora. En <b>11</b> de ellos (65 %) hay también entidades españolas, frente al 52 % del conjunto de proyectos.</p>
+      <p>Por países, los hispanohablantes aparecen con España en <b>9 de 11</b> casos; Brasil, en <b>2 de 7</b>. Son pocos proyectos, así que es un indicio y no una prueba: la diferencia con el conjunto no es estadísticamente significativa.</p></div>
+      <table class="tab latam-t"><thead><tr><th>País</th><th class="n">Proyectos</th><th class="n">Con España</th><th class="n">Sin España</th></tr></thead><tbody><tr><td>BR</td><td class="n">7</td><td class="n">2</td><td class="n">5</td></tr><tr><td>AR</td><td class="n">3</td><td class="n">2</td><td class="n">1</td></tr><tr><td>CL</td><td class="n">3</td><td class="n">3</td><td class="n">0</td></tr><tr><td>CO</td><td class="n">2</td><td class="n">1</td><td class="n">1</td></tr><tr><td>UY</td><td class="n">2</td><td class="n">2</td><td class="n">0</td></tr><tr><td>MX</td><td class="n">1</td><td class="n">1</td><td class="n">0</td></tr></tbody></table>
+    </div>
   </div>
   <footer class="pie"><span>Datos: CORDIS (volcado de 8 de octubre de 2026) y base de datos pública de LIFE · CC BY 4.0</span><b>3 / 6</b></footer>
 </section>
@@ -417,7 +427,7 @@ table.fechas{width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:1mm
           <li><b>La medida es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.</li>
           <li><b>Dos ámbitos, dos unidades.</b> Un proyecto europeo con su consorcio no equivale a una ayuda nacional: el número de proyectos no se suma. El importe total de la portada junta ambas medidas y es un mínimo.</li>
           <li><b>Contratos de la AEI fuera.</b> Los contratos de personal y las estancias repiten el texto de su proyecto y se cuentan aparte.</li>
-          <li><b>Datos incompletos.</b> En LIFE el 90 % del dinero está atribuido a un socio concreto y el resto no se reparte; la Fundación Biodiversidad no publica el importe en muchas fichas.</li>
+          <li><b>Datos incompletos.</b> En LIFE el 90 % del dinero está atribuido a un socio concreto y el resto no se reparte; 23 de las 28 ayudas de la Fundación Biodiversidad no publican importe, y 11 ayudas no tienen comunidad autónoma determinada.</li>
           <li><b>Cada dato lleva su vía.</b> Qué criterio hizo entrar cada proyecto y cómo se dedujo su país o comunidad queda anotado.</li>
         </ul>
       </div>

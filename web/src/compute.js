@@ -19,6 +19,9 @@ export const PROGRAMAS = [
 // Los que entran en las cifras de partida.
 export const PROGRAMAS_BASE = PROGRAMAS.filter((p) => !p.complementario).map((p) => p.codigo);
 
+// America Latina: los paises de habla hispana y portuguesa del continente, con los codigos de CORDIS.
+export const LATAM = ['AR', 'BO', 'BR', 'CL', 'CO', 'CR', 'CU', 'DO', 'EC', 'SV', 'GT', 'HN', 'MX', 'NI', 'PA', 'PY', 'PE', 'UY', 'VE'];
+
 export const ETIQUETA_PROGRAMA = Object.fromEntries(PROGRAMAS.map((p) => [p.codigo, p.etiqueta]));
 
 export const ACTIVITY_LABELS = {
@@ -195,6 +198,38 @@ function construir({ proyectos, participaciones, contadosPorPrograma, filtro,
     pctAportacion: pct(e.aportacionNeta, aportacionNetaTotal),
   })).sort((a, b) => b.proyectos - a.proyectos);
 
+  // --- vinculo con America Latina: en cuantos proyectos hay entidades latinoamericanas y en cuantos de
+  // ellos participa tambien el pais foco, frente a lo que cabria esperar por azar ---
+  const setFoco = porPais.get(paisFoco)?.proyectos ?? new Set();
+  const regionProyectos = new Set();
+  const latamPaises = [];
+  for (const cod of LATAM) {
+    const e = porPais.get(cod);
+    if (!e) continue;
+    for (const id of e.proyectos) regionProyectos.add(id);
+    const con = [...e.proyectos].filter((id) => setFoco.has(id)).length;
+    latamPaises.push({ pais: cod, proyectos: e.proyectos.size, conFoco: con, sinFoco: e.proyectos.size - con,
+      coordinados: e.coordinados.size, organizaciones: e.orgs.size, aportacionNeta: e.aportacionNeta });
+  }
+  latamPaises.sort((a, b) => b.proyectos - a.proyectos);
+  const conFocoRegion = [...regionProyectos].filter((id) => setFoco.has(id)).length;
+  const latam = {
+    aplicable: !LATAM.includes(paisFoco),
+    proyectos: regionProyectos.size, conFoco: conFocoRegion, sinFoco: regionProyectos.size - conFocoRegion,
+    pctFocoEnRegion: pct(conFocoRegion, regionProyectos.size),          // de los proyectos con Latam, los que tienen foco
+    pctFocoGeneral: pct(setFoco.size, totalProyectos),                  // de todos los proyectos, los que tienen foco
+    pctRegionConFoco: pct(conFocoRegion, setFoco.size),                 // de los proyectos con foco, los que tienen Latam
+    pctRegionSinFoco: pct(regionProyectos.size - conFocoRegion, totalProyectos - setFoco.size),
+    participaciones: participaciones.filter((p) => LATAM.includes(p.pais)).length,
+    asociadas: participaciones.filter((p) => LATAM.includes(p.pais) && p.rol === 'associatedPartner').length,
+    aportacionNeta: participaciones.filter((p) => LATAM.includes(p.pais)).reduce((s, p) => s + p.aportacionNeta, 0),
+    coordinados: new Set(participaciones.filter((p) => p.rol === 'coordinator' && LATAM.includes(p.pais)).map((p) => p.proyecto)).size,
+    paises: latamPaises,
+    // Pares pais-proyecto: los paises hispanohablantes frente a Brasil (un proyecto con dos paises cuenta dos veces).
+    hispano: { pares: latamPaises.filter((p) => p.pais !== 'BR').reduce((s, p) => s + p.proyectos, 0), conFoco: latamPaises.filter((p) => p.pais !== 'BR').reduce((s, p) => s + p.conFoco, 0) },
+    brasil: { pares: latamPaises.find((p) => p.pais === 'BR')?.proyectos ?? 0, conFoco: latamPaises.find((p) => p.pais === 'BR')?.conFoco ?? 0 },
+  };
+
   // --- coordinador y entidades del pais foco, adjuntos a cada proyecto ---
   // Se calcula aqui y no en la vista para que la tabla de la web y el CSV
   // descargable digan exactamente lo mismo.
@@ -320,7 +355,7 @@ function construir({ proyectos, participaciones, contadosPorPrograma, filtro,
       focoAportacionNeta: foco.aportacionNeta,
       focoPctAportacion: foco.pctAportacion,
     },
-    programas, subprogramas, familias, esquemas, paises, tipos, serie, entidadesFoco, csic,
+    programas, subprogramas, familias, esquemas, paises, tipos, serie, entidadesFoco, csic, latam,
     paisesComparados: paisesComparados.map((c) => paises.find((p) => p.pais === c)).filter(Boolean),
     proyectos: [...proyectos.values()],
     participaciones,

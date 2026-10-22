@@ -279,6 +279,7 @@ function pintar() {
   el('#p-entidades').querySelectorAll('[data-socio]').forEach((a) =>
     a.addEventListener('click', (ev) => { ev.preventDefault(); elegirSocio(a.dataset.socio); }));
 
+  pintarLatam(r, pais);
   tablaProyectos();
 
   el('#pie').innerHTML = `Generado el ${fecha(r.meta.generado)} · `
@@ -291,6 +292,26 @@ function pintarGrafico() {
     claves: estado.programas, campo: 'porPrograma', titulo: 'Proyectos por año de inicio',
     color: (c) => COLOR[c], etiqueta: (c) => ETIQUETA_PROGRAMA[c] || c,
   });
+}
+
+// ---------- vínculo con América Latina ----------
+// Cuántos proyectos tienen entidades latinoamericanas y en cuántos de ellos participa también el país de
+// referencia, frente al peso del país en el conjunto. Con tan pocos proyectos la comparación es orientativa.
+function pintarLatam(r, pais) {
+  const L = r.latam, cont = el('#p-latam');
+  if (!L.aplicable || !L.proyectos) { cont.hidden = true; cont.innerHTML = ''; return; }
+  cont.hidden = false;
+  const aviso = L.proyectos < 30 ? ' Con tan pocos proyectos, las diferencias no son estadísticamente significativas.' : '';
+  tabla('#p-latam', 'América Latina',
+    `Entidades latinoamericanas participan en <b>${num(L.proyectos)}</b> de ${num(r.resumen.totalProyectos)} proyectos (${pc(100 * L.proyectos / r.resumen.totalProyectos)}). `
+    + `En <b>${num(L.conFoco)}</b> de ellos (${pc(L.pctFocoEnRegion)}) participa también ${esc(pais)}, frente al ${pc(L.pctFocoGeneral)} de todos los proyectos. `
+    + `Entre los proyectos con ${esc(pais)} hay entidades latinoamericanas en el ${pc(L.pctRegionConFoco)}; entre los que no, en el ${pc(L.pctRegionSinFoco)}.${aviso}`
+    + (L.hispano.pares && L.brasil.pares ? ` Por países, los hispanohablantes aparecen con ${esc(pais)} en ${num(L.hispano.conFoco)} de ${num(L.hispano.pares)} casos; Brasil, en ${num(L.brasil.conFoco)} de ${num(L.brasil.pares)}.` : '')
+    + ` ${num(L.participaciones)} participaciones, ${num(L.asociadas)} de ellas como socio asociado${L.coordinados ? `; coordinan ${num(L.coordinados)}` : '; ninguna coordina'}.`,
+    'latam',
+    ['País', 'Proyectos', `Con ${pais}`, `Sin ${pais}`, 'Entidades', 'Aportación'],
+    L.paises, (p) => [esc(nombrePais(p.pais)), num(p.proyectos), num(p.conFoco), num(p.sinFoco), num(p.organizaciones), millones(p.aportacionNeta)],
+    'latam', descargar);
 }
 
 // ---------- límites de los datos ----------
@@ -366,6 +387,10 @@ registrarAyuda({
     'FP7 aporta muy pocos proyectos, porque entonces apenas se usaba el término «citizen science». Además su volcado está cerrado: al ser un programa terminado, CORDIS no lo actualiza desde enero de 2025.',
     'Erasmus+ y Europa Creativa salen de la plataforma de resultados de proyectos de la Comisión, y los <b>fondos de cohesión (Kohesio)</b> —FEDER, FSE+, Interreg— del portal Kohesio. Dan un importe por proyecto, no por socio (y Kohesio no da el país de cada beneficiario), y quedan fuera de las cifras de partida; su detalle está en «Límites de estos datos».',
     'LIFE sale de la base de datos pública de CINEA con el <b>mismo criterio</b>, aplicado a la descripción de cada ficha. Sus socios no traen PIC, tipo de entidad ni reparto del dinero, y su país se resuelve cruzando fuentes: cada participación lleva anotada la vía en el CSV.'],
+  latam: ['América Latina',
+    'Proyectos con al menos una entidad de uno de estos países: Argentina, Bolivia, Brasil, Chile, Colombia, Costa Rica, Cuba, República Dominicana, Ecuador, El Salvador, Guatemala, Honduras, México, Nicaragua, Panamá, Paraguay, Perú, Uruguay y Venezuela.',
+    'Sirve para ver si España hace de <b>puente</b> con la región: si en los proyectos con entidades latinoamericanas aparece España más de lo que le correspondería por su peso general. Es un indicio, no una prueba, porque son pocos proyectos.',
+    'Las entidades latinoamericanas aparecen solo en Horizonte (LIFE y los programas complementarios no tienen ninguna). Los socios asociados normalmente no reciben contribución de la UE.'],
   filtroPais: ['País de referencia',
     'Todas las cifras y tablas marcadas se recalculan alrededor del país que elijas. Sirve para comparar: prueba Italia o Alemania.',
     'CORDIS usa <code>UK</code> para Reino Unido y <code>EL</code> para Grecia, en lugar de los códigos habituales.'],

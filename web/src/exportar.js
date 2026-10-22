@@ -76,6 +76,16 @@ export const TABLAS = {
     { titulo: 'pct_aportacion', valor: (p) => dec(p.pctAportacion, 1) },
   ]),
 
+  latam: (r) => aCsv(r.latam.paises, [
+    { titulo: 'pais', valor: (p) => p.pais },
+    { titulo: 'proyectos', valor: (p) => p.proyectos },
+    { titulo: 'con_pais_foco', valor: (p) => p.conFoco },
+    { titulo: 'sin_pais_foco', valor: (p) => p.sinFoco },
+    { titulo: 'coordinados', valor: (p) => p.coordinados },
+    { titulo: 'entidades', valor: (p) => p.organizaciones },
+    { titulo: 'aportacion_neta_eur', valor: (p) => dec(p.aportacionNeta) },
+  ]),
+
   serie: (r) => aCsv(r.serie, [
     { titulo: 'anio', valor: (s) => s.anio },
     { titulo: 'proyectos', valor: (s) => s.total },

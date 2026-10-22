@@ -130,6 +130,8 @@ function topConEs(campo, n, fmtEt = pais) {
 const fuenteEu = Object.fromEntries(eu.meta.fuentes.map((f) => [f.codigo, f]));
 const cobLife = fuenteEu.LIFE?.importesPanel;
 const pctLife = cobLife?.total ? Math.round(100 * cobLife.asignado / cobLife.total) : null;
+const fbAyudas = nacTodo.ayudas.filter((a) => a.financiador === 'FB').length;
+const fbSinImporte = nacTodo.ayudas.filter((a) => a.financiador === 'FB' && !(a.importe > 0)).length;
 const fuenteEs = Object.fromEntries(nacTodo.meta.fuentes.map((f) => [f.codigo, f]));
 const top = (arr, n, f) => [...arr].sort((a, b) => f(b) - f(a)).slice(0, n);
 const ordinal = (n) => (n === 1 ? 'el primer puesto' : `el puesto ${n}`);
@@ -298,6 +300,16 @@ const tAct = tramo(anioCierre - 2, anioCierre), tAnt = tramo(anioCierre - 5, ani
 const dif = tAct.con - tAnt.con;
 const fraseTendencia = `Proyectos con participación española iniciados en ${anioCierre - 2}–${anioCierre}: <b>${num(tAct.con)}</b> de ${num(tAct.tot)}; en ${anioCierre - 5}–${anioCierre - 3}: <b>${num(tAnt.con)}</b> de ${num(tAnt.tot)}. ${Math.abs(dif) <= 3 ? 'La presencia es alta pero no ha crecido entre los dos periodos.' : dif > 0 ? 'La presencia ha crecido entre los dos periodos.' : 'La presencia ha bajado entre los dos periodos.'}`;
 
+// ---------- vinculo con America Latina ----------
+const LA = eu.latam;
+const bloqueLatam = LA.proyectos ? `
+    <h3 class="subtit" style="margin-top:5mm">Vínculo con América Latina</h3>
+    <div class="latam">
+      <div><p>Entidades latinoamericanas participan en <b>${num(LA.proyectos)}</b> de los ${num(E.totalProyectos)} proyectos (${pct(100 * LA.proyectos / E.totalProyectos)}), con ${num(LA.participaciones)} participaciones (${num(LA.asociadas)} de socios asociados)${LA.coordinados ? `; coordinan ${num(LA.coordinados)}` : ' y sin ninguna coordinadora'}. En <b>${num(LA.conFoco)}</b> de ellos (${pct(LA.pctFocoEnRegion)}) hay también entidades españolas, frente al ${pct(LA.pctFocoGeneral)} del conjunto de proyectos.</p>
+      <p>Por países, los hispanohablantes aparecen con España en <b>${num(LA.hispano.conFoco)} de ${num(LA.hispano.pares)}</b> casos; Brasil, en <b>${num(LA.brasil.conFoco)} de ${num(LA.brasil.pares)}</b>. Son pocos proyectos, así que es un indicio y no una prueba: la diferencia con el conjunto no es estadísticamente significativa.</p></div>
+      ${tabla([['País', ''], ['Proyectos', 'n'], ['Con España', 'n'], ['Sin España', 'n']], LA.paises.map((p) => `<tr>${celda(esc(pais(p.pais)))}${celda(num(p.proyectos), 'n')}${celda(num(p.conFoco), 'n')}${celda(num(p.sinFoco), 'n')}</tr>`), { cls: 'latam-t' })}
+    </div>` : '';
+
 // ---------- pagina 3: España en Europa ----------
 const tiposEnt = eu.tipos.filter((t) => t.codigo).slice(0, 5).map((t) => ({ et: t.etiqueta.replace('Entidades con animo de lucro', 'Empresas').replace('Educacion superior o secundaria', 'Educación superior').replace('Organismos de investigacion', 'Organismos de investigación').replace('Organismos publicos', 'Organismos públicos'), v: t.entidades }));
 const p3 = `
@@ -321,6 +333,7 @@ const p3 = `
         `CORDIS y LIFE${pctLife != null ? ` (LIFE: ${pctLife} % atribuido a un socio, del panel público de CINEA)` : ''}. Mínimo: lo no atribuido no se reparte.`)}
     </div>
     <div class="programas">${eu.programas.map((p) => `<div><b>${esc(p.etiqueta)}</b><span>España en ${num(p.foco)} de ${num(p.proyectos)} · ${pct(p.pctFoco)}</span></div>`).join('')}</div>
+    ${bloqueLatam}
   </div>
   ${pie(3, `Datos: CORDIS (volcado de ${esc(fecha(new Date(fuenteEu.HORIZON.actualizado).toISOString()))}) y base de datos pública de LIFE · CC BY 4.0`)}
 </section>`;
@@ -398,7 +411,7 @@ const p5 = `
           <li><b>La medida es textual.</b> Detecta los proyectos que dicen ser de ciencia ciudadana, no los que lo son sin llamarlo así.</li>
           <li><b>Dos ámbitos, dos unidades.</b> Un proyecto europeo con su consorcio no equivale a una ayuda nacional: el número de proyectos no se suma. El importe total de la portada junta ambas medidas y es un mínimo.</li>
           <li><b>Contratos de la AEI fuera.</b> Los contratos de personal y las estancias repiten el texto de su proyecto y se cuentan aparte.</li>
-          <li><b>Datos incompletos.</b> En LIFE ${pctLife != null ? `el ${pctLife} % del dinero` : 'parte del dinero'} está atribuido a un socio concreto y el resto no se reparte; la Fundación Biodiversidad no publica el importe en muchas fichas.</li>
+          <li><b>Datos incompletos.</b> En LIFE ${pctLife != null ? `el ${pctLife} % del dinero` : 'parte del dinero'} está atribuido a un socio concreto y el resto no se reparte; ${fbSinImporte} de las ${fbAyudas} ayudas de la Fundación Biodiversidad no publican importe, y ${S.sinCcaa} ayudas no tienen comunidad autónoma determinada.</li>
           <li><b>Cada dato lleva su vía.</b> Qué criterio hizo entrar cada proyecto y cómo se dedujo su país o comunidad queda anotado.</li>
         </ul>
       </div>
@@ -503,6 +516,9 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
 .kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
 .kp span{font-size:7.6pt;color:var(--gris)}
+.latam{display:grid;grid-template-columns:1.3fr 1fr;gap:6mm;align-items:start}
+.latam p{margin:0 0 2mm;font-size:8.2pt}
+.latam table.tab{margin:0}
 .tendencia{margin:-1mm 0 4mm;padding:2.2mm 3.5mm;background:var(--fondo);border-left:2.2pt solid var(--ambar);font-size:8.6pt}
 table.tab{width:100%;border-collapse:collapse;font-size:7.8pt;margin:0 0 1.5mm}
 .tab th{text-align:left;font-size:7pt;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--negro);padding:1.3mm 2mm}
