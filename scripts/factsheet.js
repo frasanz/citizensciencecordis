@@ -60,7 +60,7 @@ function barrasH(items, { ancho = 330, fila = 22, etAncho = 118, fmt = num, max 
 
 // Columnas por año. series: [{ clave, color }]; cada fila de datos: { anio, [clave]: n }.
 // Con `superpuesta` la segunda serie se dibuja encima de la primera (parte de un total).
-function columnas(datos, series, { ancho = 700, alto = 150, superpuesta = false, etiquetaAnios = 1 } = {}) {
+function columnas(datos, series, { ancho = 700, alto = 150, superpuesta = false, etiquetaAnios = 1, cifras = true } = {}) {
   const mt = 14, mb = 20, ml = 24, mr = 6;
   const w = ancho - ml - mr, h = alto - mt - mb;
   const total = (d) => (superpuesta ? d[series[0].clave] : series.reduce((s, x) => s + (d[x.clave] || 0), 0));
@@ -91,7 +91,7 @@ function columnas(datos, series, { ancho = 700, alto = 150, superpuesta = false,
       });
     }
     const t = total(d);
-    if (t) g += `<text x="${(x + ancho1 / 2).toFixed(1)}" y="${(mt + h - (t / tope) * h - 3).toFixed(1)}" text-anchor="middle" class="eje v">${t}</text>`;
+    if (t && cifras) g += `<text x="${(x + ancho1 / 2).toFixed(1)}" y="${(mt + h - (t / tope) * h - 3).toFixed(1)}" text-anchor="middle" class="eje v">${t}</text>`;
     if (k % etiquetaAnios === 0) g += `<text x="${(x + ancho1 / 2).toFixed(1)}" y="${alto - 6}" text-anchor="middle" class="eje">${String(d.anio).slice(superpuesta ? 0 : 0)}</text>`;
   });
   return `<svg viewBox="0 0 ${ancho} ${alto}" role="img">${g}</svg>`;
@@ -168,7 +168,7 @@ const mensajes = [
 
 // ---------- piezas de pagina ----------
 const cabecera = (n, kicker) => `<header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>${esc(kicker)}</span></header>`;
-const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / 6</b></footer>`;
+const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / 7</b></footer>`;
 const kpi = (valor, et, sub = '') => `<div class="kpi"><div class="n">${valor}</div><div class="e">${et}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
 const fig = (titulo, cuerpo, nota = '') => `<figure><figcaption>${titulo}</figcaption>${cuerpo}${nota ? `<p class="nota">${nota}</p>` : ''}</figure>`;
 
@@ -202,11 +202,64 @@ const p1 = `
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
-      <p>Un proyecto es de <b>ciencia ciudadana</b> si la expresión aparece en su título o descripción: una medida textual y reproducible, no un juicio de calidad. <b>El número de proyectos no se suma</b> (un proyecto con consorcio no es una ayuda a una entidad). El importe total junta la contribución neta de la UE a entidades españolas y lo concedido por financiadores estatales, sin restar posibles solapes, y es un <b>mínimo</b>: no incluye Erasmus+, Europa Creativa ni Kohesio, ni lo no atribuible de LIFE. Detalle en la página 6.</p>
+      <p>Un proyecto es de <b>ciencia ciudadana</b> si la expresión aparece en su título o descripción: una medida textual y reproducible, no un juicio de calidad. <b>El número de proyectos no se suma</b> (un proyecto con consorcio no es una ayuda a una entidad). El importe total junta la contribución neta de la UE a entidades españolas y lo concedido por financiadores estatales, sin restar posibles solapes, y es un <b>mínimo</b>: no incluye Erasmus+, Europa Creativa ni Kohesio, ni lo no atribuible de LIFE. Detalle en la página 7.</p>
     </div>
   </div>
   ${pie(1, 'Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis')}
 </section>`;
+
+// ---------- mapas ----------
+// Las geometrias salen de datos/mapas.json (Eurostat GISCO, NUTS 2021, ver scripts/mapas.js). La proyeccion es la acimutal
+// equivalente de Lambert (LAEA, la oficial europea) y todo se dibuja como SVG, sin dependencias.
+const GEO = JSON.parse(fs.readFileSync(path.join(RAIZ, 'datos', 'mapas.json'), 'utf8'));
+const RAD = Math.PI / 180;
+const laea = (lon0, lat0) => (lon, lat) => {
+  const f = lat * RAD, l = (lon - lon0) * RAD, f1 = lat0 * RAD;
+  const k = Math.sqrt(2 / (1 + Math.sin(f1) * Math.sin(f) + Math.cos(f1) * Math.cos(f) * Math.cos(l)));
+  return [6371 * k * Math.cos(f) * Math.sin(l), -6371 * k * (Math.cos(f1) * Math.sin(f) - Math.sin(f1) * Math.cos(f) * Math.cos(l))];
+};
+const mezcla = (a, b, t) => { const h = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)); const A = h(a), B = h(b); return `#${A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join('')}`; };
+const ESCALA_GRIS = ['#e6e6e2', '#2b2b2b'], ESCALA_AMBAR = ['#fbefcf', '#a86f00'];
+
+// items: [{ id, anillos (lon/lat), proy, valor, color?, etiqueta?, inset? }]. Devuelve el SVG.
+function dibujarMapa(items, { ancho = 330, escala = ESCALA_AMBAR, max = 1, vacio = '#f3f3f0' } = {}) {
+  const planos = items.map((it) => ({ ...it, anillos: it.anillos.map((a) => a.map(([x, y]) => it.proy(x, y))) }));
+  const caja = (lista) => { let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; for (const it of lista) for (const a of it.anillos) for (const [x, y] of a) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); } return { x0, y0, x1, y1 }; };
+  const principales = planos.filter((it) => !it.inset), insets = planos.filter((it) => it.inset);
+  let B = caja(principales);
+  if (insets.length) {                                 // el inset (Canarias) va debajo a la izquierda, a la misma escala
+    const I = caja(insets), dx = B.x0 - I.x0, dy = B.y1 + (B.y1 - B.y0) * 0.04 - I.y0;
+    for (const it of insets) it.anillos = it.anillos.map((a) => a.map(([x, y]) => [x + dx, y + dy]));
+    B = caja(planos);
+  }
+  const esc = ancho / (B.x1 - B.x0), alto = (B.y1 - B.y0) * esc;
+  const P = ([x, y]) => `${((x - B.x0) * esc).toFixed(1)} ${((y - B.y0) * esc).toFixed(1)}`;
+  const color = (it) => it.color ?? (it.valor > 0 ? mezcla(escala[0], escala[1], Math.sqrt(it.valor / max)) : vacio);
+  const caminos = planos.map((it) => `<path d="${it.anillos.map((a) => `M${a.map(P).join('L')}Z`).join('')}" fill="${color(it)}" stroke="#fff" stroke-width=".6" stroke-linejoin="round"/>`).join('');
+  const colocados = [];
+  const rotulos = planos.filter((it) => it.etiqueta).sort((a, b) => b.valor - a.valor).map((it) => {
+    const g = it.anillos.reduce((m, a) => (a.length > m.length ? a : m), []);
+    const xs = g.map((q) => q[0]), ys = g.map((q) => q[1]);
+    const cx = ((Math.min(...xs) + Math.max(...xs)) / 2 - B.x0) * esc, cy = ((Math.min(...ys) + Math.max(...ys)) / 2 - B.y0) * esc;
+    if (colocados.some(([x, y]) => Math.hypot(x - cx, y - cy) < 17)) return '';   // no se pisan las etiquetas: la cifra exacta esta en las barras
+    colocados.push([cx, cy]);
+    const oscuro = it.valor > 0 && Math.sqrt(it.valor / max) > 0.55;
+    return `<text x="${cx.toFixed(1)}" y="${(cy + 3).toFixed(1)}" text-anchor="middle" class="rot-mapa${oscuro ? ' claro' : ''}">${esc2(it.etiqueta)}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${ancho} ${alto.toFixed(1)}" role="img">${caminos}${rotulos}</svg>`;
+}
+const esc2 = esc;
+const leyendaMapa = (max, escala, unidad) => `<div class="leyenda-mapa"><span>0</span><i style="background:linear-gradient(90deg,${escala[0]},${escala[1]})"></i><span>${num(max)} ${unidad}</span></div>`;
+
+// Mapa de Europa: Espana en ambar y el resto en escala de grises segun sus proyectos.
+const proyEu = laea(10, 52);
+const maxPaisEu = Math.max(...paises.filter((p) => p.pais !== 'ES').map((p) => p.proyectos));
+const valPais = Object.fromEntries(paises.map((p) => [p.pais, p.proyectos]));
+const topEtiquetas = new Set(top(paises, 9, (p) => p.proyectos).map((p) => p.pais));
+const mapaEuropa = dibujarMapa(GEO.paises.map((g) => ({
+  id: g.id, anillos: g.anillos, proy: proyEu, valor: valPais[g.id] || 0,
+  color: g.id === 'ES' ? C.ambar : undefined, etiqueta: topEtiquetas.has(g.id) ? String(valPais[g.id]) : '',
+})), { ancho: 300, escala: ESCALA_GRIS, max: maxPaisEu, vacio: '#f1f1ee' });
 
 // ---------- pagina 2: panorama europeo ----------
 const topPaises = (campo, n = 8) => top(paises, n, (p) => p[campo]).map((p) => ({ et: pais(p.pais), v: p[campo], resaltar: p.pais === 'ES' }));
@@ -243,18 +296,18 @@ const p2 = `
       ${kpiPeq(num(E.totalProyectos), 'proyectos')}${kpiPeq(num(paises.length), 'países')}${kpiPeq(num(E.organizacionesUnicas), 'entidades distintas')}
       ${kpiPeq(num(E.participaciones), 'participaciones')}${kpiPeq(meur(E.aportacionNetaTotal), 'contribución neta UE')}
     </div>
-    ${fig('Proyectos por año de inicio y programa', columnas(serieProg, progOrden.map((c) => ({ clave: c, color: colProg[c] })), { alto: 152 })
+    ${fig('Proyectos por año de inicio y programa', columnas(serieProg, progOrden.map((c) => ({ clave: c, color: colProg[c] })), { alto: 118 })
       + leyenda(progOrden.map((c) => ({ et: etProg[c], color: colProg[c] }))),
       `${num(serieEu.filter((s) => s.anio >= anioActual).reduce((s, x) => s + x.total, 0))} proyectos con inicio en ${anioActual} o después ya están firmados; el año en curso no está cerrado.`)}
     <div class="rejilla">
+      ${fig('Proyectos con participantes de cada país', mapaEuropa + leyendaMapa(maxPaisEu, ESCALA_GRIS, 'proyectos'), `España, en ámbar, con ${num(es.proyectos)}. Se rotulan los países con más proyectos que caben sin solaparse.`)}
       ${fig('Proyectos por país', barrasH(topPaises('proyectos', 10)), 'Con al menos una entidad del país en el consorcio.')}
-      ${fig('Áreas temáticas con más proyectos', barrasH(areasTop, { etAncho: 178, ancho: 360 }), 'Subprograma bajo el que se financia, con el nombre oficial de CORDIS traducido.')}
     </div>
     <h3 class="subtit">Comparación por habitante</h3>
     <div class="rejilla">
-      ${fig('Proyectos por millón de habitantes', barrasH(topConEs('permm', 8), { fmt: dec1 }),
+      ${fig('Proyectos por millón de habitantes', barrasH(topConEs('permm', 6), { fmt: dec1 }),
         `Países con al menos ${MIN_PROYECTOS_HAB} proyectos (${habitantes.length}). Población a 1 de enero de ${anioPob}, Eurostat.${sinPoblacion.length ? ` Sin ${sinPoblacion.join(', ')}: Eurostat no publica su población.` : ''}`)}
-      ${fig('Contribución neta de la UE por habitante (€)', barrasH(topConEs('eurHab', 8), { fmt: (v) => dec1(v) }),
+      ${fig('Contribución neta de la UE por habitante (€)', barrasH(topConEs('eurHab', 6), { fmt: (v) => dec1(v) }),
         `CORDIS y LIFE${pctLife != null ? ` (el ${pctLife} % de la contribución de LIFE está atribuido a un socio)` : ''}; Erasmus+ y Europa Creativa quedan fuera.`)}
     </div>
   </div>
@@ -310,6 +363,47 @@ const bloqueLatam = LA.proyectos ? `
       ${tabla([['País', ''], ['Proyectos', 'n'], ['Con España', 'n'], ['Sin España', 'n']], LA.paises.map((p) => `<tr>${celda(esc(pais(p.pais)))}${celda(num(p.proyectos), 'n')}${celda(num(p.conFoco), 'n')}${celda(num(p.sinFoco), 'n')}</tr>`), { cls: 'latam-t' })}
     </div>` : '';
 
+// ---------- dinero por año ----------
+// Aportacion de la UE al proyecto entero (no solo a la parte española) segun su año de inicio, en M€.
+const eurosEu = new Map();
+for (const x of eu.proyectos) {
+  if (!x.anio || x.anio < 2011) continue;
+  const f = eurosEu.get(x.anio) || { anio: x.anio, total: 0, foco: 0 };
+  f.total += x.aportacionUE / 1e6;
+  if (x.entidadesFoco.length) f.foco += x.aportacionUE / 1e6;
+  eurosEu.set(x.anio, f);
+}
+const serieEurosEu = [...eurosEu.values()].sort((a, b) => a.anio - b.anio).map((f) => ({ anio: f.anio, total: Math.round(f.total), foco: Math.round(f.foco) }));
+const eurosNac = new Map();
+for (const a of nac.ayudas) {
+  if (!a.anio || a.anio < 2012) continue;
+  const f = eurosNac.get(a.anio) || { anio: a.anio };
+  f[a.financiador] = (f[a.financiador] || 0) + (a.importe || 0) / 1e6;
+  eurosNac.set(a.anio, f);
+}
+const serieEurosNac = [...eurosNac.values()].sort((a, b) => a.anio - b.anio);
+
+// Comunidades autonomas: NUTS 2 -> nombre del cruce con las convocatorias estatales.
+const CCAA_NUTS = { ES11: 'Galicia', ES12: 'Asturias', ES13: 'Cantabria', ES21: 'País Vasco', ES22: 'Navarra', ES23: 'La Rioja', ES24: 'Aragón', ES30: 'Madrid',
+  ES41: 'Castilla y León', ES42: 'Castilla-La Mancha', ES43: 'Extremadura', ES51: 'Cataluña', ES52: 'Comunidad Valenciana', ES53: 'Illes Balears',
+  ES61: 'Andalucía', ES62: 'Murcia', ES63: 'Ceuta', ES64: 'Melilla', ES70: 'Canarias' };
+const regEu = Object.fromEntries(eu.regiones.lista.map((r) => [r.nuts2, r]));
+const nacCcaa = Object.fromEntries(nac.ccaa.filter((c) => c.clave).map((c) => [c.etiqueta, c]));
+const proyEs = laea(-3.7, 40.2), proyCan = laea(-15.6, 28.3);
+const maxRegEu = Math.max(...eu.regiones.lista.map((r) => r.proyectos), 1), maxRegNac = Math.max(...Object.values(nacCcaa).map((c) => c.ayudas), 1);
+const itemsCcaa = (valorDe, etiquetaDe) => GEO.ccaa.map((g) => ({ id: g.id, anillos: g.anillos, proy: g.id === 'ES70' ? proyCan : proyEs, inset: g.id === 'ES70', valor: valorDe(g.id) || 0, etiqueta: etiquetaDe(g.id) }));
+const top5 = (valorDe) => new Set(Object.keys(CCAA_NUTS).sort((a, b) => (valorDe(b) || 0) - (valorDe(a) || 0)).slice(0, 6));
+const vEu = (id) => regEu[id]?.proyectos, vNac = (id) => nacCcaa[CCAA_NUTS[id]]?.ayudas;
+const t5Eu = top5(vEu), t5Nac = top5(vNac);
+const mapaCcaaEu = dibujarMapa(itemsCcaa(vEu, (id) => (t5Eu.has(id) && vEu(id) ? String(vEu(id)) : '')), { ancho: 230, max: maxRegEu });
+const mapaCcaaNac = dibujarMapa(itemsCcaa(vNac, (id) => (t5Nac.has(id) && vNac(id) ? String(vNac(id)) : '')), { ancho: 230, max: maxRegNac });
+const filasCcaa = Object.entries(CCAA_NUTS).map(([id, nombre]) => ({ id, nombre, e: regEu[id], n: nacCcaa[nombre] }))
+  .filter((r) => r.e || r.n).sort((a, b) => (b.e?.proyectos ?? 0) - (a.e?.proyectos ?? 0) || (b.n?.ayudas ?? 0) - (a.n?.ayudas ?? 0))
+  .map((r) => `<tr>${celda(esc(r.nombre))}${celda(r.e ? num(r.e.proyectos) : '—', 'n')}${celda(r.e ? meur(r.e.aportacionNeta) : '—', 'n')}${celda(r.n ? num(r.n.ayudas) : '—', 'n')}${celda(r.n ? meur(r.n.importe) : '—', 'n')}</tr>`);
+const sumaRegEu = eu.regiones.lista.reduce((a, r) => a + r.proyectos, 0);
+const dosPrimEu = [...eu.regiones.lista].sort((a, b) => b.proyectos - a.proyectos).slice(0, 2);
+const pctSinSede = Math.round(100 * eu.regiones.sinNuts / (eu.regiones.conNuts + eu.regiones.sinNuts));
+
 // ---------- pagina 3: España en Europa ----------
 const tiposEnt = eu.tipos.filter((t) => t.codigo).slice(0, 5).map((t) => ({ et: t.etiqueta.replace('Entidades con animo de lucro', 'Empresas').replace('Educacion superior o secundaria', 'Educación superior').replace('Organismos de investigacion', 'Organismos de investigación').replace('Organismos publicos', 'Organismos públicos'), v: t.entidades }));
 const p3 = `
@@ -324,8 +418,13 @@ const p3 = `
       <div><b>${rDin}.º</b><span>en contribución neta UE<br>(${meur(es.aportacionNeta)}, ${pct(es.pctAportacion)}); ${rHabDin}.º por habitante</span></div>
       <div><b>${num(es.organizaciones)}</b><span>entidades españolas<br>distintas</span></div>
     </div>
-    ${fig('Proyectos por año de inicio', columnas(serieEu.map((s) => ({ anio: s.anio, total: s.total, foco: s.foco })), [{ clave: 'total', color: C.claro }, { clave: 'foco', color: C.ambar }], { superpuesta: true, alto: 140 })
-      + leyenda([{ et: 'Todos los proyectos', color: C.claro }, { et: 'Con participación española', color: C.ambar }]))}
+    <div class="rejilla">
+      ${fig('Proyectos por año de inicio', columnas(serieEu.map((s) => ({ anio: s.anio, total: s.total, foco: s.foco })), [{ clave: 'total', color: C.claro }, { clave: 'foco', color: C.ambar }], { superpuesta: true, alto: 150, ancho: 340, etiquetaAnios: 2, cifras: false })
+        + leyenda([{ et: 'Todos', color: C.claro }, { et: 'Con España', color: C.ambar }]))}
+      ${fig('Aportación de la UE por año de inicio (M€)', columnas(serieEurosEu, [{ clave: 'total', color: C.claro }, { clave: 'foco', color: C.ambar }], { superpuesta: true, alto: 150, ancho: 340, etiquetaAnios: 2, cifras: false })
+        + leyenda([{ et: 'Todos los proyectos', color: C.claro }, { et: 'Con participación española', color: C.ambar }]),
+        'Importe máximo del proyecto entero, no solo de la parte española.')}
+    </div>
     <p class="tendencia">${fraseTendencia}</p>
     <div class="rejilla">
       ${fig('Proyectos coordinados', barrasH(topPaises('coordinados')))}
@@ -359,20 +458,45 @@ const p3b = `
   ${pie(4, `Datos: CORDIS y base de datos pública de LIFE · CC BY 4.0`)}
 </section>`;
 
-// ---------- pagina 3: convocatorias españolas ----------
+// ---------- pagina 5: España por comunidades ----------
+const nomRegEu = (r) => CCAA_NUTS[r.nuts2];
+const dosPrimNac = nac.ccaa.filter((c) => c.clave).slice(0, 2);
+const p3c = `
+<section class="pagina">
+  ${cabecera(5, 'España por comunidades autónomas')}
+  <div class="cuerpo">
+    <h2>La participación se concentra en pocas comunidades: ${esc(nomRegEu(dosPrimEu[0]))} y ${esc(nomRegEu(dosPrimEu[1]))} van en cabeza</h2>
+    <p class="entra">Comunidad autónoma de la sede de cada entidad. En los proyectos europeos lideran ${esc(nomRegEu(dosPrimEu[0]))} (${num(dosPrimEu[0].proyectos)} proyectos) y ${esc(nomRegEu(dosPrimEu[1]))} (${num(dosPrimEu[1].proyectos)}); en las ayudas estatales, ${esc(dosPrimNac[0].etiqueta)} (${num(dosPrimNac[0].ayudas)}) y ${esc(dosPrimNac[1].etiqueta)} (${num(dosPrimNac[1].ayudas)}).</p>
+    <div class="rejilla">
+      ${fig('Proyectos europeos con entidades de la comunidad', `<div class="mapa-es">${mapaCcaaEu}</div>` + leyendaMapa(maxRegEu, ESCALA_AMBAR, 'proyectos'), 'Un proyecto cuenta una vez por comunidad.')}
+      ${fig('Ayudas estatales por comunidad de la entidad', `<div class="mapa-es">${mapaCcaaNac}</div>` + leyendaMapa(maxRegNac, ESCALA_AMBAR, 'ayudas'), 'Solo proyectos (sin contratos ni estancias de la AEI).')}
+    </div>
+    <h3 class="subtit">Las dos fuentes, por comunidad</h3>
+    ${tabla([['Comunidad autónoma', ''], ['Proyectos europeos', 'n'], ['Aportación UE', 'n'], ['Ayudas estatales', 'n'], ['Importe estatal', 'n']], filasCcaa)}
+    <p class="nota">Europa: sede de cada entidad según el código NUTS de CORDIS (también en LIFE cuando la entidad coincide por nombre con una de CORDIS); ${pctSinSede} % de las participaciones españolas no tiene sede conocida y no entra. Aportación UE: contribución neta a las entidades de la comunidad, no el importe de los proyectos. Estatal: sede de la entidad beneficiaria; ${num(S.sinCcaa)} ayudas sin comunidad determinada.</p>
+  </div>
+  ${pie(5, 'Datos: CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad · Límites administrativos: © EuroGeographics (Eurostat GISCO)')}
+</section>`;
+
+// ---------- pagina 6: convocatorias españolas ----------
 const colFin = { AEI: C.negro, FECYT: C.medio, FB: C.claro };
 const finOrden = ['AEI', 'FECYT', 'FB'].filter((f) => nac.financiadores.some((x) => x.clave === f));
 const VIA = { titulo: 'En el título', resumen: 'En el resumen', 'palabras-clave': 'En las palabras clave', categoria: 'Línea FECYT' };
 const viasTop = nac.vias.map((v) => ({ et: VIA[v.clave] || v.clave, v: v.ayudas }));
 const p4 = `
 <section class="pagina">
-  ${cabecera(5, 'Convocatorias españolas')}
+  ${cabecera(6, 'Convocatorias españolas')}
   <div class="cuerpo">
     <h2>${num(S.totalAyudas)} proyectos y ${meur(S.importeTotal)} concedidos desde ${S.desde}</h2>
     <p class="entra">AEI, FECYT y Fundación Biodiversidad. Aquí la unidad es la ayuda a una entidad, sin consorcios. Se cuentan solo proyectos: ${num(personal?.ayudas ?? 0)} contratos de personal y ${num(estancia?.ayudas ?? 0)} estancias de la AEI (${meur((personal?.importe ?? 0) + (estancia?.importe ?? 0))}) quedan fuera porque heredan el texto de su proyecto.</p>
-    ${fig('Proyectos por año de convocatoria', columnas(serieNac, finOrden.map((f) => ({ clave: f, color: colFin[f] })), { alto: 152 })
-      + leyenda(finOrden.map((f) => ({ et: finEtiqueta[f], color: colFin[f] }))),
-      'Año de la convocatoria (AEI, FECYT) o de inicio de ejecución (Fundación Biodiversidad).')}
+    <div class="rejilla">
+      ${fig('Proyectos por año de convocatoria', columnas(serieNac, finOrden.map((f) => ({ clave: f, color: colFin[f] })), { alto: 150, ancho: 340, etiquetaAnios: 2, cifras: false })
+        + leyenda(finOrden.map((f) => ({ et: finEtiqueta[f], color: colFin[f] }))),
+        'Año de la convocatoria (AEI, FECYT) o de inicio de ejecución (Fundación Biodiversidad).')}
+      ${fig('Importe concedido por año y financiador (M€)', columnas(serieEurosNac, finOrden.map((f) => ({ clave: f, color: colFin[f] })), { alto: 150, ancho: 340, etiquetaAnios: 2, cifras: false })
+        + leyenda(finOrden.map((f) => ({ et: finEtiqueta[f], color: colFin[f] }))),
+        'La Fundación Biodiversidad no publica el importe de la mayoría de sus ayudas.')}
+    </div>
     <div class="rejilla">
       ${fig('Proyectos por comunidad autónoma', barrasH(ccaaTop.map((c, k) => ({ et: c.etiqueta, v: c.ayudas, resaltar: k === 0 })), { etAncho: 112 }),
         `Cataluña y Madrid reúnen el ${pct(concentracion)}. ${num(S.sinCcaa)} proyectos sin comunidad determinada.`)}
@@ -382,14 +506,14 @@ const p4 = `
       ${fig('Cómo entra cada proyecto en el criterio', barrasH(viasTop, { etAncho: 130 }), 'Un proyecto entra por la primera vía que cumple. «Palabras clave»: las declara el proyecto (en la AEI, sin poder comprobarlas aquí).')}
     </div>
   </div>
-  ${pie(5, `Datos: AEI (${esc(fecha(fuenteEs.AEI.actualizado))}), FECYT y Fundación Biodiversidad · leídos de sus webs públicas`)}
+  ${pie(6, `Datos: AEI (${esc(fecha(fuenteEs.AEI.actualizado))}), FECYT y Fundación Biodiversidad · leídos de sus webs públicas`)}
 </section>`;
 
 // ---------- pagina 4: metodologia ----------
 const fl = (f) => nacTodo.meta.filtro.frases.map((x) => `<i>${esc(x)}</i>`).join(', ');
 const p5 = `
 <section class="pagina">
-  ${cabecera(6, 'Metodología y límites')}
+  ${cabecera(7, 'Metodología y límites')}
   <div class="cuerpo">
     <h2>Cómo se han obtenido estas cifras</h2>
     <p class="entra">Todo se recalcula con un único comando a partir de los datos públicos de cada financiador; el código y los CSV de partida están en abierto.</p>
@@ -444,7 +568,7 @@ const p5 = `
     </div>
     <p class="legal">Datos de CORDIS y LIFE: © Unión Europea, CC BY 4.0. Datos de AEI, FECYT y Fundación Biodiversidad: reutilizados según la Ley 37/2007, sobre reutilización de la información del sector público. Este documento es un análisis independiente elaborado por Fundación Ibercivis y no es una publicación oficial de ninguno de los financiadores.</p>
   </div>
-  ${pie(6, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
+  ${pie(7, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
 </section>`;
 
 // ---------- cabecera del sitio (solo en pantalla) ----------
@@ -464,10 +588,10 @@ const cabeceraSitio = `<header class="sitio no-imprimir">
     <a class="pestana" href="./#espana"><span class="largo">Convocatorias españolas</span><span class="corto">España</span><span class="pct">AEI, FECYT y Fundación Biodiversidad</span></a>
     <span class="div" aria-hidden="true"></span>
     <a class="pestana" href="./metodologia.html">Metodología<span class="pct">cómo se obtiene cada dato</span></a>
-    <a class="pestana" href="./factsheet.html" aria-current="page">Factsheet<span class="pct">informe de 6 páginas · PDF</span></a>
+    <a class="pestana" href="./factsheet.html" aria-current="page">Factsheet<span class="pct">informe de 7 páginas · PDF</span></a>
   </nav>
 </header>
-<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>6 páginas A4 · generado el ${esc(fecha(eu.meta.generado))}</span></div>`;
+<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>7 páginas A4 · generado el ${esc(fecha(eu.meta.generado))}</span></div>`;
 
 // ---------- documento ----------
 const css = `
@@ -544,6 +668,11 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .kp{border-top:1.6pt solid var(--negro);padding-top:1.6mm}
 .kp b{display:block;font-size:15pt;line-height:1.1;color:var(--negro);font-weight:700}
 .kp span{font-size:7.6pt;color:var(--gris)}
+.mapa-es{max-width:72%;margin:0 auto}
+.rot-mapa{font:700 8.4px var(--sans);fill:#111;text-anchor:middle;pointer-events:none}
+.rot-mapa.claro{fill:#fff}
+.leyenda-mapa{display:flex;align-items:center;gap:2mm;font-size:7.2pt;color:var(--gris);margin-top:1.2mm}
+.leyenda-mapa i{flex:1;height:2.2mm;border-radius:1mm;border:.4pt solid var(--claro)}
 .latam{display:grid;grid-template-columns:1.3fr 1fr;gap:6mm;align-items:start}
 .latam p{margin:0 0 2mm;font-size:8.2pt}
 .latam table.tab{margin:0}
@@ -596,6 +725,7 @@ ${p1}
 ${p2}
 ${p3}
 ${p3b}
+${p3c}
 ${p4}
 ${p5}
 </body>

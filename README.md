@@ -46,13 +46,20 @@ node scripts/snapshot.js --sin-cache      # ignora lo ya descargado en .cache/
 
 ## Factsheet
 
-`node scripts/factsheet.js --pdf` genera `web/factsheet.html` y `web/factsheet.pdf`: seis páginas A4,
+`node scripts/factsheet.js --pdf` genera `web/factsheet.html` y `web/factsheet.pdf`: siete páginas A4,
 «La ciencia ciudadana en España», con la identidad de Ibercivis (logo en `web/img/`). Lee los mismos
 JSON que la web, así que las cifras no pueden diverger; en la parte española cuenta solo proyectos.
 La comparación por habitante usa `datos/poblacion.csv` (población a 1 de enero, Eurostat `demo_pjan`),
 que se refresca a mano con `node scripts/poblacion.js` (cambia una vez al año). Solo entran los países con
 al menos 15 proyectos, y Reino Unido queda fuera porque Eurostat ya no publica su población.
 El PDF necesita Playwright y Chromium (`npx playwright install chromium`); el HTML, solo Node.
+
+## Mapas
+
+El factsheet dibuja mapas de países europeos y de comunidades autónomas (SVG, sin dependencias) con los límites de
+Eurostat GISCO (NUTS 2021, © EuroGeographics), simplificados en `datos/mapas.json`; para regenerarlos,
+`node scripts/mapas.js`. La comunidad de la participación europea sale del código NUTS que da CORDIS (`nuts` en cada
+participación, `regiones` en el resultado).
 
 ## Vínculo con América Latina
 
@@ -205,6 +212,7 @@ datos/
   life-paises.csv    países de socios de LIFE resueltos a mano, con la fuente de cada uno
   life-importes.csv  contribución de la UE por socio de LIFE, extraída del panel público de CINEA
   poblacion.csv      población por país (Eurostat), para las comparaciones por habitante
+  mapas.json         límites de países y comunidades autónomas (Eurostat GISCO) para los mapas del factsheet
   life-paises-pendientes.csv   los que quedan sin país (lo regenera snapshot.js)
   ccaa-entidades.csv           comunidad autónoma de entidades resuelta a mano
   ccaa-entidades-pendientes.csv   las que quedan sin comunidad (lo regenera snapshot.js)

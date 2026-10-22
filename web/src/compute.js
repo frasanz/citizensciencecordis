@@ -40,8 +40,8 @@ export const COLUMNAS_PROYECTO = ['id', 'acronym', 'title', 'objective', 'keywor
 export const OPCIONALES_PROYECTO = ['keywords', 'fundingScheme', 'ecSignatureDate', 'status', 'totalCost'];
 
 export const COLUMNAS_ORGANIZACION = ['projectID', 'organisationID', 'name', 'shortName',
-  'country', 'activityType', 'role', 'netEcContribution', 'ecContribution'];
-export const OPCIONALES_ORGANIZACION = ['shortName', 'netEcContribution', 'ecContribution', 'activityType', 'role'];
+  'country', 'activityType', 'role', 'netEcContribution', 'ecContribution', 'nutsCode'];
+export const OPCIONALES_ORGANIZACION = ['shortName', 'netEcContribution', 'ecContribution', 'activityType', 'role', 'nutsCode'];
 
 export const COLUMNAS_BASE_LEGAL = ['projectID', 'legalBasis', 'title'];
 export const OPCIONALES_BASE_LEGAL = ['title'];
@@ -149,6 +149,8 @@ export function crearAnalisis({ filtro, roles = ROLES }) {
         // De donde sale el pais: 'cordis' para todo CORDIS; en LIFE, la via de la
         // cadena (ficha, cordis, fts, fts-aprox, forma-juridica, manual, sin-pais).
         via: rec.paisVia || 'cordis',
+        // Codigo NUTS de la sede (CORDIS lo da en H2020 y Horizonte Europa y, a veces, en FP7).
+        nuts: rec.nutsCode || '',
       });
     },
 
@@ -228,6 +230,27 @@ function construir({ proyectos, participaciones, contadosPorPrograma, filtro,
     // Pares pais-proyecto: los paises hispanohablantes frente a Brasil (un proyecto con dos paises cuenta dos veces).
     hispano: { pares: latamPaises.filter((p) => p.pais !== 'BR').reduce((s, p) => s + p.proyectos, 0), conFoco: latamPaises.filter((p) => p.pais !== 'BR').reduce((s, p) => s + p.conFoco, 0) },
     brasil: { pares: latamPaises.find((p) => p.pais === 'BR')?.proyectos ?? 0, conFoco: latamPaises.find((p) => p.pais === 'BR')?.conFoco ?? 0 },
+  };
+
+  // --- regiones (NUTS 2) del pais foco: proyectos distintos, entidades y dinero por region de la sede ---
+  const porRegion = new Map();
+  let focoConNuts = 0, focoSinNuts = 0;
+  for (const p of participaciones) {
+    if (p.pais !== paisFoco) continue;
+    if (!p.nuts || p.nuts.length < 4) { focoSinNuts++; continue; }
+    focoConNuts++;
+    const k = p.nuts.slice(0, 4);
+    let e = porRegion.get(k);
+    if (!e) porRegion.set(k, e = { nuts2: k, proyectos: new Set(), coordinados: new Set(), orgs: new Set(), aportacionNeta: 0 });
+    e.proyectos.add(p.proyecto);
+    if (p.rol === 'coordinator') e.coordinados.add(p.proyecto);
+    e.orgs.add(p.orgId || p.nombre);
+    e.aportacionNeta += p.aportacionNeta;
+  }
+  const regiones = {
+    conNuts: focoConNuts, sinNuts: focoSinNuts,
+    lista: [...porRegion.values()].map((e) => ({ nuts2: e.nuts2, proyectos: e.proyectos.size, coordinados: e.coordinados.size, organizaciones: e.orgs.size, aportacionNeta: e.aportacionNeta }))
+      .sort((a, b) => b.proyectos - a.proyectos),
   };
 
   // --- coordinador y entidades del pais foco, adjuntos a cada proyecto ---
@@ -355,7 +378,7 @@ function construir({ proyectos, participaciones, contadosPorPrograma, filtro,
       focoAportacionNeta: foco.aportacionNeta,
       focoPctAportacion: foco.pctAportacion,
     },
-    programas, subprogramas, familias, esquemas, paises, tipos, serie, entidadesFoco, csic, latam,
+    programas, subprogramas, familias, esquemas, paises, tipos, serie, entidadesFoco, csic, latam, regiones,
     paisesComparados: paisesComparados.map((c) => paises.find((p) => p.pais === c)).filter(Boolean),
     proyectos: [...proyectos.values()],
     participaciones,

@@ -403,6 +403,8 @@ export function registrosParticipacion(x, ficha, { cordis, fts, manual, importes
       netEcContribution: '',
       ecContribution: '',
       paisVia: pais ? via : 'sin-pais',
+      // La sede (NUTS) solo se conoce si la entidad se casa por nombre con una de CORDIS del mismo pais.
+      nutsCode: enCordis?.nuts && enCordis.pais === pais ? enCordis.nuts : '',
     });
   }
   const filas = importes?.get(claveImportes(x.reference));

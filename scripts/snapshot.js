@@ -76,8 +76,9 @@ const recogerNombre = (r) => {
     if (!n || !r.country) continue;
     const k = claveNombre(n);
     const e = nombresCordis.get(k);
-    if (!e) nombresCordis.set(k, { pais: r.country, pic: r.organisationID || '' });
+    if (!e) nombresCordis.set(k, { pais: r.country, pic: r.organisationID || '', nuts: r.nutsCode || '' });
     else if (e.pais !== r.country) e.pais = null;
+    else if (e.nuts !== r.nutsCode) e.nuts = '';       // dos sedes distintas con el mismo nombre: sin NUTS
   }
 };
 
