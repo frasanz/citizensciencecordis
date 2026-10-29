@@ -1,4 +1,4 @@
-// Factsheet "La ciencia ciudadana en España": 4 paginas A4 con la identidad de
+// Factsheet "La ciencia ciudadana en España": paginas A4 con la identidad de
 // Ibercivis (logo blanco sobre negro, grises y un acento ambar). Sale de los
 // mismos JSON que la web, asi que se regenera con cada snapshot y las cifras no
 // pueden diverger.
@@ -137,17 +137,20 @@ const top = (arr, n, f) => [...arr].sort((a, b) => f(b) - f(a)).slice(0, n);
 const ordinal = (n) => (n === 1 ? 'el primer puesto' : `el puesto ${n}`);
 
 const S = nac.resumen;
-const ccaaTop = nac.ccaa.filter((c) => c.clave).slice(0, 10);
 const anioActual = new Date(eu.meta.generado).getFullYear();
 const serieEu = eu.serie.filter((s) => s.anio >= 2011);
-const serieNac = nac.serie.filter((s) => s.anio >= 2012).map((s) => ({ anio: s.anio, ...s.porFinanciador }));
 const aniosNacFuerte = nac.serie.filter((s) => s.anio >= 2018 && s.anio < anioActual);
 const mediaReciente = aniosNacFuerte.reduce((s, x) => s + x.total, 0) / (aniosNacFuerte.length || 1);
 const mediaAntes = nac.serie.filter((s) => s.anio >= 2013 && s.anio <= 2016).reduce((s, x) => s + x.total, 0) / 4;
 const personal = nacTodo.tipos.find((t) => t.clave === 'personal');
 const estancia = nacTodo.tipos.find((t) => t.clave === 'estancia');
 const finEtiqueta = { AEI: 'AEI', FECYT: 'FECYT', FB: 'Fundación Biodiversidad' };
-const concentracion = (ccaaTop[0].ayudas + ccaaTop[1].ayudas) / S.totalAyudas * 100;
+const finOrden = ['AEI', 'FECYT', 'FB'].filter((f) => nac.financiadores.some((x) => x.clave === f));
+const finRes = Object.fromEntries(nac.financiadores.map((f) => [f.clave, f]));
+// Portada, Europa (3), comunidades, una por financiador y metodologia.
+const TOTAL_PAG = 6 + finOrden.length;
+const nMetodologia = TOTAL_PAG;
+const desgloseFin = (campo, fmt) => finOrden.map((f) => `${finEtiqueta[f]} ${fmt(finRes[f][campo])}`).join(' · ');
 
 // Resumen total en euros: contribucion neta de la UE a entidades españolas (CORDIS y LIFE) mas lo concedido por los
 // financiadores estatales (solo proyectos). Son dos medidas distintas y no se han restado solapes: es un minimo.
@@ -162,13 +165,13 @@ const mensajes = [
     t: `Coordina ${num(es.coordinados)} y recibe ${meur(es.aportacionNeta)}`,
     p: `España ocupa ${ordinal(rCoord)} en proyectos coordinados y ${ordinal(rDin)} en contribución neta de la UE, con ${num(es.organizaciones)} entidades españolas distintas participando.` },
   { n: 3,
-    t: `${num(S.totalAyudas)} proyectos nacionales, ${meur(S.importeTotal)} concedidos`,
-    p: `Entre 2009 y ${S.hasta}, AEI, FECYT y la Fundación Biodiversidad han concedido ayudas a ${num(S.entidades)} entidades. Desde 2018 se financian de media unos ${num(mediaReciente)} proyectos al año, frente a unos ${num(mediaAntes)} entre 2013 y 2016.` },
+    t: `${num(S.totalAyudas)} proyectos en convocatorias españolas`,
+    p: `${finOrden.map((f) => `${f === 'FB' ? 'la Fundación Biodiversidad' : f === 'AEI' ? 'la AEI' : f} ha financiado ${num(finRes[f].ayudas)} (${meur(finRes[f].importe)}${f === 'FB' && fbSinImporte ? ', sin importe publicado en la mayoría' : ''})`).join('; ').replace(/^./, (c) => c.toUpperCase())}. Desde 2018 se financian de media unos ${num(mediaReciente)} proyectos al año, frente a unos ${num(mediaAntes)} entre 2013 y 2016.` },
 ];
 
 // ---------- piezas de pagina ----------
 const cabecera = (n, kicker) => `<header class="cab"><img src="img/ibercivis-logo.png" alt="Ibercivis"><span>${esc(kicker)}</span></header>`;
-const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / 7</b></footer>`;
+const pie = (n, texto) => `<footer class="pie"><span>${texto}</span><b>${n} / ${TOTAL_PAG}</b></footer>`;
 const kpi = (valor, et, sub = '') => `<div class="kpi"><div class="n">${valor}</div><div class="e">${et}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
 const fig = (titulo, cuerpo, nota = '') => `<figure><figcaption>${titulo}</figcaption>${cuerpo}${nota ? `<p class="nota">${nota}</p>` : ''}</figure>`;
 
@@ -185,14 +188,15 @@ const p1 = `
       <div class="td">
         <div class="barra"><i style="width:${pctEu}%"></i></div>
         <p><b>${meur(es.aportacionNeta)}</b> de la UE (CORDIS y LIFE) · ${pctEu} %</p>
-        <p><b>${meur(S.importeTotal)}</b> concedidos por convocatorias estatales (AEI, FECYT, Fundación Biodiversidad) · ${100 - pctEu} %</p>
+        <p><b>${meur(S.importeTotal)}</b> concedidos por convocatorias estatales · ${100 - pctEu} %</p>
+        <p class="fin">${esc(desgloseFin('importe', meur))}</p>
       </div>
     </div>
     <div class="kpis">
       ${kpi(num(es.proyectos), 'proyectos europeos con participación española', `${pct(es.pctSobreTotal)} de los ${num(E.totalProyectos)} del criterio`)}
       ${kpi(num(es.coordinados), 'proyectos europeos coordinados desde España', `${meur(es.aportacionNeta)} de contribución neta UE`)}
-      ${kpi(num(S.totalAyudas), 'proyectos financiados en convocatorias españolas', `${num(S.entidades)} entidades · ${S.desde}–${S.hasta}`)}
-      ${kpi(meur(S.importeTotal), 'concedidos en esas convocatorias', `${num(S.sinImporte)} sin importe publicado`)}
+      ${kpi(num(S.totalAyudas), 'proyectos financiados en convocatorias españolas', esc(desgloseFin('ayudas', num)))}
+      ${kpi(meur(S.importeTotal), 'concedidos en esas convocatorias', `${esc(desgloseFin('importe', meur))}${S.sinImporte ? ` · ${num(S.sinImporte)} sin importe publicado` : ''}`)}
     </div>
   </div>
   <div class="cuerpo">
@@ -202,7 +206,7 @@ const p1 = `
     </ol>
     <div class="recuadro">
       <h3>Cómo leer estas cifras</h3>
-      <p>Un proyecto es de <b>ciencia ciudadana</b> si la expresión aparece en su título o descripción: una medida textual y reproducible, no un juicio de calidad. <b>El número de proyectos no se suma</b> (un proyecto con consorcio no es una ayuda a una entidad). El importe total junta la contribución neta de la UE a entidades españolas y lo concedido por financiadores estatales, sin restar posibles solapes, y es un <b>mínimo</b>: no incluye Erasmus+, Europa Creativa ni Kohesio, ni lo no atribuible de LIFE. Detalle en la página 7.</p>
+      <p>Un proyecto es de <b>ciencia ciudadana</b> si la expresión aparece en su título o descripción: una medida textual y reproducible, no un juicio de calidad. <b>El número de proyectos no se suma</b> (un proyecto con consorcio no es una ayuda a una entidad). El importe total junta la contribución neta de la UE a entidades españolas y lo concedido por financiadores estatales, sin restar posibles solapes, y es un <b>mínimo</b>: no incluye Erasmus+, Europa Creativa ni Kohesio, ni lo no atribuible de LIFE. Detalle en la página ${nMetodologia}.</p>
     </div>
   </div>
   ${pie(1, 'Fuentes: CORDIS, CINEA (LIFE), AEI, FECYT y Fundación Biodiversidad · Elaboración: Ibercivis')}
@@ -374,14 +378,6 @@ for (const x of eu.proyectos) {
   eurosEu.set(x.anio, f);
 }
 const serieEurosEu = [...eurosEu.values()].sort((a, b) => a.anio - b.anio).map((f) => ({ anio: f.anio, total: Math.round(f.total), foco: Math.round(f.foco) }));
-const eurosNac = new Map();
-for (const a of nac.ayudas) {
-  if (!a.anio || a.anio < 2012) continue;
-  const f = eurosNac.get(a.anio) || { anio: a.anio };
-  f[a.financiador] = (f[a.financiador] || 0) + (a.importe || 0) / 1e6;
-  eurosNac.set(a.anio, f);
-}
-const serieEurosNac = [...eurosNac.values()].sort((a, b) => a.anio - b.anio);
 
 // Comunidades autonomas: NUTS 2 -> nombre del cruce con las convocatorias estatales.
 const CCAA_NUTS = { ES11: 'Galicia', ES12: 'Asturias', ES13: 'Cantabria', ES21: 'País Vasco', ES22: 'Navarra', ES23: 'La Rioja', ES24: 'Aragón', ES30: 'Madrid',
@@ -389,6 +385,8 @@ const CCAA_NUTS = { ES11: 'Galicia', ES12: 'Asturias', ES13: 'Cantabria', ES21: 
   ES61: 'Andalucía', ES62: 'Murcia', ES63: 'Ceuta', ES64: 'Melilla', ES70: 'Canarias' };
 const regEu = Object.fromEntries(eu.regiones.lista.map((r) => [r.nuts2, r]));
 const nacCcaa = Object.fromEntries(nac.ccaa.filter((c) => c.clave).map((c) => [c.etiqueta, c]));
+const nacCcaaFin = Object.fromEntries(finOrden.map((f) => [f, {}]));
+for (const a of nac.ayudas) if (a.ccaa && nacCcaaFin[a.financiador]) nacCcaaFin[a.financiador][a.ccaa] = (nacCcaaFin[a.financiador][a.ccaa] || 0) + 1;
 const proyEs = laea(-3.7, 40.2), proyCan = laea(-15.6, 28.3);
 const maxRegEu = Math.max(...eu.regiones.lista.map((r) => r.proyectos), 1), maxRegNac = Math.max(...Object.values(nacCcaa).map((c) => c.ayudas), 1);
 const itemsCcaa = (valorDe, etiquetaDe) => GEO.ccaa.map((g) => ({ id: g.id, anillos: g.anillos, proy: g.id === 'ES70' ? proyCan : proyEs, inset: g.id === 'ES70', valor: valorDe(g.id) || 0, etiqueta: etiquetaDe(g.id) }));
@@ -399,7 +397,7 @@ const mapaCcaaEu = dibujarMapa(itemsCcaa(vEu, (id) => (t5Eu.has(id) && vEu(id) ?
 const mapaCcaaNac = dibujarMapa(itemsCcaa(vNac, (id) => (t5Nac.has(id) && vNac(id) ? String(vNac(id)) : '')), { ancho: 230, max: maxRegNac });
 const filasCcaa = Object.entries(CCAA_NUTS).map(([id, nombre]) => ({ id, nombre, e: regEu[id], n: nacCcaa[nombre] }))
   .filter((r) => r.e || r.n).sort((a, b) => (b.e?.proyectos ?? 0) - (a.e?.proyectos ?? 0) || (b.n?.ayudas ?? 0) - (a.n?.ayudas ?? 0))
-  .map((r) => `<tr>${celda(esc(r.nombre))}${celda(r.e ? num(r.e.proyectos) : '—', 'n')}${celda(r.e ? meur(r.e.aportacionNeta) : '—', 'n')}${celda(r.n ? num(r.n.ayudas) : '—', 'n')}${celda(r.n ? meur(r.n.importe) : '—', 'n')}</tr>`);
+  .map((r) => `<tr>${celda(esc(r.nombre))}${celda(r.e ? num(r.e.proyectos) : '—', 'n')}${celda(r.e ? meur(r.e.aportacionNeta) : '—', 'n')}${finOrden.map((f) => celda(nacCcaaFin[f][r.nombre] ? num(nacCcaaFin[f][r.nombre]) : '—', 'n')).join('')}</tr>`);
 const sumaRegEu = eu.regiones.lista.reduce((a, r) => a + r.proyectos, 0);
 const dosPrimEu = [...eu.regiones.lista].sort((a, b) => b.proyectos - a.proyectos).slice(0, 2);
 const pctSinSede = Math.round(100 * eu.regiones.sinNuts / (eu.regiones.conNuts + eu.regiones.sinNuts));
@@ -472,48 +470,92 @@ const p3c = `
       ${fig('Ayudas estatales por comunidad de la entidad', `<div class="mapa-es">${mapaCcaaNac}</div>` + leyendaMapa(maxRegNac, ESCALA_AMBAR, 'ayudas'), 'Solo proyectos (sin contratos ni estancias de la AEI).')}
     </div>
     <h3 class="subtit">Las dos fuentes, por comunidad</h3>
-    ${tabla([['Comunidad autónoma', ''], ['Proyectos europeos', 'n'], ['Aportación UE', 'n'], ['Ayudas estatales', 'n'], ['Importe estatal', 'n']], filasCcaa)}
-    <p class="nota">Europa: sede de cada entidad según el código NUTS de CORDIS (también en LIFE cuando la entidad coincide por nombre con una de CORDIS); ${pctSinSede} % de las participaciones españolas no tiene sede conocida y no entra. Aportación UE: contribución neta a las entidades de la comunidad, no el importe de los proyectos. Estatal: sede de la entidad beneficiaria; ${num(S.sinCcaa)} ayudas sin comunidad determinada.</p>
+    ${tabla([['Comunidad autónoma', ''], ['Proyectos europeos', 'n'], ['Aportación UE', 'n'], ...finOrden.map((f) => [`Ayudas ${f === 'FB' ? 'F. Biodiv.' : finEtiqueta[f]}`, 'n'])], filasCcaa)}
+    <p class="nota">Europa: sede de cada entidad según el código NUTS de CORDIS (también en LIFE cuando la entidad coincide por nombre con una de CORDIS); ${pctSinSede} % de las participaciones españolas no tiene sede conocida y no entra. Aportación UE: contribución neta a las entidades de la comunidad, no el importe de los proyectos. Ayudas estatales: proyectos de cada financiador por sede de la entidad beneficiaria, sin sumarlos; ${num(S.sinCcaa)} sin comunidad determinada. El importe de cada financiador, en su página.</p>
   </div>
   ${pie(5, 'Datos: CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad · Límites administrativos: © EuroGeographics (Eurostat GISCO)')}
 </section>`;
 
-// ---------- pagina 6: convocatorias españolas ----------
-const colFin = { AEI: C.negro, FECYT: C.medio, FB: C.claro };
-const finOrden = ['AEI', 'FECYT', 'FB'].filter((f) => nac.financiadores.some((x) => x.clave === f));
-const VIA = { titulo: 'En el título', resumen: 'En el resumen', 'palabras-clave': 'En las palabras clave', categoria: 'Línea FECYT' };
-const viasTop = nac.vias.map((v) => ({ et: VIA[v.clave] || v.clave, v: v.ayudas }));
-const p4 = `
+// ---------- paginas 6 a 8: una por financiador español ----------
+// Cada financiador va en su pagina y no se suman entre si: el importe, el año y la via de entrada no
+// significan lo mismo en la AEI, en FECYT y en la Fundacion Biodiversidad.
+const VIA = { titulo: 'En el título', resumen: 'En el resumen', 'palabras-clave': 'En las palabras clave', categoria: 'Línea de ciencia ciudadana' };
+const nombreNac = (n) => corto(/CONSEJO SUPERIOR DE INVESTIGACIONES CIENT/i.test(n) ? 'CSIC' : titular(n).replace(/^Universidad/, 'U.').replace(/^Universitat/, 'U.'), 28);
+// FECYT da el tipo como "Universidad, Publica"; cuando solo dice "Publica" o "Privada" no hay tipo.
+const tipoFecyt = (t) => { const x = t && t.includes(',') ? t.split(',')[0].trim() : ''; return x && x !== 'Otros' ? x : 'Otras o sin tipo'; };
+const porTipoFecyt = (ayudas) => [...ayudas.reduce((m, a) => m.set(tipoFecyt(a.tipoEntidad), (m.get(tipoFecyt(a.tipoEntidad)) || 0) + 1), new Map())]
+  .map(([et, v]) => ({ et, v })).sort((a, b) => b.v - a.v).slice(0, 7);
+const FIN_TEXTO = {
+  AEI: {
+    nombre: 'Agencia Estatal de Investigación',
+    entra: `Ayudas a proyectos de investigación de sus convocatorias de I+D+i. Se cuentan solo proyectos: ${num(personal?.ayudas ?? 0)} contratos de personal y ${num(estancia?.ayudas ?? 0)} estancias (${meur((personal?.importe ?? 0) + (estancia?.importe ?? 0))}) quedan fuera porque heredan el texto de su proyecto.`,
+    anio: 'Año de la convocatoria.',
+    importe: 'Ayuda concedida que publica el buscador de la AEI.',
+    vias: '«Palabras clave»: las declara el proyecto y la AEI no las exporta, así que no se comprueban aquí.',
+  },
+  FECYT: {
+    nombre: 'Fundación Española para la Ciencia y la Tecnología',
+    entra: 'Ayudas de la convocatoria anual de fomento de la cultura científica, tecnológica y de la innovación: divulgación, comunicación y participación, no investigación.',
+    anio: 'Año de la convocatoria.',
+    importe: 'Propuesta de financiación final de la resolución de concesión.',
+    vias: '«Línea de ciencia ciudadana»: concedida en la línea o categoría de ciencia ciudadana de la convocatoria. «Palabras clave»: los descriptores de la ficha del proyecto.',
+  },
+  FB: {
+    nombre: 'Fundación Biodiversidad (MITECO)',
+    entra: 'Proyectos de conservación de la biodiversidad y del medio marino de sus convocatorias de ayudas, del Programa Pleamar y de Biodiversa+.',
+    anio: 'Año de inicio de ejecución según la ficha del proyecto.',
+    importe: 'Importe de la ayuda que da la ficha; la mayoría de las fichas no lo publica.',
+    vias: '',
+  },
+};
+const paginasFin = finOrden.map((f, k) => {
+  const r = recomputarNacional(nacTodo, { tipos: ['proyecto'], financiadores: [f] });
+  const R = r.resumen, T = FIN_TEXTO[f];
+  const n = 6 + k;
+  const serie = r.serie.filter((s) => s.anio >= R.desde).map((s) => ({ anio: s.anio, v: s.total }));
+  const euros = r.serie.filter((s) => s.anio >= R.desde).map((s) => ({ anio: s.anio, v: Math.round(s.importe / 1e5) / 10 }));
+  const ccaa = r.ccaa.filter((c) => c.clave).slice(0, 8);
+  // Algunas fichas de la Fundacion Biodiversidad no dicen quien es el beneficiario: no cuentan como entidad.
+  const entidades = r.entidades.filter((e) => e.nombre?.trim());
+  const sinEntidad = r.ayudas.filter((a) => !a.entidad?.trim()).length;
+  const tercera = f === 'FECYT'
+    ? fig('Tipo de entidad beneficiaria', barrasH(porTipoFecyt(r.ayudas), { etAncho: 150 }), 'Tal como lo da la resolución de FECYT.')
+    : fig('Proyectos por convocatoria', barrasH(r.convocatorias.slice(0, 7).map((c) => ({ et: corto(c.etiqueta, 34), v: c.ayudas })), { etAncho: 170 }), 'Nombre de la convocatoria o del programa que da el financiador.');
+  const conImporte = R.sinImporte ? `${num(R.conImporte)} de ${num(R.totalAyudas)} con importe` : `${num(R.importeMedio / 1000)} mil € de media`;
+  return `
 <section class="pagina">
-  ${cabecera(6, 'Convocatorias españolas')}
+  ${cabecera(n, `Convocatorias españolas · ${finEtiqueta[f]}`)}
   <div class="cuerpo">
-    <h2>${num(S.totalAyudas)} proyectos y ${meur(S.importeTotal)} concedidos desde ${S.desde}</h2>
-    <p class="entra">AEI, FECYT y Fundación Biodiversidad. Aquí la unidad es la ayuda a una entidad, sin consorcios. Se cuentan solo proyectos: ${num(personal?.ayudas ?? 0)} contratos de personal y ${num(estancia?.ayudas ?? 0)} estancias de la AEI (${meur((personal?.importe ?? 0) + (estancia?.importe ?? 0))}) quedan fuera porque heredan el texto de su proyecto.</p>
-    <div class="rejilla">
-      ${fig('Proyectos por año de convocatoria', columnas(serieNac, finOrden.map((f) => ({ clave: f, color: colFin[f] })), { alto: 150, ancho: 340, etiquetaAnios: 2, cifras: false })
-        + leyenda(finOrden.map((f) => ({ et: finEtiqueta[f], color: colFin[f] }))),
-        'Año de la convocatoria (AEI, FECYT) o de inicio de ejecución (Fundación Biodiversidad).')}
-      ${fig('Importe concedido por año y financiador (M€)', columnas(serieEurosNac, finOrden.map((f) => ({ clave: f, color: colFin[f] })), { alto: 150, ancho: 340, etiquetaAnios: 2, cifras: false })
-        + leyenda(finOrden.map((f) => ({ et: finEtiqueta[f], color: colFin[f] }))),
-        'La Fundación Biodiversidad no publica el importe de la mayoría de sus ayudas.')}
+    <h2>${esc(finEtiqueta[f])}: ${num(R.totalAyudas)} proyectos y ${meur(R.importeTotal)} concedidos entre ${R.desde} y ${R.hasta}</h2>
+    <p class="entra"><b>${esc(T.nombre)}.</b> ${T.entra} La unidad es la ayuda a una entidad, sin consorcios.</p>
+    <div class="kps">
+      ${kpiPeq(num(R.totalAyudas), 'proyectos')}${kpiPeq(num(entidades.length), 'entidades distintas')}${kpiPeq(meur(R.importeTotal), conImporte)}
+      ${kpiPeq(num(R.ccaaConAyudas), 'comunidades autónomas')}${kpiPeq(`${R.desde}–${R.hasta}`, 'años con proyectos')}
     </div>
     <div class="rejilla">
-      ${fig('Proyectos por comunidad autónoma', barrasH(ccaaTop.map((c, k) => ({ et: c.etiqueta, v: c.ayudas, resaltar: k === 0 })), { etAncho: 112 }),
-        `Cataluña y Madrid reúnen el ${pct(concentracion)}. ${num(S.sinCcaa)} proyectos sin comunidad determinada.`)}
-      ${fig('Importe concedido por financiador (M€)', barrasH(nac.financiadores.map((f) => ({ et: finEtiqueta[f.clave], v: f.importe / 1e6 })), { fmt: dec1, etAncho: 128 }),
-        `${num(S.sinImporte)} proyectos, casi todos de la Fundación Biodiversidad, no publican importe.`)}
-      ${fig('Entidades con más proyectos', barrasH(nac.entidades.slice(0, 8).map((e) => ({ et: corto(/CONSEJO SUPERIOR DE INVESTIGACIONES CIENT/i.test(e.nombre) ? 'CSIC' : titular(e.nombre).replace(/^Universidad/, 'U.').replace(/^Universitat/, 'U.'), 26), v: e.ayudas })), { etAncho: 150 }))}
-      ${fig('Cómo entra cada proyecto en el criterio', barrasH(viasTop, { etAncho: 130 }), 'Un proyecto entra por la primera vía que cumple. «Palabras clave»: las declara el proyecto (en la AEI, sin poder comprobarlas aquí).')}
+      ${fig('Proyectos por año', columnas(serie, [{ clave: 'v', color: C.carbon }], { alto: 150, ancho: 340, etiquetaAnios: 2 }), T.anio)}
+      ${fig('Importe concedido por año (M€)', columnas(euros, [{ clave: 'v', color: C.ambar }], { alto: 150, ancho: 340, etiquetaAnios: 2, cifras: false }), T.importe)}
+    </div>
+    <div class="rejilla">
+      ${fig('Proyectos por comunidad autónoma', barrasH(ccaa.map((c, j) => ({ et: c.etiqueta, v: c.ayudas, resaltar: j === 0 })), { etAncho: 112 }),
+        `Comunidad de la sede de la entidad.${R.sinCcaa ? ` ${num(R.sinCcaa)} proyectos sin comunidad determinada.` : ''}`)}
+      ${fig('Entidades con más proyectos', barrasH(entidades.slice(0, 8).map((e) => ({ et: nombreNac(e.nombre), v: e.ayudas })), { etAncho: 150 }),
+        sinEntidad ? `${num(sinEntidad)} proyectos sin entidad beneficiaria en su ficha.` : '')}
+      ${tercera}
+      ${fig('Cómo entra cada proyecto en el criterio', barrasH(r.vias.map((v) => ({ et: VIA[v.clave] || v.clave, v: v.ayudas })), { etAncho: 130 }),
+        `Un proyecto entra por la primera vía que cumple.${T.vias ? ` ${T.vias}` : ''}`)}
     </div>
   </div>
-  ${pie(6, `Datos: AEI (${esc(fecha(fuenteEs.AEI.actualizado))}), FECYT y Fundación Biodiversidad · leídos de sus webs públicas`)}
+  ${pie(n, `Datos: ${esc(T.nombre)} (${esc(fecha(fuenteEs[f]?.actualizado ?? fuenteEs.AEI.actualizado))}) · leídos de su web pública`)}
 </section>`;
+});
+const p4 = paginasFin.join('\n');
 
-// ---------- pagina 4: metodologia ----------
+// ---------- ultima pagina: metodologia ----------
 const fl = (f) => nacTodo.meta.filtro.frases.map((x) => `<i>${esc(x)}</i>`).join(', ');
 const p5 = `
 <section class="pagina">
-  ${cabecera(7, 'Metodología y límites')}
+  ${cabecera(nMetodologia, 'Metodología y límites')}
   <div class="cuerpo">
     <h2>Cómo se han obtenido estas cifras</h2>
     <p class="entra">Todo se recalcula con un único comando a partir de los datos públicos de cada financiador; el código y los CSV de partida están en abierto.</p>
@@ -568,7 +610,7 @@ const p5 = `
     </div>
     <p class="legal">Datos de CORDIS y LIFE: © Unión Europea, CC BY 4.0. Datos de AEI, FECYT y Fundación Biodiversidad: reutilizados según la Ley 37/2007, sobre reutilización de la información del sector público. Este documento es un análisis independiente elaborado por Fundación Ibercivis y no es una publicación oficial de ninguno de los financiadores.</p>
   </div>
-  ${pie(7, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
+  ${pie(nMetodologia, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
 </section>`;
 
 // ---------- cabecera del sitio (solo en pantalla) ----------
@@ -588,10 +630,10 @@ const cabeceraSitio = `<header class="sitio no-imprimir">
     <a class="pestana" href="./#espana"><span class="largo">Convocatorias españolas</span><span class="corto">España</span><span class="pct">AEI, FECYT y Fundación Biodiversidad</span></a>
     <span class="div" aria-hidden="true"></span>
     <a class="pestana" href="./metodologia.html">Metodología<span class="pct">cómo se obtiene cada dato</span></a>
-    <a class="pestana" href="./factsheet.html" aria-current="page">Factsheet<span class="pct">informe de 7 páginas · PDF</span></a>
+    <a class="pestana" href="./factsheet.html" aria-current="page">Factsheet<span class="pct">informe de ${TOTAL_PAG} páginas · PDF</span></a>
   </nav>
 </header>
-<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>7 páginas A4 · generado el ${esc(fecha(eu.meta.generado))}</span></div>`;
+<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>${TOTAL_PAG} páginas A4 · generado el ${esc(fecha(eu.meta.generado))}</span></div>`;
 
 // ---------- documento ----------
 const css = `
@@ -649,6 +691,7 @@ svg .eje.v{font-weight:800;fill:var(--negro)}
 .total .barra i{display:block;height:100%;background:var(--ambar)}
 .total .td p{margin:.6mm 0;font-size:8.2pt;color:#d9d9d9}
 .total .td p b{color:#fff}
+.total .td p.fin{font-size:7.6pt;color:var(--medio);padding-left:3mm}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm}
 .kpi{border-top:1.6pt solid var(--ambar);padding-top:2.4mm}
 .kpi .n{font-size:24pt;font-weight:700;line-height:1;color:#fff}

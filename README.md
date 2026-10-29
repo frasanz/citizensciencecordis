@@ -46,7 +46,7 @@ node scripts/snapshot.js --sin-cache      # ignora lo ya descargado en .cache/
 
 ## Factsheet
 
-`node scripts/factsheet.js --pdf` genera `web/factsheet.html` y `web/factsheet.pdf`: siete páginas A4,
+`node scripts/factsheet.js --pdf` genera `web/factsheet.html` y `web/factsheet.pdf`: nueve páginas A4,
 «La ciencia ciudadana en España», con la identidad de Ibercivis (logo en `web/img/`). Lee los mismos
 JSON que la web, así que las cifras no pueden diverger; en la parte española cuenta solo proyectos.
 La comparación por habitante usa `datos/poblacion.csv` (población a 1 de enero, Eurostat `demo_pjan`),
@@ -194,7 +194,7 @@ pestaña española: la línea entre pestañas es quién concede la ayuda, no de 
 web/                 sitio estático (es la raíz publicada en GitHub Pages)
   index.html         indicadores: las pestañas de programas europeos y convocatorias españolas
   metodologia.html   cómo se obtiene y analiza cada conjunto de datos
-  factsheet.html/pdf informe de 6 páginas (lo genera scripts/factsheet.js)
+  factsheet.html/pdf informe de 9 páginas (lo genera scripts/factsheet.js)
   estilo.css         paleta, tipografía y cabecera comunes a las cuatro secciones
   fonts/             Source Sans 3 y Source Serif 4 (OFL), alojadas aquí para no usar Google Fonts
   img/               logo de Ibercivis
@@ -224,7 +224,7 @@ scripts/
   aei.js             CSV del buscador de la AEI (con la CA de la FNMT)
   fecyt.js           listados de concedidas de FECYT (PDF, por coordenadas) y fichas resumen (HTML)
   biodiversidad.js   API y fichas de la Fundación Biodiversidad
-  factsheet.js       factsheet de 4 páginas (HTML y PDF) a partir de los JSON
+  factsheet.js       factsheet de 9 páginas (HTML y PDF) a partir de los JSON
   serve.js           servidor de desarrollo
   test-csv.js        casos del parser, incluidos los malformados de CORDIS
   smoke.js           la web sobre un DOM real (jsdom), las dos pestañas
