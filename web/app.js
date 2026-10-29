@@ -340,7 +340,7 @@ function limitesEuropa(fuentes) {
 // Los textos viven aqui juntos para que se lean como un glosario coherente.
 registrarAyuda({
   proyectos: ['Proyectos',
-    'Proyectos financiados por la UE cuya <b>descripción o título</b> menciona <code>citizen science</code>, dentro de los programas marco seleccionados arriba.',
+    'Proyectos financiados por la UE cuya <b>descripción o título</b> incluye <code>citizen science</code>, dentro de los programas marco seleccionados arriba.',
     'No es la lista oficial de proyectos de ciencia ciudadana: no existe tal lista. Es lo que se puede medir de forma reproducible sobre los datos abiertos de CORDIS.'],
   entidades: ['Entidades participantes',
     'Organizaciones <b>distintas</b> que participan en esos proyectos: universidades, centros de investigación, empresas, administraciones y asociaciones.',

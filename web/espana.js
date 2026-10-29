@@ -356,7 +356,7 @@ function tablaAyudas() {
 registrarAyuda({
   esAyudas: ['Ayudas concedidas',
     'Cada fila es una <b>ayuda a una entidad</b>: no hay consorcios ni socios. Por eso esta pestaña no se puede sumar a la europea, donde la unidad es el proyecto con todos sus participantes.',
-    'Entran las que mencionan <code>ciencia ciudadana</code> (o <code>citizen science</code>, o sus variantes en catalán, gallego y euskera) en el título o el resumen; en FECYT también las concedidas en la línea de ciencia ciudadana de la convocatoria, y en la AEI y FECYT las que la declaran entre sus palabras clave.',
+    'Entran las que incluyen <code>ciencia ciudadana</code> (o <code>citizen science</code>, o sus variantes en catalán, gallego y euskera) en el título o el resumen; en FECYT también las concedidas en la línea de ciencia ciudadana de la convocatoria, y en la AEI y FECYT las que la declaran entre sus palabras clave.',
     'En la AEI se incluyen contratos y estancias, no solo proyectos, porque su buscador los publica juntos y el criterio se aplica igual. La tabla de convocatorias permite separarlos.'],
   esEntidades: ['Entidades beneficiarias',
     'Entidades distintas que reciben alguna ayuda. La AEI da el CIF; FECYT y la Fundación Biodiversidad solo el nombre, que se cruza con el CIF cuando coincide sin acentos ni mayúsculas.',

@@ -17,6 +17,8 @@ const leer = (f) => JSON.parse(fs.readFileSync(path.join(WEB, 'data', f), 'utf8'
 // Europa: solo los programas de las cifras de partida (Erasmus+ y Europa Creativa quedan fuera).
 const euTodo = leer('indicadores.json');
 const eu = recomputar(euTodo, { programas: PROGRAMAS_BASE.filter((c) => euTodo.proyectos.some((p) => p.programa === c)) });
+// Fecha de los datos (la del snapshot), no la del momento en que se genera el factsheet.
+const FECHA_DATOS = euTodo.meta.generado;
 const nacTodo = leer('nacional.json');
 // Cifra principal: solo proyectos. Los contratos de personal y las estancias de la
 // AEI heredan el texto de su proyecto y harian contar dos veces la misma idea.
@@ -137,7 +139,7 @@ const top = (arr, n, f) => [...arr].sort((a, b) => f(b) - f(a)).slice(0, n);
 const ordinal = (n) => (n === 1 ? 'el primer puesto' : `el puesto ${n}`);
 
 const S = nac.resumen;
-const anioActual = new Date(eu.meta.generado).getFullYear();
+const anioActual = new Date(FECHA_DATOS).getFullYear();
 const serieEu = eu.serie.filter((s) => s.anio >= 2011);
 const aniosNacFuerte = nac.serie.filter((s) => s.anio >= 2018 && s.anio < anioActual);
 const mediaReciente = aniosNacFuerte.reduce((s, x) => s + x.total, 0) / (aniosNacFuerte.length || 1);
@@ -160,7 +162,7 @@ const pctEu = Math.round(100 * es.aportacionNeta / totalEur);
 const mensajes = [
   { n: 1,
     t: `España está en el ${pct(es.pctSobreTotal)} de los proyectos europeos`,
-    p: `${num(es.proyectos)} de los ${num(E.totalProyectos)} proyectos de FP7, Horizonte 2020, Horizonte Europa y LIFE que mencionan ciencia ciudadana tienen al menos una entidad española, lo que sitúa a España en ${ordinal(rProy)} entre ${paises.length} países en cifras absolutas. Por habitante, en cambio, baja al puesto ${rHabProy} de ${habitantes.length} en proyectos (países con al menos ${MIN_PROYECTOS_HAB}).` },
+    p: `${num(es.proyectos)} de los ${num(E.totalProyectos)} proyectos de FP7, Horizonte 2020, Horizonte Europa y LIFE que incluyen ciencia ciudadana en su título o descripción tienen al menos una entidad española, lo que sitúa a España en ${ordinal(rProy)} entre ${paises.length} países en cifras absolutas. Por habitante, en cambio, baja al puesto ${rHabProy} de ${habitantes.length} en proyectos (países con al menos ${MIN_PROYECTOS_HAB}).` },
   { n: 2,
     t: `Coordina ${num(es.coordinados)} y recibe ${meur(es.aportacionNeta)}`,
     p: `España ocupa ${ordinal(rCoord)} en proyectos coordinados y ${ordinal(rDin)} en contribución neta de la UE, con ${num(es.organizaciones)} entidades españolas distintas participando.` },
@@ -180,7 +182,7 @@ const p1 = `
 <section class="pagina portada">
   <div class="banda">
     <img class="logo" src="img/ibercivis-logo.png" alt="Ibercivis · gente haciendo ciencia">
-    <div class="kicker">Factsheet · ${esc(fecha(eu.meta.generado))}</div>
+    <div class="kicker">Factsheet · ${esc(fecha(FECHA_DATOS))}</div>
     <h1>La ciencia ciudadana<br>en <em>España</em></h1>
     <p class="sub">Qué proyectos financian los programas europeos y las convocatorias españolas, medido de forma reproducible sobre los datos abiertos de cada financiador.</p>
     <div class="total">
@@ -294,7 +296,7 @@ const p2 = `
 <section class="pagina">
   ${cabecera(2, 'Panorama europeo')}
   <div class="cuerpo">
-    <h2>${num(E.totalProyectos)} proyectos europeos mencionan ciencia ciudadana, con participantes de ${paises.length} países</h2>
+    <h2>${num(E.totalProyectos)} proyectos europeos incluyen ciencia ciudadana en su título o descripción, con participantes de ${paises.length} países</h2>
     <p class="entra">FP7, Horizonte 2020, Horizonte Europa y LIFE. Un proyecto cuenta una vez, con todo su consorcio.</p>
     <div class="kps">
       ${kpiPeq(num(E.totalProyectos), 'proyectos')}${kpiPeq(num(paises.length), 'países')}${kpiPeq(num(E.organizacionesUnicas), 'entidades distintas')}
@@ -340,7 +342,7 @@ const nombreEntidad = (e) => (e.siglas && e.siglas.length <= 14 ? e.siglas : tit
 const filasEntidades = top(eu.entidadesFoco, 9, (e) => e.proyectos).map((e) => `<tr>${celda(esc(corto(nombreEntidad(e), 34)))}${celda(esc(TIPO_ENT[e.tipo] ?? e.tipo))}${celda(num(e.proyectos), 'n')}${celda(e.coordinados ? num(e.coordinados) : '—', 'n')}${celda(esc(e.programas.map((c) => CORTO_PROG[c] || c).join(' · ')))}${celda(e.aportacionNeta ? meur(e.aportacionNeta) : '—', 'n')}</tr>`);
 
 // Proyectos en curso coordinados desde España: arrancados y sin terminar a la fecha de los datos.
-const hoyIso = new Date(eu.meta.generado).toISOString().slice(0, 10);
+const hoyIso = new Date(FECHA_DATOS).toISOString().slice(0, 10);
 const miembros = new Map();
 for (const x of eu.participaciones) { const m = miembros.get(x.proyecto) || { n: 0, paises: new Set() }; m.n++; if (x.pais) m.paises.add(x.pais); miembros.set(x.proyecto, m); }
 const enCurso = eu.proyectos.filter((x) => x.coordinaFoco && x.inicio && x.inicio <= hoyIso && x.fin && x.fin >= hoyIso)
@@ -351,7 +353,7 @@ const mesAnio = (iso) => (iso ? `${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '');
 const filasEnCurso = enCurso.slice(0, 7).map((x) => `<tr>${celda(`<b>${esc(corto(x.acronimo || x.titulo, 24))}</b>`)}${celda(esc(corto(nombreEntidad({ siglas: x.coordinador, nombre: x.coordinadorNombre || x.coordinador }), 30)))}${celda(esc(CORTO_PROG[x.programa] || x.programa))}${celda(num(x.miembros), 'n')}${celda(num(x.paisesN), 'n')}${celda(mesAnio(x.fin), 'n')}${celda(meur(x.aportacionUE), 'n')}</tr>`);
 
 // Tendencia: proyectos con España que arrancan en los tres ultimos años cerrados frente a los tres anteriores.
-const anioCierre = new Date(eu.meta.generado).getUTCFullYear() - 1;
+const anioCierre = new Date(FECHA_DATOS).getUTCFullYear() - 1;
 const tramo = (a, b) => ({ con: eu.proyectos.filter((x) => x.entidadesFoco.length && x.anio >= a && x.anio <= b).length, tot: eu.proyectos.filter((x) => x.anio >= a && x.anio <= b).length });
 const tAct = tramo(anioCierre - 2, anioCierre), tAnt = tramo(anioCierre - 5, anioCierre - 3);
 const dif = tAct.con - tAnt.con;
@@ -449,7 +451,7 @@ const p3b = `
     ${tabla([['Entidad', ''], ['Tipo', ''], ['Proyectos', 'n'], ['Coordina', 'n'], ['Programas', ''], ['Contribución UE', 'n']], filasEntidades)}
     <p class="nota">Las entidades se identifican por su PIC, estable entre programas: el CSIC cuenta como una sola. La contribución es la asignada en el acuerdo de subvención, no lo pagado; en LIFE, la que atribuye el panel de CINEA. Entidades españolas distintas: ${num(es.organizaciones)}.</p>
     <h3 class="subtit">Proyectos en curso coordinados desde España</h3>
-    <p class="entra" style="margin-bottom:2mm">${num(enCurso.length)} proyectos en marcha a ${esc(fecha(eu.meta.generado))}, con ${meur(aportEnCurso)} de aportación de la UE al conjunto de cada proyecto. Los mayores, por número de miembros:</p>
+    <p class="entra" style="margin-bottom:2mm">${num(enCurso.length)} proyectos en marcha a ${esc(fecha(FECHA_DATOS))}, con ${meur(aportEnCurso)} de aportación de la UE al conjunto de cada proyecto. Los mayores, por número de miembros:</p>
     ${tabla([['Proyecto', ''], ['Coordinador', ''], ['Programa', ''], ['Miembros', 'n'], ['Países', 'n'], ['Fin', 'n'], ['Aportación UE', 'n']], filasEnCurso)}
     <p class="nota">En curso: empezó y no ha terminado a la fecha de los datos. Miembros: coordinador, beneficiarios, entidades afiliadas y socios asociados. Aportación UE: la del proyecto entero, no solo la parte española.</p>
   </div>
@@ -605,12 +607,12 @@ const p5 = `
       </div>
       <div>
         <h3>Cómo citar</h3>
-        <p class="cita">Ibercivis (${anioActual}). <i>La ciencia ciudadana en España. Factsheet</i>. Datos de CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad a ${esc(fecha(eu.meta.generado))}. frasanz.github.io/citizensciencecordis</p>
+        <p class="cita">Ibercivis (${anioActual}). <i>La ciencia ciudadana en España. Factsheet</i>. Datos de CORDIS, LIFE, AEI, FECYT y Fundación Biodiversidad a ${esc(fecha(FECHA_DATOS))}. frasanz.github.io/citizensciencecordis</p>
       </div>
     </div>
     <p class="legal">Datos de CORDIS y LIFE: © Unión Europea, CC BY 4.0. Datos de AEI, FECYT y Fundación Biodiversidad: reutilizados según la Ley 37/2007, sobre reutilización de la información del sector público. Este documento es un análisis independiente elaborado por Fundación Ibercivis y no es una publicación oficial de ninguno de los financiadores.</p>
   </div>
-  ${pie(nMetodologia, `Generado el ${esc(fecha(eu.meta.generado))} · Elaboración: Ibercivis`)}
+  ${pie(nMetodologia, `Generado el ${esc(fecha(FECHA_DATOS))} · Elaboración: Ibercivis`)}
 </section>`;
 
 // ---------- cabecera del sitio (solo en pantalla) ----------
@@ -633,7 +635,7 @@ const cabeceraSitio = `<header class="sitio no-imprimir">
     <a class="pestana" href="./factsheet.html" aria-current="page">Factsheet<span class="pct">informe de ${TOTAL_PAG} páginas · PDF</span></a>
   </nav>
 </header>
-<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>${TOTAL_PAG} páginas A4 · generado el ${esc(fecha(eu.meta.generado))}</span></div>`;
+<div class="fs-barra no-imprimir"><a href="factsheet.pdf" download>Descargar el PDF</a><span>${TOTAL_PAG} páginas A4 · generado el ${esc(fecha(FECHA_DATOS))}</span></div>`;
 
 // ---------- documento ----------
 const css = `
